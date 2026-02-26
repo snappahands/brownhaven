@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deako Smart Lighting Demo</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#0d1117;font-family:system-ui,-apple-system,sans-serif}
+  body{display:flex;flex-direction:column;padding:10px 12px;gap:8px;min-height:100vh}
+
+  header{display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+  .logo{color:#fff;font-size:20px;font-weight:800;letter-spacing:.04em}
+  .logo em{color:#7ecfe0;font-style:normal}
+  .logo small{font-size:10px;color:#445;font-weight:400;margin-left:10px;letter-spacing:.12em;text-transform:uppercase}
+  .hbtns{display:flex;gap:8px}
+  .btn{padding:7px 18px;border-radius:24px;border:none;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.03em;transition:all .18s}
+  .bon{background:#f5c842;color:#1a1a2e}.bon:hover{background:#ffd84a}
+  .boff{background:#1b2233;color:#778;border:1px solid #2a3348}.boff:hover{color:#aaa}
+
+  .scenes{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;flex-shrink:0}
+  .sbtn{padding:6px 14px;border-radius:20px;border:1px solid #2a3348;background:#131928;color:#667;font-size:11px;font-weight:700;cursor:pointer;transition:all .18s;letter-spacing:.03em}
+  .sbtn:hover{border-color:#7ecfe0;color:#7ecfe0}
+  .sbtn.active{background:#1a3a4a;border-color:#7ecfe0;color:#7ecfe0}
+
+  #fpbox{position:relative;flex:1 1 auto;min-height:0;border-radius:10px;overflow:hidden;border:1px solid #1a2535;background:#0a0e17;display:flex;align-items:stretch}
+  #fpimg{width:100%;height:100%;object-fit:contain;display:block;transition:filter .5s ease}
+  #svgl{position:absolute;top:0;left:0;width:100%;height:100%}
+
+  .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
+  #stxt{color:#7ecfe0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  #scnt{color:#334;font-size:11px}
+  #scnt span{color:#f5c842;font-weight:700}
+  .dtag{font-size:10px;color:#2a3348;letter-spacing:.06em}
+
+  /* Dimmer popup */
+  #dimmer-popup{
+    position:fixed;
+    background:#1a2235;
+    border:1px solid #2e3f58;
+    border-radius:14px;
+    padding:16px 18px;
+    width:220px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.6);
+    z-index:999;
+    display:none;
+    flex-direction:column;
+    gap:10px;
+  }
+  #dimmer-popup.show{display:flex}
+  #dimmer-title{color:#fff;font-size:13px;font-weight:700;letter-spacing:.03em}
+  #dimmer-subtitle{color:#556;font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-top:-6px}
+  .dim-row{display:flex;align-items:center;gap:10px}
+  .dim-icon{font-size:14px;flex-shrink:0}
+  #dim-slider{
+    -webkit-appearance:none;appearance:none;
+    flex:1;height:6px;border-radius:3px;
+    background:linear-gradient(to right,#f5c842 0%,#f5c842 var(--pct,100%),#2a3a50 var(--pct,100%),#2a3a50 100%);
+    outline:none;cursor:pointer;
+  }
+  #dim-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#f5c842;cursor:pointer;box-shadow:0 0 6px rgba(245,200,66,0.6)}
+  #dim-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#f5c842;cursor:pointer;border:none}
+  #dim-value{color:#f5c842;font-size:13px;font-weight:700;min-width:36px;text-align:right}
+  .dim-btns{display:flex;gap:8px;margin-top:2px}
+  .dim-btn{flex:1;padding:7px 0;border-radius:8px;border:none;cursor:pointer;font-size:11px;font-weight:700;transition:all .15s}
+  .dim-off{background:#0d1117;color:#778;border:1px solid #2a3348}.dim-off:hover{color:#aaa}
+  .dim-close{background:#f5c842;color:#1a1a2e}.dim-close:hover{background:#ffd84a}
+  #dimmer-overlay{position:fixed;inset:0;z-index:998;display:none}
+  #dimmer-overlay.show{display:block}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">deako<em>.</em><small>Smart Lighting Demo</small></div>
+  <div class="hbtns">
+    <button class="btn bon" onclick="allOn()">☀ All On</button>
+    <button class="btn boff" onclick="allOff()">⏻ All Off</button>
+  </div>
+</header>
+
+<div class="scenes">
+  <button class="sbtn" onclick="runScene(this,'arrive')">🏠 Arrive Home</button>
+  <button class="sbtn" onclick="runScene(this,'dinner')">🍽 Dinner</button>
+  <button class="sbtn" onclick="runScene(this,'evening')">🌙 Wind Down</button>
+  <button class="sbtn" onclick="runScene(this,'vacation')">🔒 Vacation Mode</button>
+  <button class="sbtn" onclick="runScene(this,'morning')">☀ Good Morning</button>
+</div>
+
+<div id="fpbox">
+  <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" alt="Floor Plan" crossorigin="anonymous"/>
+  <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+</div>
+
+<div class="statusbar">
+  <span id="stxt">Tap a room to toggle · Long-press to dim</span>
+  <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
+  <span class="dtag">DEAKO SMART LIGHTING</span>
+</div>
+
+<!-- Dimmer popup -->
+<div id="dimmer-overlay" onclick="closeDimmer()"></div>
+<div id="dimmer-popup">
+  <div id="dimmer-title">Room Name</div>
+  <div id="dimmer-subtitle">Dimmer Control</div>
+  <div class="dim-row">
+    <span class="dim-icon">🌑</span>
+    <input type="range" id="dim-slider" min="5" max="100" value="100" oninput="onDimSlide(this.value)">
+    <span class="dim-icon">☀</span>
+  </div>
+  <div id="dim-value">100%</div>
+  <div class="dim-btns">
+    <button class="dim-btn dim-off" onclick="turnRoomOff()">Turn Off</button>
+    <button class="dim-btn dim-close" onclick="closeDimmer()">Done</button>
+  </div>
+</div>
+
+<script>
+const ROOMS = [
+  {id:"dining",   label:"Dining",        x:4.5,  y:19,  w:22,  h:21},
+  {id:"kitchen",  label:"Kitchen",       x:4.5,  y:38,  w:22,  h:19},
+  {id:"great",    label:"Great Room",    x:26.5, y:19,  w:29,  h:38},
+  {id:"owners",   label:"Owner's Suite", x:71,   y:19,  w:28,  h:31},
+  {id:"owic",     label:"O. WIC",        x:71,   y:50,  w:15,  h:20},
+  {id:"obath",    label:"O. Bath",       x:86,   y:50,  w:13,  h:27},
+  {id:"foyer",    label:"Foyer",         x:38,   y:64,  w:14,  h:15},
+  {id:"strg",     label:"Staircase",     x:52,   y:57,  w:14,  h:16},
+  {id:"pantry",   label:"Pantry",        x:20.5, y:59,  w:12,  h:13},
+  {id:"mudroom",  label:"Mud Room",      x:4.5,  y:59,  w:15,  h:13},
+  {id:"laundry",  label:"Laundry",       x:4.5,  y:72,  w:15,  h:15},
+  {id:"powder",   label:"Powder",        x:20.5, y:72,  w:12,  h:15},
+  {id:"porch",    label:"Front Porch",   x:33,   y:83,  w:19,  h:13},
+  {id:"deck",     label:"Rear Deck",     x:33,   y:1,   w:19,  h:13},
+];
+const SCENES = {
+  arrive:  ["foyer","great","kitchen","porch","mudroom"],
+  dinner:  ["dining","kitchen","great"],
+  evening: ["owners","owic","great"],
+  vacation:["foyer","porch","deck","great","owners"],
+  morning: ["kitchen","dining","foyer","laundry","mudroom","owners"],
+};
+
+// State: brightness 0=off, 1–100=dim level
+let levels = {};
+ROOMS.forEach(r => levels[r.id] = 0);
+
+let activeDimRoom = null;
+let pressTimer = null;
+
+const svg = document.getElementById("svgl");
+const img = document.getElementById("fpimg");
+
+// Build SVG defs
+const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
+defs.innerHTML = `<filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+  <feGaussianBlur stdDeviation="1.6" result="cb"/>
+  <feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge>
+</filter>`;
+svg.appendChild(defs);
+
+ROOMS.forEach(r => {
+  const radId = "rad-"+r.id;
+  const rg = document.createElementNS("http://www.w3.org/2000/svg","radialGradient");
+  rg.setAttribute("id",radId); rg.setAttribute("cx","50%"); rg.setAttribute("cy","40%"); rg.setAttribute("r","60%");
+  rg.innerHTML=`<stop offset="0%" stop-color="rgba(255,235,100,0.45)"/><stop offset="100%" stop-color="rgba(255,200,40,0)"/>`;
+  defs.appendChild(rg);
+
+  const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.id = "g-"+r.id; g.style.cursor="pointer";
+
+  const mk=(tag,attrs)=>{const el=document.createElementNS("http://www.w3.org/2000/svg",tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el;};
+
+  const glowR=mk("rect",{class:"glow-rect",x:r.x,y:r.y,width:r.w,height:r.h,rx:"0.5",fill:"rgba(255,215,50,0.15)",filter:"url(#glow)"});
+  glowR.style.display="none";
+
+  const fillR=mk("rect",{class:"fill-rect",x:r.x,y:r.y,width:r.w,height:r.h,rx:"0.4",fill:"rgba(255,255,255,0.02)",stroke:"rgba(255,255,255,0.08)","stroke-width":"0.22"});
+  fillR.style.transition="fill .35s,stroke .35s,opacity .35s";
+
+  const radR=mk("rect",{class:"rad-rect",x:r.x,y:r.y,width:r.w,height:r.h,rx:"0.4",fill:`url(#${radId})`});
+  radR.style.display="none"; radR.style.pointerEvents="none"; radR.style.transition="opacity .35s";
+
+  const txt=mk("text",{class:"room-txt",x:r.x+r.w/2,y:r.y+r.h/2,"text-anchor":"middle","dominant-baseline":"middle","font-size":"2.8","font-weight":"700","font-family":"system-ui,sans-serif",fill:"rgba(255,255,255,0.28)","letter-spacing":"0.04"});
+  txt.style.transition="fill .3s"; txt.style.pointerEvents="none"; txt.textContent=r.label;
+
+  // Dim % badge
+  const badge=mk("text",{class:"dim-badge",x:r.x+r.w/2,y:r.y+r.h-2.5,"text-anchor":"middle","dominant-baseline":"middle","font-size":"2.2","font-weight":"700","font-family":"system-ui,sans-serif",fill:"rgba(255,230,100,0.9)","letter-spacing":"0.02"});
+  badge.style.pointerEvents="none"; badge.style.display="none";
+
+  const dot=mk("circle",{class:"dot",cx:r.x+r.w-1.8,cy:r.y+2,r:"1.1",fill:"rgba(255,255,255,0.1)"});
+  dot.style.transition="fill .3s"; dot.style.pointerEvents="none";
+
+  [glowR,fillR,radR,txt,badge,dot].forEach(el=>g.appendChild(el));
+
+  // Click = toggle, long press = open dimmer
+  g.addEventListener("mousedown",  e => startPress(r.id, e));
+  g.addEventListener("touchstart", e => startPress(r.id, e), {passive:true});
+  g.addEventListener("mouseup",    () => endPress(r.id));
+  g.addEventListener("mouseleave", () => cancelPress());
+  g.addEventListener("touchend",   () => endPress(r.id));
+
+  svg.appendChild(g);
+});
+
+let pressTarget = null;
+let didLongPress = false;
+
+function startPress(id, e) {
+  pressTarget = id;
+  didLongPress = false;
+  pressTimer = setTimeout(() => {
+    didLongPress = true;
+    openDimmer(id, e);
+  }, 400);
+}
+function endPress(id) {
+  clearTimeout(pressTimer);
+  if (!didLongPress) toggle(id);
+  pressTarget = null;
+}
+function cancelPress() {
+  clearTimeout(pressTimer);
+  pressTarget = null;
+}
+
+function toggle(id) {
+  document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
+  if (levels[id] > 0) {
+    levels[id] = 0;
+    renderRoom(id);
+    setStatus(ROOMS.find(r=>r.id===id).label + " — Off");
+  } else {
+    levels[id] = 100;
+    renderRoom(id);
+    setStatus(ROOMS.find(r=>r.id===id).label + " — On");
+  }
+  updateCount(); updateImg();
+}
+
+function renderRoom(id) {
+  const lv = levels[id];
+  const g = document.getElementById("g-"+id); if(!g)return;
+  const gl=g.querySelector(".glow-rect");
+  const fr=g.querySelector(".fill-rect");
+  const rr=g.querySelector(".rad-rect");
+  const tx=g.querySelector(".room-txt");
+  const bg=g.querySelector(".dim-badge");
+  const dt=g.querySelector(".dot");
+  const on = lv > 0;
+  const a = lv / 100;
+
+  if (on) {
+    gl.style.display="block"; gl.setAttribute("opacity", 0.4 + a*0.6);
+    fr.setAttribute("fill",`rgba(255,210,60,${0.07+a*0.18})`);
+    fr.setAttribute("stroke",`rgba(255,200,40,${0.3+a*0.3})`);
+    fr.setAttribute("stroke-width","0.38");
+    rr.style.display="block"; rr.setAttribute("opacity", a);
+    tx.setAttribute("fill",`rgba(255,248,170,${0.5+a*0.5})`);
+    dt.setAttribute("fill",`rgba(255,216,74,${0.4+a*0.6})`);
+    if (lv < 100) {
+      bg.style.display="block";
+      bg.textContent = lv+"%";
+    } else {
+      bg.style.display="none";
+    }
+  } else {
+    gl.style.display="none";
+    fr.setAttribute("fill","rgba(255,255,255,0.02)");
+    fr.setAttribute("stroke","rgba(255,255,255,0.08)");
+    fr.setAttribute("stroke-width","0.22");
+    rr.style.display="none";
+    tx.setAttribute("fill","rgba(255,255,255,0.28)");
+    dt.setAttribute("fill","rgba(255,255,255,0.1)");
+    bg.style.display="none";
+  }
+}
+
+function updateImg() {
+  const vals = Object.values(levels);
+  const avg = vals.reduce((s,v)=>s+v,0) / (vals.length*100);
+  img.style.filter=`brightness(${0.28+avg*0.52}) saturate(${0.15+avg*0.65}) contrast(1.05)`;
+}
+function updateCount() {
+  document.getElementById("ln").textContent = Object.values(levels).filter(v=>v>0).length;
+}
+function setStatus(m){ document.getElementById("stxt").textContent=m.toUpperCase(); }
+
+// ── DIMMER POPUP ──
+function openDimmer(id, e) {
+  activeDimRoom = id;
+  const room = ROOMS.find(r=>r.id===id);
+  const lv = levels[id] || 100;
+  document.getElementById("dimmer-title").textContent = room.label;
+  const sl = document.getElementById("dim-slider");
+  sl.value = lv;
+  updateSliderStyle(lv);
+  document.getElementById("dim-value").textContent = lv+"%";
+
+  // Position near click
+  const popup = document.getElementById("dimmer-popup");
+  popup.classList.add("show");
+  document.getElementById("dimmer-overlay").classList.add("show");
+
+  // Get position from event
+  let cx=0, cy=0;
+  if (e && e.clientX) { cx=e.clientX; cy=e.clientY; }
+  else if (e && e.touches) { cx=e.touches[0].clientX; cy=e.touches[0].clientY; }
+
+  let left = cx - 110;
+  let top  = cy - 160;
+  left = Math.max(8, Math.min(left, window.innerWidth - 236));
+  top  = Math.max(8, Math.min(top,  window.innerHeight - 220));
+  popup.style.left = left+"px";
+  popup.style.top  = top+"px";
+
+  if (lv === 0) { levels[id]=100; renderRoom(id); updateCount(); updateImg(); }
+  setStatus(room.label + " — Dimmer");
+}
+
+function closeDimmer() {
+  document.getElementById("dimmer-popup").classList.remove("show");
+  document.getElementById("dimmer-overlay").classList.remove("show");
+  activeDimRoom = null;
+}
+
+function onDimSlide(val) {
+  val = parseInt(val);
+  updateSliderStyle(val);
+  document.getElementById("dim-value").textContent = val+"%";
+  if (activeDimRoom) {
+    levels[activeDimRoom] = val;
+    renderRoom(activeDimRoom);
+    updateCount(); updateImg();
+    setStatus(ROOMS.find(r=>r.id===activeDimRoom).label + " — "+val+"%");
+  }
+}
+
+function updateSliderStyle(val) {
+  const sl = document.getElementById("dim-slider");
+  sl.style.setProperty("--pct", val+"%");
+}
+
+function turnRoomOff() {
+  if (activeDimRoom) {
+    levels[activeDimRoom] = 0;
+    renderRoom(activeDimRoom);
+    updateCount(); updateImg();
+    setStatus(ROOMS.find(r=>r.id===activeDimRoom).label + " — Off");
+  }
+  closeDimmer();
+}
+
+function allOn() {
+  document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
+  ROOMS.forEach(r=>{levels[r.id]=100;renderRoom(r.id);});
+  updateCount(); updateImg(); setStatus("All Lights On");
+}
+function allOff() {
+  document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
+  ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
+  updateCount(); updateImg(); setStatus("All Lights Off");
+}
+function runScene(btn, key) {
+  document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+  ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
+  const names={arrive:"🏠 Arrive Home",dinner:"🍽 Dinner",evening:"🌙 Wind Down",vacation:"🔒 Vacation Mode",morning:"☀ Good Morning"};
+  setStatus(names[key]+" Scene");
+  (SCENES[key]||[]).forEach((id,i)=>{
+    setTimeout(()=>{levels[id]=100;renderRoom(id);updateCount();updateImg();},i*220);
+  });
+}
+</script>
+</body>
+</html>
