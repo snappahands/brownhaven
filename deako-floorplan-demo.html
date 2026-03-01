@@ -22,6 +22,45 @@
   .sbtn{padding:6px 14px;border-radius:20px;border:1px solid #2a3348;background:#131928;color:#667;font-size:11px;font-weight:700;cursor:pointer;transition:all .18s;letter-spacing:.03em}
   .sbtn:hover{border-color:#7ecfe0;color:#7ecfe0}
   .sbtn.active{background:#1a3a4a;border-color:#7ecfe0;color:#7ecfe0}
+  .sbtn-mgr{border-color:#1e2d40;color:#445}.sbtn-mgr:hover{border-color:#7ecfe0;color:#7ecfe0}
+
+  /* Scene Manager Modal */
+  #sm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:none;align-items:center;justify-content:center}
+  #sm-overlay.show{display:flex}
+  #sm-panel{background:#111826;border:1px solid #2a3348;border-radius:16px;width:500px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,0.7)}
+  #sm-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a2535;flex-shrink:0}
+  #sm-title{color:#fff;font-size:14px;font-weight:800;letter-spacing:.04em}
+  .sm-close{background:none;border:none;color:#556;cursor:pointer;font-size:20px;line-height:1;padding:2px 6px}.sm-close:hover{color:#fff}
+  #sm-body{flex:1;overflow-y:auto;padding:14px}
+  /* Scene list */
+  .scene-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid #1a2535;margin-bottom:8px;background:#0a0e17}
+  .sr-info{flex:1;min-width:0}
+  .sr-name{color:#fff;font-size:13px;font-weight:700}
+  .sr-rooms{color:#445;font-size:10px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sr-btns{display:flex;gap:6px;flex-shrink:0}
+  .sr-edit{padding:5px 12px;border-radius:6px;border:1px solid #2a3348;background:transparent;color:#7ecfe0;font-size:11px;font-weight:700;cursor:pointer}.sr-edit:hover{background:#1a3a4a}
+  .sr-del{padding:5px 10px;border-radius:6px;border:1px solid #2a3348;background:transparent;color:#ff6b6b;font-size:11px;cursor:pointer}.sr-del:hover{background:#2a1515}
+  #sm-add{width:100%;padding:10px;border-radius:8px;border:1px dashed #2a3348;background:transparent;color:#7ecfe0;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px}.#sm-add:hover{border-color:#7ecfe0}
+  /* Scene editor */
+  #se-view{display:none;flex-direction:column;gap:14px}
+  #se-view.show{display:flex}
+  .se-row{display:flex;gap:10px}
+  .se-field{display:flex;flex-direction:column;gap:5px;flex:1}
+  .se-label{color:#667;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .se-input{background:#0d1117;border:1px solid #2a3348;border-radius:8px;padding:8px 12px;color:#fff;font-size:13px;outline:none;width:100%}.se-input:focus{border-color:#7ecfe0}
+  .se-emoji{max-width:64px;text-align:center;font-size:18px}
+  .se-room-list{display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto}
+  .se-rrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:#0d1117;border:1px solid #1a2535}
+  .se-rrow.off .se-rlabel{color:#334}
+  .se-rrow.off .se-rslider{opacity:.3;pointer-events:none}
+  .se-rrow.off .se-rpct{color:#334}
+  .se-rcheck{width:15px;height:15px;accent-color:#f5c842;cursor:pointer;flex-shrink:0}
+  .se-rlabel{flex:1;font-size:12px;color:#aaa}
+  .se-rslider{flex:2;accent-color:#f5c842;cursor:pointer;height:4px}
+  .se-rpct{font-size:11px;color:#f5c842;font-weight:700;min-width:32px;text-align:right}
+  .se-footer{display:flex;gap:8px;padding-top:2px}
+  .se-back{flex:1;padding:9px;border-radius:8px;border:1px solid #2a3348;background:transparent;color:#778;font-size:12px;font-weight:700;cursor:pointer}.se-back:hover{color:#aaa}
+  .se-save{flex:2;padding:9px;border-radius:8px;border:none;background:#f5c842;color:#0d1117;font-size:12px;font-weight:800;cursor:pointer}.se-save:hover{background:#ffd84a}
 
   #fpbox{position:relative;flex:1 1 auto;min-height:0;border-radius:10px;overflow:hidden;border:1px solid #1a2535;background:#0a0e17;display:flex;align-items:center;justify-content:center}
   #fpimg{display:block;max-width:100%;max-height:100%;transition:filter .5s ease}
@@ -79,13 +118,7 @@
   </div>
 </header>
 
-<div class="scenes">
-  <button class="sbtn" onclick="runScene(this,'arrive')">🏠 Arrive Home</button>
-  <button class="sbtn" onclick="runScene(this,'dinner')">🍽 Dinner</button>
-  <button class="sbtn" onclick="runScene(this,'evening')">🌙 Wind Down</button>
-  <button class="sbtn" onclick="runScene(this,'vacation')">🔒 Vacation Mode</button>
-  <button class="sbtn" onclick="runScene(this,'morning')">☀ Good Morning</button>
-</div>
+<div class="scenes" id="scenes-row"></div>
 
 <div id="fpbox">
   <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" alt="Floor Plan" crossorigin="anonymous"/>
@@ -96,6 +129,44 @@
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
   <span class="dtag">DEAKO SMART LIGHTING</span>
+</div>
+
+<!-- Scene Manager Modal -->
+<div id="sm-overlay" onclick="smOverlayClick(event)">
+  <div id="sm-panel">
+    <div id="sm-header">
+      <span id="sm-title">Manage Scenes</span>
+      <button class="sm-close" onclick="closeSceneMgr()">✕</button>
+    </div>
+    <div id="sm-body">
+      <!-- List view -->
+      <div id="sm-list">
+        <div id="sm-rows"></div>
+        <button id="sm-add" onclick="openSceneEditor(null)">+ Add New Scene</button>
+      </div>
+      <!-- Editor view -->
+      <div id="se-view">
+        <div class="se-row">
+          <div class="se-field" style="max-width:68px">
+            <label class="se-label">Icon</label>
+            <input class="se-input se-emoji" id="se-emoji" type="text" maxlength="2" placeholder="✨">
+          </div>
+          <div class="se-field">
+            <label class="se-label">Scene Name</label>
+            <input class="se-input" id="se-name" type="text" placeholder="My Scene">
+          </div>
+        </div>
+        <div class="se-field">
+          <label class="se-label">Rooms &amp; Brightness</label>
+          <div class="se-room-list" id="se-rooms"></div>
+        </div>
+        <div class="se-footer">
+          <button class="se-back" onclick="backToList()">← Back</button>
+          <button class="se-save" onclick="saveScene()">Save Scene</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Dimmer popup -->
@@ -132,13 +203,14 @@ const ROOMS = [
   {id:"porch",   label:"Front Porch",   x:42.55, y:68.14, w:16.72, h:5.94},
   {id:"deck",    label:"Rear Deck",     x:42.45, y:20.73, w:16.92, h:9.36},
 ];
-const SCENES = {
-  arrive:  [{id:"porch",lv:100},{id:"foyer",lv:100},{id:"mudroom",lv:100},{id:"kitchen",lv:70},{id:"great",lv:80}],
-  dinner:  [{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}],
-  evening: [{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}],
-  vacation:[{id:"porch",lv:100},{id:"deck",lv:100},{id:"foyer",lv:100},{id:"great",lv:50},{id:"owners",lv:30}],
-  morning: [{id:"owners",lv:70},{id:"laundry",lv:80},{id:"mudroom",lv:80},{id:"foyer",lv:100},{id:"dining",lv:100},{id:"kitchen",lv:100}],
-};
+const DEFAULT_SCENES = [
+  {key:"arrive",  emoji:"🏠", name:"Arrive Home",  rooms:[{id:"porch",lv:100},{id:"foyer",lv:100},{id:"mudroom",lv:100},{id:"kitchen",lv:70},{id:"great",lv:80}]},
+  {key:"dinner",  emoji:"🍽", name:"Dinner",        rooms:[{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}]},
+  {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
+  {key:"vacation",emoji:"🔒", name:"Vacation Mode", rooms:[{id:"porch",lv:100},{id:"deck",lv:100},{id:"foyer",lv:100},{id:"great",lv:50},{id:"owners",lv:30}]},
+  {key:"morning", emoji:"☀", name:"Good Morning",  rooms:[{id:"owners",lv:70},{id:"laundry",lv:80},{id:"mudroom",lv:80},{id:"foyer",lv:100},{id:"dining",lv:100},{id:"kitchen",lv:100}]},
+];
+let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || DEFAULT_SCENES.map(s=>({...s,rooms:[...s.rooms]}));
 
 // State: brightness 0=off, 1–100=dim level
 let levels = {};
@@ -371,14 +443,127 @@ function allOff() {
   updateCount(); updateImg(); setStatus("All Lights Off");
 }
 function runScene(btn, key) {
-  document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active")); btn.classList.add("active");
+  document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
-  const names={arrive:"🏠 Arrive Home",dinner:"🍽 Dinner",evening:"🌙 Wind Down",vacation:"🔒 Vacation Mode",morning:"☀ Good Morning"};
-  setStatus(names[key]+" Scene");
-  (SCENES[key]||[]).forEach((item,i)=>{
+  const sc = scenesData.find(s=>s.key===key); if(!sc) return;
+  setStatus(sc.emoji+" "+sc.name+" Scene");
+  sc.rooms.forEach((item,i)=>{
     setTimeout(()=>{levels[item.id]=item.lv;renderRoom(item.id);updateCount();updateImg();},i*220);
   });
 }
+
+// ── SCENE BUTTONS ──────────────────────────────────────────────────────────
+function renderSceneButtons() {
+  const row = document.getElementById("scenes-row");
+  row.innerHTML = "";
+  scenesData.forEach(sc => {
+    const b = document.createElement("button");
+    b.className = "sbtn";
+    b.textContent = sc.emoji+" "+sc.name;
+    b.onclick = () => runScene(b, sc.key);
+    row.appendChild(b);
+  });
+  const mgr = document.createElement("button");
+  mgr.className = "sbtn sbtn-mgr";
+  mgr.textContent = "⚙ Scenes";
+  mgr.onclick = openSceneMgr;
+  row.appendChild(mgr);
+}
+
+// ── SCENE MANAGER ──────────────────────────────────────────────────────────
+function openSceneMgr() {
+  renderSceneRows();
+  document.getElementById("sm-list").style.display = "block";
+  document.getElementById("se-view").classList.remove("show");
+  document.getElementById("sm-title").textContent = "Manage Scenes";
+  document.getElementById("sm-overlay").classList.add("show");
+}
+function closeSceneMgr() { document.getElementById("sm-overlay").classList.remove("show"); }
+function smOverlayClick(e) { if(e.target===document.getElementById("sm-overlay")) closeSceneMgr(); }
+
+function renderSceneRows() {
+  const el = document.getElementById("sm-rows");
+  el.innerHTML = "";
+  scenesData.forEach(sc => {
+    const div = document.createElement("div");
+    div.className = "scene-row";
+    const roomSummary = sc.rooms.map(r=>{ const rm=ROOMS.find(x=>x.id===r.id); return (rm?rm.label:r.id)+" "+r.lv+"%"; }).join(", ");
+    div.innerHTML = `
+      <div class="sr-info">
+        <div class="sr-name">${sc.emoji} ${sc.name}</div>
+        <div class="sr-rooms">${roomSummary}</div>
+      </div>
+      <div class="sr-btns">
+        <button class="sr-edit" onclick="openSceneEditor('${sc.key}')">Edit</button>
+        <button class="sr-del"  onclick="deleteScene('${sc.key}')">✕</button>
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+let editingKey = null;
+function openSceneEditor(key) {
+  editingKey = key;
+  document.getElementById("sm-title").textContent = key ? "Edit Scene" : "New Scene";
+  document.getElementById("sm-list").style.display = "none";
+  document.getElementById("se-view").classList.add("show");
+  const sc = key ? scenesData.find(s=>s.key===key) : null;
+  document.getElementById("se-emoji").value = sc ? sc.emoji : "✨";
+  document.getElementById("se-name").value  = sc ? sc.name  : "";
+  const container = document.getElementById("se-rooms");
+  container.innerHTML = "";
+  ROOMS.forEach(r => {
+    const existing = sc ? sc.rooms.find(x=>x.id===r.id) : null;
+    const checked  = !!existing;
+    const lv       = existing ? existing.lv : 100;
+    const row = document.createElement("div");
+    row.className = "se-rrow"+(checked?"":" off");
+    row.id = "ser-"+r.id;
+    row.innerHTML = `
+      <input type="checkbox" class="se-rcheck" id="sec-${r.id}" ${checked?"checked":""} onchange="toggleRoomInEditor('${r.id}')">
+      <label class="se-rlabel" for="sec-${r.id}">${r.label}</label>
+      <input type="range" class="se-rslider" id="sesl-${r.id}" min="5" max="100" value="${lv}" oninput="document.getElementById('sepct-${r.id}').textContent=this.value+'%'">
+      <span class="se-rpct" id="sepct-${r.id}">${lv}%</span>`;
+    container.appendChild(row);
+  });
+}
+function toggleRoomInEditor(id) {
+  const checked = document.getElementById("sec-"+id).checked;
+  document.getElementById("ser-"+id).classList.toggle("off", !checked);
+}
+function backToList() {
+  renderSceneRows();
+  document.getElementById("sm-list").style.display = "block";
+  document.getElementById("se-view").classList.remove("show");
+  document.getElementById("sm-title").textContent = "Manage Scenes";
+}
+function saveScene() {
+  const emoji = document.getElementById("se-emoji").value.trim() || "✨";
+  const name  = document.getElementById("se-name").value.trim();
+  if (!name) { document.getElementById("se-name").focus(); return; }
+  const rooms = ROOMS
+    .filter(r => document.getElementById("sec-"+r.id)?.checked)
+    .map(r => ({ id: r.id, lv: parseInt(document.getElementById("sesl-"+r.id).value) }));
+  if (editingKey) {
+    const sc = scenesData.find(s=>s.key===editingKey);
+    sc.emoji=emoji; sc.name=name; sc.rooms=rooms;
+  } else {
+    scenesData.push({ key:"scene_"+Date.now(), emoji, name, rooms });
+  }
+  localStorage.setItem("bhScenes", JSON.stringify(scenesData));
+  renderSceneButtons();
+  backToList();
+}
+function deleteScene(key) {
+  if (!confirm("Delete this scene?")) return;
+  scenesData = scenesData.filter(s=>s.key!==key);
+  localStorage.setItem("bhScenes", JSON.stringify(scenesData));
+  renderSceneButtons();
+  renderSceneRows();
+}
+
+renderSceneButtons();
 </script>
 </body>
 </html>
