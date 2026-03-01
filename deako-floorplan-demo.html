@@ -23,9 +23,9 @@
   .sbtn:hover{border-color:#7ecfe0;color:#7ecfe0}
   .sbtn.active{background:#1a3a4a;border-color:#7ecfe0;color:#7ecfe0}
 
-  #fpbox{position:relative;flex:1 1 auto;min-height:0;border-radius:10px;overflow:hidden;border:1px solid #1a2535;background:#0a0e17;display:flex;align-items:stretch}
-  #fpimg{width:100%;height:100%;object-fit:contain;display:block;transition:filter .5s ease}
-  #svgl{position:absolute;top:0;left:0;width:100%;height:100%}
+  #fpbox{position:relative;flex:1 1 auto;min-height:0;border-radius:10px;overflow:hidden;border:1px solid #1a2535;background:#0a0e17;display:flex;align-items:center;justify-content:center}
+  #fpimg{display:block;max-width:100%;max-height:100%;transition:filter .5s ease}
+  #svgl{position:absolute;pointer-events:all}
 
   .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
   #stxt{color:#7ecfe0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
@@ -89,7 +89,7 @@
 
 <div id="fpbox">
   <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" alt="Floor Plan" crossorigin="anonymous"/>
-  <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+  <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
 </div>
 
 <div class="statusbar">
@@ -117,27 +117,27 @@
 
 <script>
 const ROOMS = [
-  {id:"dining",   label:"Dining",        x:4.5,  y:19,  w:22,  h:21},
-  {id:"kitchen",  label:"Kitchen",       x:4.5,  y:38,  w:22,  h:19},
-  {id:"great",    label:"Great Room",    x:26.5, y:19,  w:29,  h:38},
-  {id:"owners",   label:"Owner's Suite", x:71,   y:19,  w:28,  h:31},
-  {id:"owic",     label:"O. WIC",        x:71,   y:50,  w:15,  h:20},
-  {id:"obath",    label:"O. Bath",       x:86,   y:50,  w:13,  h:27},
-  {id:"foyer",    label:"Foyer",         x:38,   y:64,  w:14,  h:15},
-  {id:"strg",     label:"Staircase",     x:52,   y:57,  w:14,  h:16},
-  {id:"pantry",   label:"Pantry",        x:20.5, y:59,  w:12,  h:13},
-  {id:"mudroom",  label:"Mud Room",      x:4.5,  y:59,  w:15,  h:13},
-  {id:"laundry",  label:"Laundry",       x:4.5,  y:72,  w:15,  h:15},
-  {id:"powder",   label:"Powder",        x:20.5, y:72,  w:12,  h:15},
-  {id:"porch",    label:"Front Porch",   x:33,   y:83,  w:19,  h:13},
-  {id:"deck",     label:"Rear Deck",     x:33,   y:1,   w:19,  h:13},
+  {id:"dining",  label:"Dining",        x:26.13, y:31.61, w:15.51, h:11.5},
+  {id:"kitchen", label:"Kitchen",       x:26.13, y:43.49, w:15.41, h:11.5},
+  {id:"great",   label:"Great Room",    x:42.75, y:31.48, w:16.52, h:23.64},
+  {id:"owners",  label:"Owner's Suite", x:59.97, y:31.48, w:15.92, h:17.83},
+  {id:"owic",    label:"O. WIC",        x:60.18, y:50.19, w:4.73,  h:14.29},
+  {id:"obath",   label:"O. Bath",       x:65.82, y:50.19, w:9.97,  h:14.66},
+  {id:"foyer",   label:"Foyer",         x:42.45, y:61.44, w:10.88, h:5.69},
+  {id:"strg",    label:"Staircase",     x:53.93, y:56.13, w:5.44,  h:11.25},
+  {id:"pantry",  label:"Pantry",        x:34.29, y:56.26, w:4.84,  h:5.06},
+  {id:"mudroom", label:"Mud Room",      x:25.92, y:56.13, w:7.45,  h:5.18},
+  {id:"laundry", label:"Laundry",       x:26.23, y:62.45, w:7.05,  h:7.33},
+  {id:"powder",  label:"Powder",        x:34.29, y:62.33, w:5.04,  h:7.33},
+  {id:"porch",   label:"Front Porch",   x:42.55, y:68.14, w:16.72, h:5.94},
+  {id:"deck",    label:"Rear Deck",     x:42.45, y:20.73, w:16.92, h:9.36},
 ];
 const SCENES = {
-  arrive:  ["foyer","great","kitchen","porch","mudroom"],
-  dinner:  ["dining","kitchen","great"],
-  evening: ["owners","owic","great"],
-  vacation:["foyer","porch","deck","great","owners"],
-  morning: ["kitchen","dining","foyer","laundry","mudroom","owners"],
+  arrive:  [{id:"porch",lv:100},{id:"foyer",lv:100},{id:"mudroom",lv:100},{id:"kitchen",lv:70},{id:"great",lv:80}],
+  dinner:  [{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}],
+  evening: [{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}],
+  vacation:[{id:"porch",lv:100},{id:"deck",lv:100},{id:"foyer",lv:100},{id:"great",lv:50},{id:"owners",lv:30}],
+  morning: [{id:"owners",lv:70},{id:"laundry",lv:80},{id:"mudroom",lv:80},{id:"foyer",lv:100},{id:"dining",lv:100},{id:"kitchen",lv:100}],
 };
 
 // State: brightness 0=off, 1–100=dim level
@@ -149,6 +149,23 @@ let pressTimer = null;
 
 const svg = document.getElementById("svgl");
 const img = document.getElementById("fpimg");
+
+// Align SVG exactly over the rendered image area so coordinates match 1:1
+function alignSVG() {
+  if (!img.naturalWidth) return;
+  const box = img.parentElement;
+  const bW = box.clientWidth, bH = box.clientHeight;
+  const iW = img.naturalWidth, iH = img.naturalHeight;
+  const scale = Math.min(bW / iW, bH / iH);
+  const dW = iW * scale, dH = iH * scale;
+  const ox = (bW - dW) / 2, oy = (bH - dH) / 2;
+  svg.style.left = ox + "px";
+  svg.style.top  = oy + "px";
+  svg.style.width  = dW + "px";
+  svg.style.height = dH + "px";
+}
+img.addEventListener("load", alignSVG);
+window.addEventListener("resize", alignSVG);
 
 // Build SVG defs
 const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
@@ -179,9 +196,6 @@ ROOMS.forEach(r => {
   const radR=mk("rect",{class:"rad-rect",x:r.x,y:r.y,width:r.w,height:r.h,rx:"0.4",fill:`url(#${radId})`});
   radR.style.display="none"; radR.style.pointerEvents="none"; radR.style.transition="opacity .35s";
 
-  const txt=mk("text",{class:"room-txt",x:r.x+r.w/2,y:r.y+r.h/2,"text-anchor":"middle","dominant-baseline":"middle","font-size":"2.8","font-weight":"700","font-family":"system-ui,sans-serif",fill:"rgba(255,255,255,0.28)","letter-spacing":"0.04"});
-  txt.style.transition="fill .3s"; txt.style.pointerEvents="none"; txt.textContent=r.label;
-
   // Dim % badge
   const badge=mk("text",{class:"dim-badge",x:r.x+r.w/2,y:r.y+r.h-2.5,"text-anchor":"middle","dominant-baseline":"middle","font-size":"2.2","font-weight":"700","font-family":"system-ui,sans-serif",fill:"rgba(255,230,100,0.9)","letter-spacing":"0.02"});
   badge.style.pointerEvents="none"; badge.style.display="none";
@@ -189,7 +203,7 @@ ROOMS.forEach(r => {
   const dot=mk("circle",{class:"dot",cx:r.x+r.w-1.8,cy:r.y+2,r:"1.1",fill:"rgba(255,255,255,0.1)"});
   dot.style.transition="fill .3s"; dot.style.pointerEvents="none";
 
-  [glowR,fillR,radR,txt,badge,dot].forEach(el=>g.appendChild(el));
+  [glowR,fillR,radR,badge,dot].forEach(el=>g.appendChild(el));
 
   // Click = toggle, long press = open dimmer
   g.addEventListener("mousedown",  e => startPress(r.id, e));
@@ -242,7 +256,6 @@ function renderRoom(id) {
   const gl=g.querySelector(".glow-rect");
   const fr=g.querySelector(".fill-rect");
   const rr=g.querySelector(".rad-rect");
-  const tx=g.querySelector(".room-txt");
   const bg=g.querySelector(".dim-badge");
   const dt=g.querySelector(".dot");
   const on = lv > 0;
@@ -254,7 +267,6 @@ function renderRoom(id) {
     fr.setAttribute("stroke",`rgba(255,200,40,${0.3+a*0.3})`);
     fr.setAttribute("stroke-width","0.38");
     rr.style.display="block"; rr.setAttribute("opacity", a);
-    tx.setAttribute("fill",`rgba(255,248,170,${0.5+a*0.5})`);
     dt.setAttribute("fill",`rgba(255,216,74,${0.4+a*0.6})`);
     if (lv < 100) {
       bg.style.display="block";
@@ -268,7 +280,6 @@ function renderRoom(id) {
     fr.setAttribute("stroke","rgba(255,255,255,0.08)");
     fr.setAttribute("stroke-width","0.22");
     rr.style.display="none";
-    tx.setAttribute("fill","rgba(255,255,255,0.28)");
     dt.setAttribute("fill","rgba(255,255,255,0.1)");
     bg.style.display="none";
   }
@@ -364,8 +375,8 @@ function runScene(btn, key) {
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
   const names={arrive:"🏠 Arrive Home",dinner:"🍽 Dinner",evening:"🌙 Wind Down",vacation:"🔒 Vacation Mode",morning:"☀ Good Morning"};
   setStatus(names[key]+" Scene");
-  (SCENES[key]||[]).forEach((id,i)=>{
-    setTimeout(()=>{levels[id]=100;renderRoom(id);updateCount();updateImg();},i*220);
+  (SCENES[key]||[]).forEach((item,i)=>{
+    setTimeout(()=>{levels[item.id]=item.lv;renderRoom(item.id);updateCount();updateImg();},i*220);
   });
 }
 </script>

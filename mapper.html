@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Room Mapper</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#0d1117;font-family:system-ui,sans-serif;color:#eee;overflow:hidden}
+  body{display:flex;flex-direction:row}
+
+  #canvas-area{flex:1;position:relative;background:#000;overflow:hidden;cursor:crosshair}
+  #fp-img{display:block;max-width:100%;max-height:100%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);user-select:none;pointer-events:none}
+  #room-svg{position:absolute}
+
+  #sidebar{width:280px;background:#111826;border-left:1px solid #1a2535;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+  #sidebar h2{padding:14px 16px;font-size:13px;letter-spacing:.1em;color:#7ecfe0;border-bottom:1px solid #1a2535;text-transform:uppercase}
+  #instructions{padding:10px 14px;border-bottom:1px solid #1a2535;font-size:11px;color:#556;line-height:1.6}
+  #instructions strong{color:#7ecfe0}
+  #room-list{flex:1;overflow-y:auto;padding:6px}
+  .room-item{padding:8px 10px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:3px;display:flex;align-items:center;gap:8px;transition:all .12s}
+  .room-item:hover{background:#1a2235}
+  .room-item.selected{background:#1a3a4a;border-color:#7ecfe0}
+  .swatch{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+  .rname{font-size:12px;font-weight:600;flex:1}
+  .rcoords{font-size:10px;color:#445;font-family:monospace}
+  #export-area{padding:12px;border-top:1px solid #1a2535;display:flex;flex-direction:column;gap:8px}
+  #export-btn{width:100%;padding:12px;background:#f5c842;color:#0d1117;border:none;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.03em}
+  #export-btn:hover{background:#ffd84a;transform:scale(1.02)}
+  #export-btn.copied{background:#6bcb77;color:#0d1117}
+  #copy-note{font-size:11px;color:#556;text-align:center;min-height:16px}
+  #output{background:#0a0e17;border:1px solid #2a3348;border-radius:6px;padding:10px;font-size:10px;color:#7ecfe0;font-family:monospace;max-height:200px;overflow-y:auto;white-space:pre;user-select:all;cursor:text}
+  #hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(10,14,23,0.85);border:1px solid #2a3348;border-radius:20px;padding:6px 16px;font-size:11px;color:#778;pointer-events:none;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div id="canvas-area">
+  <img id="fp-img" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" crossorigin="anonymous" alt="Floor Plan" draggable="false">
+  <svg id="room-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+  <div id="hint">Select a room → drag to draw its boundary</div>
+</div>
+
+<div id="sidebar">
+  <h2>Room Mapper</h2>
+  <div id="instructions">
+    1. <strong>Click a room</strong> in the list<br>
+    2. <strong>Drag on the floor plan</strong> to draw its exact boundary<br>
+    3. Repeat for all rooms<br>
+    4. Click <strong>Export</strong> → paste into the main app
+  </div>
+  <div id="room-list"></div>
+  <div id="export-area">
+    <button id="export-btn" onclick="copyCoords()">📋 Copy Coordinates</button>
+    <div id="copy-note">Map all rooms, then click to copy</div>
+    <div id="output"></div>
+  </div>
+</div>
+
+<script>
+const COLORS = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff922b','#cc5de8','#20c997','#f06595','#a9e34b','#74c0fc','#ff8787','#ffe066','#8ce99a','#63e6be'];
+
+let rooms = [
+  {id:"dining",  label:"Dining",        x:19,   y:17,   w:19,   h:18},
+  {id:"kitchen", label:"Kitchen",       x:19,   y:35,   w:18,   h:17},
+  {id:"great",   label:"Great Room",    x:37,   y:17,   w:25,   h:37},
+  {id:"owners",  label:"Owner's Suite", x:62,   y:17,   w:22,   h:26},
+  {id:"owic",    label:"O. WIC",        x:62,   y:43,   w:8,    h:21},
+  {id:"obath",   label:"O. Bath",       x:70,   y:43,   w:14,   h:21},
+  {id:"foyer",   label:"Foyer",         x:37,   y:59,   w:9,    h:9},
+  {id:"strg",    label:"Staircase",     x:46,   y:46,   w:10,   h:20},
+  {id:"pantry",  label:"Pantry",        x:29,   y:51,   w:8,    h:10},
+  {id:"mudroom", label:"Mud Room",      x:19,   y:51,   w:10,   h:10},
+  {id:"laundry", label:"Laundry",       x:19,   y:61,   w:10,   h:13},
+  {id:"powder",  label:"Powder",        x:29,   y:61,   w:8,    h:13},
+  {id:"porch",   label:"Front Porch",   x:33,   y:72,   w:26,   h:11},
+  {id:"deck",    label:"Rear Deck",     x:33,   y:7,    w:30,   h:13},
+];
+
+let selectedId = null;
+let isDragging = false;
+let dragStart = null;
+
+const svg   = document.getElementById("room-svg");
+const img   = document.getElementById("fp-img");
+const area  = document.getElementById("canvas-area");
+
+// ── Align SVG over the image ──────────────────────────────────────────────
+function alignSVG() {
+  if (!img.naturalWidth) return;
+  const bW = area.clientWidth, bH = area.clientHeight;
+  const iW = img.naturalWidth,  iH = img.naturalHeight;
+  const scale = Math.min(bW / iW, bH / iH);
+  const dW = iW * scale, dH = iH * scale;
+  const ox = (bW - dW) / 2, oy = (bH - dH) / 2;
+  svg.style.left   = ox + "px";
+  svg.style.top    = oy + "px";
+  svg.style.width  = dW + "px";
+  svg.style.height = dH + "px";
+}
+img.addEventListener("load", () => { alignSVG(); renderRooms(); buildList(); });
+window.addEventListener("resize", alignSVG);
+
+// ── Convert screen → SVG viewBox coords (0-100) ───────────────────────────
+function toSVG(clientX, clientY) {
+  const r = svg.getBoundingClientRect();
+  const x = Math.max(0, Math.min(100, (clientX - r.left)  / r.width  * 100));
+  const y = Math.max(0, Math.min(100, (clientY - r.top)   / r.height * 100));
+  return {x, y};
+}
+
+// ── Drag to draw ──────────────────────────────────────────────────────────
+svg.addEventListener("mousedown", e => {
+  if (!selectedId) return;
+  isDragging = true;
+  dragStart  = toSVG(e.clientX, e.clientY);
+  e.preventDefault();
+});
+window.addEventListener("mousemove", e => {
+  if (!isDragging || !selectedId) return;
+  const cur = toSVG(e.clientX, e.clientY);
+  const r = rooms.find(r => r.id === selectedId);
+  if (!r) return;
+  r.x = +(Math.min(dragStart.x, cur.x)).toFixed(2);
+  r.y = +(Math.min(dragStart.y, cur.y)).toFixed(2);
+  r.w = +(Math.abs(cur.x - dragStart.x)).toFixed(2);
+  r.h = +(Math.abs(cur.y - dragStart.y)).toFixed(2);
+  renderRooms();
+  buildList();
+});
+window.addEventListener("mouseup", () => { isDragging = false; });
+
+// ── Render room boxes ─────────────────────────────────────────────────────
+function renderRooms() {
+  svg.innerHTML = "";
+  rooms.forEach((r, i) => {
+    const color = COLORS[i % COLORS.length];
+    const sel   = selectedId === r.id;
+
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.style.cursor = "pointer";
+    g.onclick = e => { e.stopPropagation(); select(r.id); };
+
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", r.x); rect.setAttribute("y", r.y);
+    rect.setAttribute("width", r.w); rect.setAttribute("height", r.h);
+    rect.setAttribute("fill",   sel ? color + "33" : color + "18");
+    rect.setAttribute("stroke", color);
+    rect.setAttribute("stroke-width", sel ? "0.55" : "0.3");
+
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", r.x + r.w / 2);
+    text.setAttribute("y", r.y + r.h / 2);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("dominant-baseline", "middle");
+    text.setAttribute("font-size", "2.6");
+    text.setAttribute("font-weight", "700");
+    text.setAttribute("fill", color);
+    text.setAttribute("font-family", "system-ui,sans-serif");
+    text.style.pointerEvents = "none";
+    text.textContent = r.label;
+
+    g.appendChild(rect); g.appendChild(text);
+    svg.appendChild(g);
+  });
+}
+
+// ── Sidebar list ──────────────────────────────────────────────────────────
+function buildList() {
+  const list = document.getElementById("room-list");
+  list.innerHTML = "";
+  rooms.forEach((r, i) => {
+    const div = document.createElement("div");
+    div.className = "room-item" + (selectedId === r.id ? " selected" : "");
+    div.innerHTML = `
+      <div class="swatch" style="background:${COLORS[i%COLORS.length]}"></div>
+      <div class="rname">${r.label}</div>
+      <div class="rcoords">${r.x},${r.y} ${r.w}×${r.h}</div>`;
+    div.onclick = () => select(r.id);
+    list.appendChild(div);
+  });
+}
+
+function select(id) {
+  selectedId = id;
+  buildList();
+  renderRooms();
+  // Scroll selected room into view
+  const items = document.querySelectorAll(".room-item");
+  const idx   = rooms.findIndex(r => r.id === id);
+  if (items[idx]) items[idx].scrollIntoView({block:"nearest"});
+}
+
+// ── Copy ──────────────────────────────────────────────────────────────────
+function copyCoords() {
+  const lines = rooms.map(r =>
+    `  {id:"${r.id}", label:"${r.label}", x:${r.x}, y:${r.y}, w:${r.w}, h:${r.h}},`
+  );
+  const out = lines.join("\n");
+  const el  = document.getElementById("output");
+  el.textContent = out;
+  el.style.display = "block";
+
+  const btn  = document.getElementById("export-btn");
+  const note = document.getElementById("copy-note");
+
+  navigator.clipboard.writeText(out).then(() => {
+    btn.textContent = "✓ Copied!";
+    btn.classList.add("copied");
+    note.textContent = "Paste it into the chat ↗";
+    setTimeout(() => {
+      btn.textContent = "📋 Copy Coordinates";
+      btn.classList.remove("copied");
+      note.textContent = "Map all rooms, then click to copy";
+    }, 3000);
+  }).catch(() => {
+    note.textContent = "Clipboard blocked — select all text below and copy manually.";
+    el.focus();
+    document.execCommand("selectAll");
+  });
+}
+
+buildList();
+renderRooms();
+</script>
+</body>
+</html>
