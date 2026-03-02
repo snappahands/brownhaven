@@ -63,7 +63,7 @@
   .se-save{flex:2;padding:9px;border-radius:8px;border:none;background:#f5c842;color:#0d1117;font-size:12px;font-weight:800;cursor:pointer}.se-save:hover{background:#ffd84a}
 
   #fpbox{position:relative;flex:1 1 auto;min-height:0;border-radius:10px;overflow:hidden;border:1px solid #1a2535;background:#0a0e17}
-  #fpimg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:100%;max-height:100%;display:block;pointer-events:none;user-select:none}
+  #fpimg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:block;pointer-events:none;user-select:none}
   #svgl{position:absolute;pointer-events:none}
 
   .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
@@ -223,20 +223,30 @@ const svg   = document.getElementById("svgl");
 const fpimg = document.getElementById("fpimg");
 const fpbox = document.getElementById("fpbox");
 
-// Align SVG by reading the image's ACTUAL rendered position — no calculations needed
-function alignSVG() {
-  const ir = fpimg.getBoundingClientRect();
-  if (!ir.width || !ir.height) return;
-  const br = fpbox.getBoundingClientRect();
-  svg.style.left   = (ir.left - br.left) + "px";
-  svg.style.top    = (ir.top  - br.top)  + "px";
-  svg.style.width  = ir.width  + "px";
-  svg.style.height = ir.height + "px";
+// Set image AND SVG to the same explicit pixel dimensions from one calculation
+function sizeAndAlign() {
+  if (!fpimg.naturalWidth) return;
+  const bW = fpbox.clientWidth, bH = fpbox.clientHeight;
+  if (!bW || !bH) return;
+  const iW = fpimg.naturalWidth, iH = fpimg.naturalHeight;
+  const scale = Math.min(bW / iW, bH / iH);
+  const dW = Math.round(iW * scale);
+  const dH = Math.round(iH * scale);
+  const ox = Math.round((bW - dW) / 2);
+  const oy = Math.round((bH - dH) / 2);
+  // Force image to exact computed dimensions
+  fpimg.style.width  = dW + "px";
+  fpimg.style.height = dH + "px";
+  // SVG uses identical dimensions and position
+  svg.style.left   = ox + "px";
+  svg.style.top    = oy + "px";
+  svg.style.width  = dW + "px";
+  svg.style.height = dH + "px";
 }
-fpimg.addEventListener("load", () => requestAnimationFrame(alignSVG));
-if (fpimg.complete && fpimg.naturalWidth) requestAnimationFrame(alignSVG);
-window.addEventListener("resize", () => requestAnimationFrame(alignSVG));
-new ResizeObserver(() => requestAnimationFrame(alignSVG)).observe(fpbox);
+fpimg.addEventListener("load", () => requestAnimationFrame(sizeAndAlign));
+if (fpimg.complete && fpimg.naturalWidth) requestAnimationFrame(sizeAndAlign);
+window.addEventListener("resize", () => requestAnimationFrame(sizeAndAlign));
+new ResizeObserver(() => requestAnimationFrame(sizeAndAlign)).observe(fpbox);
 
 
 // Build SVG defs
