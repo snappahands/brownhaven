@@ -21,7 +21,10 @@ Interactive smart lighting demo for a Brownhaven home floor plan, built for Deak
 - **GitHub Pages:** https://snappahands.github.io/brownhaven/deako-floorplan-demo.html
 
 ## Workflow
-- After every code change, commit and push to GitHub, then share the live link: https://snappahands.github.io/brownhaven/deako-floorplan-demo.html
+- After every code change:
+  1. Increment the version number in the status bar (`v1.0`, `v1.1`, etc.)
+  2. Commit and push to GitHub
+  3. Tell the user the new version number and share the live link: https://snappahands.github.io/brownhaven/deako-floorplan-demo.html
 
 ## App Details (deako-floorplan-demo.html)
 - Dark-themed UI (`#0d1117` background)
