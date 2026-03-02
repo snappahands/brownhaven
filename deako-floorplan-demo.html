@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v1.9</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.0</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -219,7 +219,7 @@
     <div class="dim-timer-label">⏱ Timer</div>
     <div class="dim-timer-btns">
       <button class="dim-tbtn active" id="dt-0"   onclick="setDimTimer(0)">Off</button>
-      <button class="dim-tbtn"        id="dt-20"  onclick="setDimTimer(20)">20s</button>
+      <button class="dim-tbtn"        id="dt-10"  onclick="setDimTimer(10)">10s</button>
       <button class="dim-tbtn"        id="dt-300" onclick="setDimTimer(300)">5 min</button>
     </div>
   </div>
@@ -283,7 +283,7 @@ function startRoomTimer(id, seconds) {
 }
 function setDimTimer(val) {
   dimTimerSelected = val;
-  [0, 20, 300].forEach(v => {
+  [0, 10, 300].forEach(v => {
     document.getElementById("dt-"+v).classList.toggle("active", dimTimerSelected === v);
   });
 }
@@ -644,7 +644,7 @@ function openSceneEditor(key) {
       <span class="se-rpct" id="sepct-${r.id}">${lv}%</span>
       <select class="se-rtimer" id="setmr-${r.id}">
         <option value="0" ${timerVal===0?"selected":""}>⏱ Off</option>
-        <option value="20" ${timerVal===20?"selected":""}>20s</option>
+        <option value="10" ${timerVal===10?"selected":""}>10s</option>
         <option value="300" ${timerVal===300?"selected":""}>5min</option>
       </select>`;
     container.appendChild(row);
