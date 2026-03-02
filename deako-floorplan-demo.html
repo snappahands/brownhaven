@@ -117,6 +117,12 @@
   #dim-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#f5c842;cursor:pointer;box-shadow:0 0 6px rgba(245,200,66,0.6)}
   #dim-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#f5c842;cursor:pointer;border:none}
   #dim-value{color:#f5c842;font-size:13px;font-weight:700;min-width:36px;text-align:right}
+  .dim-timer-section{display:flex;flex-direction:column;gap:5px}
+  .dim-timer-label{color:#556;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .dim-timer-btns{display:flex;gap:5px}
+  .dim-tbtn{flex:1;padding:5px 0;border-radius:6px;border:1px solid #2a3348;background:#0d1117;color:#556;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+  .dim-tbtn:hover{border-color:#7ecfe0;color:#7ecfe0}
+  .dim-tbtn.active{background:#1a3a4a;border-color:#7ecfe0;color:#7ecfe0}
   .dim-btns{display:flex;gap:8px;margin-top:2px}
   .dim-btn{flex:1;padding:7px 0;border-radius:8px;border:none;cursor:pointer;font-size:11px;font-weight:700;transition:all .15s}
   .dim-off{background:#0d1117;color:#778;border:1px solid #2a3348}.dim-off:hover{color:#aaa}
@@ -154,7 +160,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v1.5</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v1.6</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -206,6 +212,14 @@
     <span class="dim-icon">☀</span>
   </div>
   <div id="dim-value">100%</div>
+  <div class="dim-timer-section">
+    <div class="dim-timer-label">⏱ Timer</div>
+    <div class="dim-timer-btns">
+      <button class="dim-tbtn active" id="dt-0"   onclick="setDimTimer(0)">Off</button>
+      <button class="dim-tbtn"        id="dt-20"  onclick="setDimTimer(20)">20s</button>
+      <button class="dim-tbtn"        id="dt-300" onclick="setDimTimer(300)">5 min</button>
+    </div>
+  </div>
   <div class="dim-btns">
     <button class="dim-btn dim-off" onclick="turnRoomOff()">Turn Off</button>
     <button class="dim-btn dim-close" onclick="closeDimmer()">Done</button>
@@ -243,11 +257,21 @@ let levels = {};
 ROOMS.forEach(r => levels[r.id] = 0);
 
 let roomTimers = {};
+let roomTimerSettings = {};
+let dimTimerSelected = 0;
+
 function clearRoomTimer(id) {
   if (roomTimers[id]) { clearTimeout(roomTimers[id]); delete roomTimers[id]; }
+  delete roomTimerSettings[id];
 }
 function clearAllTimers() {
   Object.keys(roomTimers).forEach(id => clearRoomTimer(id));
+}
+function setDimTimer(val) {
+  dimTimerSelected = val;
+  [0, 20, 300].forEach(v => {
+    document.getElementById("dt-"+v).classList.toggle("active", dimTimerSelected === v);
+  });
 }
 
 let activeDimRoom = null;
@@ -385,12 +409,8 @@ function renderRoom(id) {
     fr.setAttribute("stroke-width","0.38");
     rr.style.display="block"; rr.setAttribute("opacity", a);
     dt.setAttribute("fill",`rgba(255,216,74,${0.4+a*0.6})`);
-    if (lv < 100) {
-      bg.style.display="block";
-      bg.textContent = lv+"%";
-    } else {
-      bg.style.display="none";
-    }
+    bg.style.display="block";
+    bg.textContent = lv+"%";
   } else {
     gl.style.display="none";
     fr.setAttribute("fill","rgba(255,255,255,0.02)");
@@ -441,10 +461,28 @@ function openDimmer(id, e) {
   popup.style.top  = top+"px";
 
   if (lv === 0) { levels[id]=100; renderRoom(id); updateCount(); updateImg(); }
+
+  // Restore current timer selection for this room
+  dimTimerSelected = roomTimerSettings[id] || 0;
+  setDimTimer(dimTimerSelected);
+
   setStatus(room.label + " — Dimmer");
 }
 
 function closeDimmer() {
+  if (activeDimRoom && levels[activeDimRoom] > 0) {
+    clearRoomTimer(activeDimRoom);
+    if (dimTimerSelected > 0) {
+      const id = activeDimRoom;
+      const label = ROOMS.find(r=>r.id===id).label;
+      roomTimerSettings[id] = dimTimerSelected;
+      roomTimers[id] = setTimeout(()=>{
+        levels[id]=0; renderRoom(id); updateCount(); updateImg();
+        setStatus(label+" — Timer Off");
+        delete roomTimers[id]; delete roomTimerSettings[id];
+      }, dimTimerSelected * 1000);
+    }
+  }
   document.getElementById("dimmer-popup").classList.remove("show");
   document.getElementById("dimmer-overlay").classList.remove("show");
   activeDimRoom = null;
