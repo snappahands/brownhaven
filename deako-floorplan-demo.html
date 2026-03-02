@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.29</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.30</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -415,7 +415,7 @@ ROOMS.forEach(r => {
 let foyerSwitchNext = "off"; // first click = all off
 [
   {x:43.8, y:74.8, interactive:true}, // foyer — toggles all off / all on
-  {x:64.5, y:28.2, interactive:true},  // owner's suite — left wall at entry door
+  {x:64.5, y:28.2, interactive:true,  rotate:90}, // owner's suite — left wall at entry door
   {x:13.0, y:59.0, interactive:true},  // mud room — inside the door
 ].forEach(pos=>{
   const si = document.createElementNS("http://www.w3.org/2000/svg","image");
@@ -424,6 +424,10 @@ let foyerSwitchNext = "off"; // first click = all off
   si.setAttribute("width","3.2"); si.setAttribute("height","3.2");
   si.setAttribute("preserveAspectRatio","xMidYMid meet");
   si.setAttribute("filter","url(#switch-shadow)");
+  if (pos.rotate) {
+    const cx = pos.x + 1.6, cy = pos.y + 1.6;
+    si.setAttribute("transform",`rotate(${pos.rotate},${cx},${cy})`);
+  }
   if (pos.interactive) {
     si.style.pointerEvents="all";
     si.style.cursor="pointer";
