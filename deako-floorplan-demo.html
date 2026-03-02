@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.6</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.7</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -250,18 +250,35 @@ const DEFAULT_SCENES = [
   {key:"arrive",  emoji:"🏠", name:"Arrive Home",  rooms:[{id:"porch",lv:100},{id:"foyer",lv:100},{id:"mudroom",lv:100},{id:"kitchen",lv:70},{id:"great",lv:80}]},
   {key:"dinner",  emoji:"🍽", name:"Dinner",        rooms:[{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}]},
   {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
-  {key:"vacation",emoji:"🔒", name:"Vacation Mode", staggerMs:10000, rooms:[{id:"porch",lv:55},{id:"foyer",lv:100},{id:"kitchen",lv:75},{id:"dining",lv:60},{id:"great",lv:45},{id:"owners",lv:70}]},
+  {key:"vacation",emoji:"🔒", name:"Vacation Mode", steps:[
+    {t:0,     id:"porch",   lv:55},
+    {t:10000, id:"foyer",   lv:100},
+    {t:20000, id:"kitchen", lv:75},
+    {t:30000, id:"dining",  lv:60},
+    {t:40000, id:"great",   lv:45},
+    {t:50000, id:"owners",  lv:70},
+    {t:50000, id:"foyer",   lv:0},
+    {t:55000, id:"dining",  lv:0},
+    {t:60000, id:"kitchen", lv:0},
+    {t:65000, id:"deck",    lv:80},
+    {t:70000, id:"obath",   lv:60},
+    {t:75000, id:"porch",   lv:0},
+    {t:75000, id:"great",   lv:0},
+    {t:75000, id:"deck",    lv:0},
+    {t:75000, id:"obath",   lv:0},
+  ]},
   {key:"morning", emoji:"☀", name:"Good Morning",  rooms:[{id:"owners",lv:70},{id:"laundry",lv:80},{id:"mudroom",lv:80},{id:"foyer",lv:100},{id:"dining",lv:100},{id:"kitchen",lv:100}]},
 ];
 let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || DEFAULT_SCENES.map(s=>({...s,rooms:[...s.rooms]}));
-// Migrate vacation scene if stored version is old (no staggerMs)
-(()=>{ const v=scenesData.find(s=>s.key==="vacation"); if(v&&!v.staggerMs){const d=DEFAULT_SCENES.find(s=>s.key==="vacation");Object.assign(v,{staggerMs:d.staggerMs,rooms:[...d.rooms]});localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
+// Migrate vacation scene if stored version doesn't have steps
+(()=>{ const v=scenesData.find(s=>s.key==="vacation"); if(v&&!v.steps){const d=DEFAULT_SCENES.find(s=>s.key==="vacation");delete v.staggerMs;delete v.rooms;v.steps=[...d.steps];localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
 
 // State: brightness 0=off, 1–100=dim level
 let levels = {};
 ROOMS.forEach(r => levels[r.id] = 0);
 
 let roomTimers = {};
+let sceneStepTimers = [];
 let roomTimerSettings = JSON.parse(localStorage.getItem("bhRoomTimers") || "{}");
 let dimTimerSelected = 0;
 
@@ -270,6 +287,10 @@ function cancelTimer(id) {
 }
 function cancelAllTimers() {
   Object.keys(roomTimers).forEach(id => cancelTimer(id));
+}
+function clearSceneStepTimers() {
+  sceneStepTimers.forEach(t => clearTimeout(t));
+  sceneStepTimers = [];
 }
 function saveTimerSettings() {
   localStorage.setItem("bhRoomTimers", JSON.stringify(roomTimerSettings));
@@ -592,6 +613,7 @@ function turnRoomOff() {
 function allOn() {
   exitLatchMode();
   cancelAllTimers();
+  clearSceneStepTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   ROOMS.forEach(r=>{levels[r.id]=100;renderRoom(r.id);});
   updateCount(); updateImg(); setStatus("All Lights On");
@@ -600,6 +622,7 @@ function allOn() {
 function allOff() {
   exitLatchMode();
   cancelAllTimers();
+  clearSceneStepTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
   updateCount(); updateImg(); setStatus("All Lights Off");
@@ -607,27 +630,36 @@ function allOff() {
 function runScene(btn, key) {
   exitLatchMode();
   cancelAllTimers();
+  clearSceneStepTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
   const sc = scenesData.find(s=>s.key===key); if(!sc) return;
   setStatus(sc.emoji+" "+sc.name+" Scene");
-  const stagger = sc.staggerMs || 220;
-  sc.rooms.forEach((item,i)=>{
-    setTimeout(()=>{
-      levels[item.id]=item.lv;
-      renderRoom(item.id);
-      updateCount(); updateImg();
-      if (item.timer > 0) {
-        // Scene has a timer — use it
-        startRoomTimer(item.id, item.timer);
-      } else {
-        // Scene has no timer for this room — clear its persistent setting
-        delete roomTimerSettings[item.id];
-        saveTimerSettings();
-      }
-    }, i*stagger);
-  });
+  if (sc.steps) {
+    sc.steps.forEach(step=>{
+      sceneStepTimers.push(setTimeout(()=>{
+        levels[step.id]=step.lv;
+        renderRoom(step.id);
+        updateCount(); updateImg();
+      }, step.t));
+    });
+  } else {
+    const stagger = sc.staggerMs || 220;
+    sc.rooms.forEach((item,i)=>{
+      setTimeout(()=>{
+        levels[item.id]=item.lv;
+        renderRoom(item.id);
+        updateCount(); updateImg();
+        if (item.timer > 0) {
+          startRoomTimer(item.id, item.timer);
+        } else {
+          delete roomTimerSettings[item.id];
+          saveTimerSettings();
+        }
+      }, i*stagger);
+    });
+  }
 }
 
 // ── SCENE BUTTONS ──────────────────────────────────────────────────────────
