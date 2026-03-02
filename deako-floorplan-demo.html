@@ -54,10 +54,13 @@
   .se-rrow.off .se-rlabel{color:#334}
   .se-rrow.off .se-rslider{opacity:.3;pointer-events:none}
   .se-rrow.off .se-rpct{color:#334}
+  .se-rrow.off .se-rtimer{opacity:.3;pointer-events:none}
   .se-rcheck{width:15px;height:15px;accent-color:#f5c842;cursor:pointer;flex-shrink:0}
   .se-rlabel{flex:1;font-size:12px;color:#aaa}
   .se-rslider{flex:2;accent-color:#f5c842;cursor:pointer;height:4px}
   .se-rpct{font-size:11px;color:#f5c842;font-weight:700;min-width:32px;text-align:right}
+  .se-rtimer{background:#0d1117;border:1px solid #2a3348;border-radius:5px;color:#7ecfe0;font-size:10px;font-weight:700;padding:3px 5px;cursor:pointer;flex-shrink:0}
+  .se-rtimer:focus{outline:none;border-color:#7ecfe0}
   .se-footer{display:flex;gap:8px;padding-top:2px}
   .se-back{flex:1;padding:9px;border-radius:8px;border:1px solid #2a3348;background:transparent;color:#778;font-size:12px;font-weight:700;cursor:pointer}.se-back:hover{color:#aaa}
   .se-save{flex:2;padding:9px;border-radius:8px;border:none;background:#f5c842;color:#0d1117;font-size:12px;font-weight:800;cursor:pointer}.se-save:hover{background:#ffd84a}
@@ -239,6 +242,14 @@ let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || DEFAU
 let levels = {};
 ROOMS.forEach(r => levels[r.id] = 0);
 
+let roomTimers = {};
+function clearRoomTimer(id) {
+  if (roomTimers[id]) { clearTimeout(roomTimers[id]); delete roomTimers[id]; }
+}
+function clearAllTimers() {
+  Object.keys(roomTimers).forEach(id => clearRoomTimer(id));
+}
+
 let activeDimRoom = null;
 let pressTimer = null;
 
@@ -342,6 +353,7 @@ function cancelPress() {
 }
 
 function toggle(id) {
+  clearRoomTimer(id);
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   if (levels[id] > 0) {
     levels[id] = 0;
@@ -457,6 +469,7 @@ function updateSliderStyle(val) {
 
 function turnRoomOff() {
   if (activeDimRoom) {
+    clearRoomTimer(activeDimRoom);
     levels[activeDimRoom] = 0;
     renderRoom(activeDimRoom);
     updateCount(); updateImg();
@@ -466,23 +479,40 @@ function turnRoomOff() {
 }
 
 function allOn() {
+  clearAllTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   ROOMS.forEach(r=>{levels[r.id]=100;renderRoom(r.id);});
   updateCount(); updateImg(); setStatus("All Lights On");
 }
 function allOff() {
+  clearAllTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
   updateCount(); updateImg(); setStatus("All Lights Off");
 }
 function runScene(btn, key) {
+  clearAllTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
   const sc = scenesData.find(s=>s.key===key); if(!sc) return;
   setStatus(sc.emoji+" "+sc.name+" Scene");
   sc.rooms.forEach((item,i)=>{
-    setTimeout(()=>{levels[item.id]=item.lv;renderRoom(item.id);updateCount();updateImg();},i*220);
+    setTimeout(()=>{
+      levels[item.id]=item.lv;
+      renderRoom(item.id);
+      updateCount(); updateImg();
+      if (item.timer) {
+        const label = ROOMS.find(r=>r.id===item.id).label;
+        roomTimers[item.id] = setTimeout(()=>{
+          levels[item.id]=0;
+          renderRoom(item.id);
+          updateCount(); updateImg();
+          setStatus(label+" — Timer Off");
+          delete roomTimers[item.id];
+        }, item.timer * 1000);
+      }
+    }, i*220);
   });
 }
 
@@ -550,6 +580,7 @@ function openSceneEditor(key) {
     const existing = sc ? sc.rooms.find(x=>x.id===r.id) : null;
     const checked  = !!existing;
     const lv       = existing ? existing.lv : 100;
+    const timerVal = existing ? (existing.timer || 0) : 0;
     const row = document.createElement("div");
     row.className = "se-rrow"+(checked?"":" off");
     row.id = "ser-"+r.id;
@@ -557,7 +588,12 @@ function openSceneEditor(key) {
       <input type="checkbox" class="se-rcheck" id="sec-${r.id}" ${checked?"checked":""} onchange="toggleRoomInEditor('${r.id}')">
       <label class="se-rlabel" for="sec-${r.id}">${r.label}</label>
       <input type="range" class="se-rslider" id="sesl-${r.id}" min="5" max="100" value="${lv}" oninput="document.getElementById('sepct-${r.id}').textContent=this.value+'%'">
-      <span class="se-rpct" id="sepct-${r.id}">${lv}%</span>`;
+      <span class="se-rpct" id="sepct-${r.id}">${lv}%</span>
+      <select class="se-rtimer" id="setmr-${r.id}">
+        <option value="0" ${timerVal===0?"selected":""}>⏱ Off</option>
+        <option value="20" ${timerVal===20?"selected":""}>20s</option>
+        <option value="300" ${timerVal===300?"selected":""}>5min</option>
+      </select>`;
     container.appendChild(row);
   });
 }
@@ -577,7 +613,7 @@ function saveScene() {
   if (!name) { document.getElementById("se-name").focus(); return; }
   const rooms = ROOMS
     .filter(r => document.getElementById("sec-"+r.id)?.checked)
-    .map(r => ({ id: r.id, lv: parseInt(document.getElementById("sesl-"+r.id).value) }));
+    .map(r => ({ id: r.id, lv: parseInt(document.getElementById("sesl-"+r.id).value), timer: parseInt(document.getElementById("setmr-"+r.id).value) || 0 }));
   if (editingKey) {
     const sc = scenesData.find(s=>s.key===editingKey);
     sc.emoji=emoji; sc.name=name; sc.rooms=rooms;
