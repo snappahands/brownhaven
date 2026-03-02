@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.11</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.12</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -351,6 +351,9 @@ const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
 defs.innerHTML = `<filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
   <feGaussianBlur stdDeviation="1.6" result="cb"/>
   <feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge>
+</filter>
+<filter id="switch-shadow" x="-20%" y="-20%" width="140%" height="140%">
+  <feDropShadow dx="0" dy="0.15" stdDeviation="0.35" flood-color="rgba(0,0,0,0.7)"/>
 </filter>`;
 svg.appendChild(defs);
 
@@ -407,6 +410,18 @@ ROOMS.forEach(r => {
 
   svg.appendChild(g);
 });
+
+// ── DEAKO SWITCH IMAGE — foyer, right of door ──
+(()=>{
+  const si = document.createElementNS("http://www.w3.org/2000/svg","image");
+  si.setAttribute("href","https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Smart_Dimmer_1080p_Square.png?v=1746725590");
+  si.setAttribute("x","43.4"); si.setAttribute("y","71.8");
+  si.setAttribute("width","2.6"); si.setAttribute("height","2.6");
+  si.setAttribute("preserveAspectRatio","xMidYMid meet");
+  si.setAttribute("filter","url(#switch-shadow)");
+  si.style.pointerEvents="none";
+  svg.appendChild(si);
+})();
 
 let pressTarget = null;
 let didLongPress = false;
