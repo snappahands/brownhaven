@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.14</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.15</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -412,9 +412,10 @@ ROOMS.forEach(r => {
 });
 
 // ── DEAKO SWITCH IMAGES ──
+let foyerSwitchNext = "off"; // first click = all off
 [
-  {x:43.8, y:74.8}, // foyer — right of door
-  {x:66.2, y:43.5}, // owner's suite — just inside left wall door
+  {x:43.8, y:74.8, interactive:true}, // foyer — toggles all off / all on
+  {x:66.2, y:43.5, interactive:false}, // owner's suite — decorative
 ].forEach(pos=>{
   const si = document.createElementNS("http://www.w3.org/2000/svg","image");
   si.setAttribute("href","https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Smart_Dimmer_1080p_Square.png?v=1746725590");
@@ -422,7 +423,18 @@ ROOMS.forEach(r => {
   si.setAttribute("width","3.2"); si.setAttribute("height","3.2");
   si.setAttribute("preserveAspectRatio","xMidYMid meet");
   si.setAttribute("filter","url(#switch-shadow)");
-  si.style.pointerEvents="none";
+  if (pos.interactive) {
+    si.style.pointerEvents="all";
+    si.style.cursor="pointer";
+    si.addEventListener("mousedown", e=>e.stopPropagation());
+    si.addEventListener("click", e=>{
+      e.stopPropagation();
+      if (foyerSwitchNext==="off") { allOff(); foyerSwitchNext="on"; }
+      else                         { allOn();  foyerSwitchNext="off"; }
+    });
+  } else {
+    si.style.pointerEvents="none";
+  }
   svg.appendChild(si);
 });
 
