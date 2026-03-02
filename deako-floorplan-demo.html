@@ -63,8 +63,7 @@
   .se-save{flex:2;padding:9px;border-radius:8px;border:none;background:#f5c842;color:#0d1117;font-size:12px;font-weight:800;cursor:pointer}.se-save:hover{background:#ffd84a}
 
   #fpbox{position:relative;flex:1 1 auto;min-height:0;border-radius:10px;overflow:hidden;border:1px solid #1a2535;background:#0a0e17;display:flex;align-items:center;justify-content:center}
-  #fpimg{display:block;max-width:100%;max-height:100%;transition:filter .5s ease}
-  #svgl{position:absolute;pointer-events:all}
+  #svgl{aspect-ratio:640/510;max-width:100%;max-height:100%;display:block;flex-shrink:0;overflow:visible}
 
   .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
   #stxt{color:#7ecfe0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
@@ -121,8 +120,10 @@
 <div class="scenes" id="scenes-row"></div>
 
 <div id="fpbox">
-  <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" alt="Floor Plan" crossorigin="anonymous"/>
-  <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+  <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <image id="fpimg" href="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp"
+      x="0" y="0" width="100" height="100" preserveAspectRatio="none" crossorigin="anonymous"/>
+  </svg>
 </div>
 
 <div class="statusbar">
@@ -220,24 +221,8 @@ let activeDimRoom = null;
 let pressTimer = null;
 
 const svg = document.getElementById("svgl");
-const img = document.getElementById("fpimg");
+const img = document.getElementById("fpimg"); // SVG <image> element
 
-// Align SVG exactly over the rendered image area so coordinates match 1:1
-function alignSVG() {
-  if (!img.naturalWidth) return;
-  const box = img.parentElement;
-  const bW = box.clientWidth, bH = box.clientHeight;
-  const iW = img.naturalWidth, iH = img.naturalHeight;
-  const scale = Math.min(bW / iW, bH / iH);
-  const dW = iW * scale, dH = iH * scale;
-  const ox = (bW - dW) / 2, oy = (bH - dH) / 2;
-  svg.style.left = ox + "px";
-  svg.style.top  = oy + "px";
-  svg.style.width  = dW + "px";
-  svg.style.height = dH + "px";
-}
-img.addEventListener("load", alignSVG);
-window.addEventListener("resize", alignSVG);
 
 // Build SVG defs
 const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
