@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.44</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.45</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -465,8 +465,8 @@ let allOnOffNext = "on"; // first click = all on
         if (greatSwitchNext==="dinner") { runScene(null,"dinner"); greatSwitchNext="on"; }
         else                            { allOn();                 greatSwitchNext="dinner"; }
       } else if (pos.clickFn === "allon") {
-        if (allOnOffNext==="on") { allOn();  allOnOffNext="off"; }
-        else                     { allOff(); allOnOffNext="on"; }
+        if (allOnOffNext==="on") { fssOn();  allOnOffNext="off"; }
+        else                     { fssOff(); allOnOffNext="on"; }
       } else {
         if (foyerSwitchNext==="off") { allOff(); foyerSwitchNext="on"; }
         else                         { allOn();  foyerSwitchNext="off"; }
@@ -718,6 +718,23 @@ function allOff() {
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
   updateCount(); updateImg(); setStatus("All Lights Off");
+}
+const FSS_ROOMS = ["porch","foyer","great","kitchen","dining"];
+function fssOn() {
+  exitLatchMode(); cancelAllTimers(); clearSceneStepTimers();
+  document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
+  batchRender(() => {
+    ROOMS.forEach(r=>{ levels[r.id] = FSS_ROOMS.includes(r.id) ? 100 : 0; renderRoom(r.id); });
+    updateCount(); updateImg(); setStatus("4SS All On");
+  });
+}
+function fssOff() {
+  exitLatchMode(); cancelAllTimers(); clearSceneStepTimers();
+  document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
+  batchRender(() => {
+    FSS_ROOMS.forEach(id=>{ levels[id]=0; renderRoom(id); });
+    updateCount(); updateImg(); setStatus("4SS All Off");
+  });
 }
 function runScene(btn, key) {
   exitLatchMode();
