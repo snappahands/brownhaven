@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.9</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.10</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -271,7 +271,7 @@ const DEFAULT_SCENES = [
 ];
 let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || DEFAULT_SCENES.map(s=>({...s,rooms:[...s.rooms]}));
 // Migrate vacation scene if stored version is outdated
-(()=>{ const v=scenesData.find(s=>s.key==="vacation"); const d=DEFAULT_SCENES.find(s=>s.key==="vacation"); if(v&&(!v.steps||v.steps[1]?.t!==d.steps[1]?.t)){delete v.staggerMs;delete v.rooms;v.steps=[...d.steps];localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
+(()=>{ const v=scenesData.find(s=>s.key==="vacation"); const d=DEFAULT_SCENES.find(s=>s.key==="vacation"); if(v&&JSON.stringify(v.steps)!==JSON.stringify(d.steps)){delete v.staggerMs;delete v.rooms;v.steps=[...d.steps];localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
 
 // State: brightness 0=off, 1–100=dim level
 let levels = {};
