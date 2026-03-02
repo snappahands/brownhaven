@@ -71,6 +71,8 @@
   #scnt{color:#334;font-size:11px}
   #scnt span{color:#f5c842;font-weight:700}
   .dtag{font-size:10px;color:#2a3348;letter-spacing:.06em}
+  #debug-btn{position:fixed;bottom:10px;right:10px;z-index:9999;padding:8px 14px;background:#cc0000;color:#fff;border:2px solid #ff4444;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;opacity:1}
+  #debug-btn:hover{background:#ff0000}
 
   /* Dimmer popup */
   #dimmer-popup{
@@ -124,6 +126,7 @@
   <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" crossorigin="anonymous" draggable="false" alt="">
   <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
 </div>
+<button id="debug-btn" onclick="toggleDebug()">⊞ Debug</button>
 
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
@@ -188,20 +191,20 @@
 
 <script>
 const ROOMS = [
-  {id:"dining",  label:"Dining",        x:26.02, y:31.23, w:15.72, h:11.63},
-  {id:"kitchen", label:"Kitchen",       x:26.23, y:43.36, w:15.41, h:11.63},
-  {id:"great",   label:"Great Room",    x:42.65, y:31.48, w:16.62, h:23.77},
-  {id:"owners",  label:"Owner's Suite", x:60.18, y:31.23, w:15.62, h:18.08},
-  {id:"owic",    label:"O. WIC",        x:60.18, y:50.32, w:5.24,  h:14.03},
-  {id:"obath",   label:"O. Bath",       x:65.92, y:50.06, w:9.87,  h:14.54},
-  {id:"foyer",   label:"Foyer",         x:42.24, y:60.56, w:6.65,  h:6.45},
-  {id:"strg",    label:"Staircase",     x:49.2,  y:55.88, w:9.97,  h:11.25},
-  {id:"pantry",  label:"Pantry",        x:34.18, y:56.01, w:5.14,  h:5.31},
-  {id:"mudroom", label:"Mud Room",      x:25.82, y:55.63, w:7.66,  h:5.69},
-  {id:"laundry", label:"Laundry",       x:26.02, y:62.07, w:7.45,  h:7.71},
-  {id:"powder",  label:"Powder",        x:34.08, y:62.33, w:5.14,  h:7.46},
-  {id:"porch",   label:"Front Porch",   x:42.65, y:68.14, w:16.62, h:5.56},
-  {id:"deck",    label:"Rear Deck",     x:42.34, y:20.61, w:17.03, h:9.73},
+  {id:"dining",  label:"Dining",        x:16.1,  y:23.46, w:22.65, h:16.8},
+  {id:"kitchen", label:"Kitchen",       x:16.1,  y:40.62, w:22.65, h:16.45},
+  {id:"great",   label:"Great Room",    x:39.46, y:23.46, w:23.93, h:33.96},
+  {id:"owners",  label:"Owner's Suite", x:64.39, y:23.46, w:22.36, h:25.38},
+  {id:"owic",    label:"O. WIC",        x:64.39, y:49.91, w:7.41,  h:20.56},
+  {id:"obath",   label:"O. Bath",       x:72.22, y:50.09, w:14.67, h:20.56},
+  {id:"foyer",   label:"Foyer",         x:39.6,  y:57.78, w:6.55,  h:16.27},
+  {id:"strg",    label:"Staircase",     x:46.87, y:58.49, w:16.38, h:15.73},
+  {id:"pantry",  label:"Pantry",        x:27.35, y:58.14, w:11.11, h:8.22},
+  {id:"mudroom", label:"Mud Room",      x:9.4,   y:58.49, w:17.24, h:7.69},
+  {id:"laundry", label:"Laundry",       x:16.52, y:67.07, w:10.11, h:11.08},
+  {id:"powder",  label:"Powder",        x:27.78, y:67.07, w:10.68, h:11.26},
+  {id:"porch",   label:"Front Porch",   x:39.32, y:75.48, w:24.22, h:8.04},
+  {id:"deck",    label:"Rear Deck",     x:39.17, y:8.44,  w:24.5,  h:13.59},
 ];
 const DEFAULT_SCENES = [
   {key:"arrive",  emoji:"🏠", name:"Arrive Home",  rooms:[{id:"porch",lv:100},{id:"foyer",lv:100},{id:"mudroom",lv:100},{id:"kitchen",lv:70},{id:"great",lv:80}]},
@@ -574,6 +577,36 @@ function deleteScene(key) {
 }
 
 renderSceneButtons();
+
+// ── DEBUG MODE ──
+let debugOn = false;
+function toggleDebug() {
+  debugOn = !debugOn;
+  document.getElementById("debug-btn").textContent = debugOn ? "✕ Debug" : "⊞ Debug";
+  document.getElementById("debug-btn").style.background = debugOn ? "#1a3a1a" : "#222";
+
+  // Remove any existing debug elements
+  svg.querySelectorAll(".dbg").forEach(el => el.remove());
+
+  if (debugOn) {
+    const colors = ["#f00","#0f0","#00f","#ff0","#f0f","#0ff","#f80","#08f","#8f0","#80f","#f08","#0f8","#888","#fff"];
+    ROOMS.forEach((r, i) => {
+      const mk=(tag,attrs)=>{const el=document.createElementNS("http://www.w3.org/2000/svg",tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));el.classList.add("dbg");return el;};
+      const c = colors[i % colors.length];
+      const rect = mk("rect",{x:r.x,y:r.y,width:r.w,height:r.h,fill:"none",stroke:c,"stroke-width":"0.5",opacity:"0.9"});
+      const label = mk("text",{x:r.x+r.w/2,y:r.y+r.h/2,"text-anchor":"middle","dominant-baseline":"middle","font-size":"2.5","font-weight":"700","font-family":"system-ui,sans-serif",fill:c,"pointer-events":"none"});
+      label.textContent = r.label;
+      svg.appendChild(rect);
+      svg.appendChild(label);
+    });
+    // Show SVG info
+    setStatus(`SVG: ${svg.style.left} left, ${svg.style.top} top, ${svg.style.width} × ${svg.style.height} | img: ${fpimg.offsetWidth}×${fpimg.offsetHeight} natural: ${fpimg.naturalWidth}×${fpimg.naturalHeight}`);
+  } else {
+    ROOMS.forEach(r => renderRoom(r.id));
+    updateCount(); updateImg();
+    setStatus("Tap a room to toggle · Long-press to dim");
+  }
+}
 </script>
 </body>
 </html>
