@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.32</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.33</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -247,8 +247,22 @@ const ROOMS = [
   {id:"deck",    label:"Rear Deck",     x:38.12, y:4.67,  w:26.96, h:14.79},
 ];
 const DEFAULT_SCENES = [
-  {key:"morning", emoji:"☀", name:"Good Morning",  rooms:[{id:"owners",lv:70},{id:"laundry",lv:80},{id:"mudroom",lv:80},{id:"foyer",lv:100},{id:"dining",lv:100},{id:"kitchen",lv:100}]},
-  {key:"arrive",  emoji:"🏠", name:"Arrive Home",  rooms:[{id:"porch",lv:100},{id:"foyer",lv:100},{id:"mudroom",lv:100},{id:"kitchen",lv:70},{id:"great",lv:80}]},
+  {key:"morning", emoji:"☀", name:"Good Morning", steps:[
+    {t:0,    id:"owners",  lv:70},
+    {t:1500, id:"great",   lv:80},
+    {t:1500, id:"foyer",   lv:100},
+    {t:3000, id:"dining",  lv:100},
+    {t:3000, id:"kitchen", lv:100},
+    {t:3000, id:"mudroom", lv:80},
+    {t:3000, id:"laundry", lv:80},
+  ]},
+  {key:"arrive",  emoji:"🏠", name:"Arrive Home", steps:[
+    {t:0,    id:"porch",   lv:100},
+    {t:1500, id:"foyer",   lv:100},
+    {t:1500, id:"strg",    lv:100},
+    {t:3000, id:"great",   lv:80},
+    {t:3000, id:"kitchen", lv:70},
+  ]},
   {key:"dinner",  emoji:"🍽", name:"Dinner",        rooms:[{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}]},
   {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
   {key:"vacation",emoji:"🔒", name:"Vacation Mode", steps:[
@@ -269,11 +283,14 @@ const DEFAULT_SCENES = [
     {t:65000, id:"owners",  lv:0},
   ]},
 ];
-let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || DEFAULT_SCENES.map(s=>({...s,rooms:[...s.rooms]}));
+let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || JSON.parse(JSON.stringify(DEFAULT_SCENES));
 // Migrate scene order to match DEFAULT_SCENES
 (()=>{ const order=DEFAULT_SCENES.map(s=>s.key); if(scenesData[0]?.key!==order[0]){scenesData.sort((a,b)=>{const ai=order.indexOf(a.key),bi=order.indexOf(b.key);return(ai<0?999:ai)-(bi<0?999:bi);});localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
-// Migrate vacation scene if stored version is outdated
-(()=>{ const v=scenesData.find(s=>s.key==="vacation"); const d=DEFAULT_SCENES.find(s=>s.key==="vacation"); if(v&&JSON.stringify(v.steps)!==JSON.stringify(d.steps)){delete v.staggerMs;delete v.rooms;v.steps=[...d.steps];localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
+// Migrate steps-based scenes if stored version is outdated
+["vacation","morning","arrive"].forEach(key=>{
+  const v=scenesData.find(s=>s.key===key); const d=DEFAULT_SCENES.find(s=>s.key===key);
+  if(v&&d&&JSON.stringify(v.steps)!==JSON.stringify(d.steps)){delete v.staggerMs;delete v.rooms;v.steps=JSON.parse(JSON.stringify(d.steps));localStorage.setItem("bhScenes",JSON.stringify(scenesData));}
+});
 
 // State: brightness 0=off, 1–100=dim level
 let levels = {};
@@ -413,10 +430,12 @@ ROOMS.forEach(r => {
 
 // ── DEAKO SWITCH IMAGES ──
 let foyerSwitchNext = "off"; // first click = all off
+let greatSwitchNext = "dinner"; // first click = dinner scene
 [
-  {x:43.8, y:74.8, interactive:true}, // foyer — toggles all off / all on
-  {x:64.5, y:28.2, interactive:true}, // owner's suite — left wall at entry door
-  {x:13.0, y:58.0, interactive:true},  // mud room — inside the door
+  {x:43.8, y:74.8, interactive:true},              // foyer — toggles all off / all on
+  {x:64.5, y:28.2, interactive:true},              // owner's suite — left wall at entry door
+  {x:13.0, y:57.2, interactive:true},              // mud room — inside the door
+  {x:37.8, y:47.0, interactive:true, clickFn:"dinner"}, // great room/kitchen wall
 ].forEach(pos=>{
   const si = document.createElementNS("http://www.w3.org/2000/svg","image");
   si.setAttribute("href","https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Smart_Dimmer_1080p_Square.png?v=1746725590");
@@ -434,8 +453,13 @@ let foyerSwitchNext = "off"; // first click = all off
     si.addEventListener("mousedown", e=>e.stopPropagation());
     si.addEventListener("click", e=>{
       e.stopPropagation();
-      if (foyerSwitchNext==="off") { allOff(); foyerSwitchNext="on"; }
-      else                         { allOn();  foyerSwitchNext="off"; }
+      if (pos.clickFn === "dinner") {
+        if (greatSwitchNext==="dinner") { runScene(null,"dinner"); greatSwitchNext="on"; }
+        else                            { allOn();                 greatSwitchNext="dinner"; }
+      } else {
+        if (foyerSwitchNext==="off") { allOff(); foyerSwitchNext="on"; }
+        else                         { allOn();  foyerSwitchNext="off"; }
+      }
     });
   } else {
     si.style.pointerEvents="none";
@@ -669,7 +693,7 @@ function runScene(btn, key) {
   cancelAllTimers();
   clearSceneStepTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
+  if (btn) btn.classList.add("active");
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
   const sc = scenesData.find(s=>s.key===key); if(!sc) return;
   setStatus(sc.emoji+" "+sc.name+" Scene");
