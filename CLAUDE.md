@@ -18,6 +18,10 @@ Interactive smart lighting demo for a Brownhaven home floor plan, built for Deak
 - **Remote:** https://github.com/snappahands/brownhaven.git
 - **Default branch:** master
 - GitHub CLI (`gh`) is installed at `C:/Program Files/GitHub CLI/` — already added to bash PATH via `~/.bashrc`, so git/gh commands work directly without using PowerShell
+- **GitHub Pages:** https://snappahands.github.io/brownhaven/deako-floorplan-demo.html
+
+## Workflow
+- After every code change, commit and push to GitHub, then share the live link: https://snappahands.github.io/brownhaven/deako-floorplan-demo.html
 
 ## App Details (deako-floorplan-demo.html)
 - Dark-themed UI (`#0d1117` background)
