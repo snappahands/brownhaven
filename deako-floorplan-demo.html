@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.3</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.4</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -366,10 +366,10 @@ ROOMS.forEach(r => {
   const slFill =mk("rect",{class:"sl-fill", x:r.x+slPad,y:slY,width:slTW,height:slH,rx:"0.25",fill:"#f5c842"});
   const slThumb=mk("circle",{class:"sl-thumb",cx:r.x+slPad+slTW,cy:slY+slH/2,r:"0.9",fill:"#f5c842",stroke:"rgba(255,255,255,0.85)","stroke-width":"0.22"});
   [slHit,slTrack,slFill,slThumb].forEach(el=>slGroup.appendChild(el));
-  slGroup.addEventListener("mousedown", e=>{e.stopPropagation();startSliderDrag(r.id,e);});
+  slGroup.addEventListener("mousedown", e=>{e.stopPropagation(); if(latchedDimRoom===r.id){exitLatchMode();}else{if(latchedDimRoom)exitLatchMode();enterLatchMode(r.id,e);}});
   slGroup.addEventListener("mouseup",   e=>{e.stopPropagation();});
-  slGroup.addEventListener("touchstart",e=>{e.stopPropagation();e.preventDefault();startSliderDrag(r.id,e.touches[0]);},{passive:false});
-  slGroup.addEventListener("touchend",  e=>{e.stopPropagation();});
+  slGroup.addEventListener("touchstart",e=>{e.stopPropagation();e.preventDefault();sliderDrag={id:r.id};doSliderPos(e);},{passive:false});
+  slGroup.addEventListener("touchend",  e=>{e.stopPropagation();sliderDrag=null;});
 
   [glowR,fillR,radR,badge,dot,slGroup].forEach(el=>g.appendChild(el));
 
@@ -386,30 +386,36 @@ ROOMS.forEach(r => {
 let pressTarget = null;
 let didLongPress = false;
 
-// ── IN-ROOM SLIDER DRAG ──
-let sliderDrag = null;
-function startSliderDrag(id, e) {
-  const r = ROOMS.find(rm=>rm.id===id);
-  sliderDrag = {id, x0: r.x+1.0, trackW: r.w-2.0};
-  doSliderDrag(e);
+// ── IN-ROOM SLIDER ──
+let latchedDimRoom = null;
+let sliderDrag = null; // touch-drag only
+
+function enterLatchMode(id, e) {
+  latchedDimRoom = id;
+  doSliderPos(e);
 }
-function doSliderDrag(e) {
-  if (!sliderDrag) return;
+function exitLatchMode() {
+  latchedDimRoom = null;
+}
+function doSliderPos(e) {
+  const id = latchedDimRoom || (sliderDrag && sliderDrag.id);
+  if (!id) return;
+  const r = ROOMS.find(rm=>rm.id===id);
   const svgRect = svg.getBoundingClientRect();
-  const cx = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
   const svgX = (cx - svgRect.left) / svgRect.width * 100;
-  const pct = Math.max(0, Math.min(1, (svgX - sliderDrag.x0) / sliderDrag.trackW));
+  const pct = Math.max(0, Math.min(1, (svgX - (r.x+1.0)) / (r.w-2.0)));
   const val = Math.max(5, Math.round(pct * 100));
-  levels[sliderDrag.id] = val;
-  renderRoom(sliderDrag.id);
+  levels[id] = val;
+  renderRoom(id);
   updateCount(); updateImg();
 }
-window.addEventListener("mousemove", e => { if (sliderDrag) doSliderDrag(e); });
-window.addEventListener("mouseup",   () => { sliderDrag = null; });
-window.addEventListener("touchmove", e => { if (sliderDrag) { e.preventDefault(); doSliderDrag(e.touches[0]); } }, {passive:false});
+window.addEventListener("mousemove", e => { if (latchedDimRoom) doSliderPos(e); });
+window.addEventListener("touchmove", e => { if (sliderDrag) { e.preventDefault(); doSliderPos(e); } }, {passive:false});
 window.addEventListener("touchend",  () => { sliderDrag = null; });
 
 function startPress(id, e) {
+  if (latchedDimRoom) { exitLatchMode(); return; }
   pressTarget = id;
   didLongPress = false;
   pressTimer = setTimeout(() => {
@@ -582,6 +588,7 @@ function turnRoomOff() {
 }
 
 function allOn() {
+  exitLatchMode();
   cancelAllTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   ROOMS.forEach(r=>{levels[r.id]=100;renderRoom(r.id);});
@@ -589,12 +596,14 @@ function allOn() {
   ROOMS.forEach(r=>{ if (roomTimerSettings[r.id]) startRoomTimer(r.id, roomTimerSettings[r.id]); });
 }
 function allOff() {
+  exitLatchMode();
   cancelAllTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
   updateCount(); updateImg(); setStatus("All Lights Off");
 }
 function runScene(btn, key) {
+  exitLatchMode();
   cancelAllTimers();
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
