@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v1.7</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v1.8</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -326,7 +326,7 @@ ROOMS.forEach(r => {
   defs.appendChild(rg);
 
   const g = document.createElementNS("http://www.w3.org/2000/svg","g");
-  g.id = "g-"+r.id; g.style.cursor="pointer";
+  g.id = "g-"+r.id; g.style.cursor="pointer"; g.style.pointerEvents="all";
 
   const mk=(tag,attrs)=>{const el=document.createElementNS("http://www.w3.org/2000/svg",tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el;};
 
