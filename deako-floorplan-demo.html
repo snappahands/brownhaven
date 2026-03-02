@@ -223,21 +223,18 @@ const svg   = document.getElementById("svgl");
 const fpimg = document.getElementById("fpimg");
 const fpbox = document.getElementById("fpbox");
 
-// Align SVG exactly over the displayed image — same algorithm as mapper.html
+// Align SVG by reading the image's ACTUAL rendered position — no calculations needed
 function alignSVG() {
-  if (!fpimg.naturalWidth) return;
-  const bW = fpbox.clientWidth,  bH = fpbox.clientHeight;
-  const iW = fpimg.naturalWidth, iH = fpimg.naturalHeight;
-  const scale = Math.min(bW / iW, bH / iH);
-  const dW = iW * scale, dH = iH * scale;
-  const ox = (bW - dW) / 2, oy = (bH - dH) / 2;
-  svg.style.left   = ox + "px";
-  svg.style.top    = oy + "px";
-  svg.style.width  = dW + "px";
-  svg.style.height = dH + "px";
+  const ir = fpimg.getBoundingClientRect();
+  if (!ir.width || !ir.height) return;
+  const br = fpbox.getBoundingClientRect();
+  svg.style.left   = (ir.left - br.left) + "px";
+  svg.style.top    = (ir.top  - br.top)  + "px";
+  svg.style.width  = ir.width  + "px";
+  svg.style.height = ir.height + "px";
 }
 fpimg.addEventListener("load", () => requestAnimationFrame(alignSVG));
-if (fpimg.complete) requestAnimationFrame(alignSVG);
+if (fpimg.complete && fpimg.naturalWidth) requestAnimationFrame(alignSVG);
 window.addEventListener("resize", () => requestAnimationFrame(alignSVG));
 new ResizeObserver(() => requestAnimationFrame(alignSVG)).observe(fpbox);
 
