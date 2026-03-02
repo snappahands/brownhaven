@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deako Smart Lighting — D.R. Horton Central Valley Sales Training</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<style>
+/* ── DEAKO BRAND THEME ── */
+:root {
+  --deako-dark:    #0d1117;
+  --deako-panel:   #111826;
+  --deako-teal:    #7ecfe0;
+  --deako-teal2:   #4ab8d0;
+  --deako-yellow:  #f5c842;
+  --deako-border:  #1e2d40;
+  --deako-text:    #e8edf5;
+  --deako-muted:   #8899aa;
+}
+
+.reveal-viewport { background: var(--deako-dark); }
+.reveal { font-family: system-ui, -apple-system, sans-serif; color: var(--deako-text); }
+
+/* Slide base */
+.reveal .slides section {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+  padding: 40px 60px;
+  box-sizing: border-box;
+}
+
+/* Typography */
+.reveal h1 { font-size: 2.8em; font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: .3em; letter-spacing: -.01em; }
+.reveal h2 { font-size: 2em; font-weight: 800; color: var(--deako-teal); margin-bottom: .4em; letter-spacing: .01em; }
+.reveal h3 { font-size: 1.3em; font-weight: 700; color: var(--deako-teal); margin-bottom: .3em; }
+.reveal p  { font-size: .92em; line-height: 1.6; color: var(--deako-text); margin-bottom: .6em; }
+.reveal ul  { list-style: none; padding: 0; margin: 0; }
+.reveal ul li { padding: .35em 0 .35em 1.4em; position: relative; font-size: .9em; line-height: 1.5; color: var(--deako-text); }
+.reveal ul li::before { content: "›"; position: absolute; left: 0; color: var(--deako-teal); font-weight: 900; font-size: 1.1em; }
+.reveal strong { color: var(--deako-yellow); font-weight: 800; }
+.reveal a { color: var(--deako-teal); }
+
+/* Section title slides */
+.section-slide { justify-content: center; align-items: center; text-align: center !important; background: var(--deako-panel) !important; }
+.section-slide h2 { font-size: 2.6em; color: var(--deako-teal); margin: 0; }
+.section-slide .section-num { font-size: .85em; color: var(--deako-muted); font-weight: 600; letter-spacing: .15em; text-transform: uppercase; margin-bottom: .5em; }
+
+/* Title slide */
+.title-slide { background: var(--deako-dark) !important; align-items: flex-start !important; justify-content: flex-end !important; padding-bottom: 60px !important; }
+.title-slide .eyebrow { font-size: .7em; color: var(--deako-teal); font-weight: 700; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 1em; }
+.title-slide h1 { font-size: 3em; }
+.title-slide .subtitle { font-size: .85em; color: var(--deako-muted); margin-top: .5em; }
+.deako-logo { font-size: 1.1em; font-weight: 900; color: #fff; letter-spacing: .06em; }
+.deako-logo em { color: var(--deako-teal); font-style: normal; }
+
+/* Pill / tag */
+.pill { display: inline-block; padding: .25em .8em; border-radius: 20px; background: var(--deako-border); color: var(--deako-teal); font-size: .7em; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: .8em; }
+
+/* Pillar grid */
+.pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+.pillar { background: var(--deako-panel); border: 1px solid var(--deako-border); border-radius: 12px; padding: 22px 24px; }
+.pillar .icon { font-size: 1.6em; margin-bottom: .3em; }
+.pillar h3 { font-size: .85em; color: var(--deako-teal); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; margin: 0 0 .4em; }
+.pillar p { font-size: .78em; color: var(--deako-muted); margin: 0; line-height: 1.5; }
+
+/* Stats grid */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+.stat { background: var(--deako-panel); border: 1px solid var(--deako-border); border-radius: 12px; padding: 22px 20px; text-align: center; }
+.stat .num { font-size: 1.8em; font-weight: 900; color: var(--deako-teal); line-height: 1; }
+.stat .label { font-size: .72em; color: var(--deako-muted); margin-top: .4em; line-height: 1.4; }
+
+/* Agenda list */
+.agenda-list { list-style: none; padding: 0; margin: 24px 0 0; }
+.agenda-list li { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--deako-border); font-size: .95em; color: var(--deako-text); }
+.agenda-list li:last-child { border-bottom: none; }
+.agenda-list .num { width: 28px; height: 28px; border-radius: 50%; background: var(--deako-border); color: var(--deako-teal); font-size: .75em; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* Two-col layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.two-col-wide { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; align-items: start; }
+
+/* Card */
+.card { background: var(--deako-panel); border: 1px solid var(--deako-border); border-radius: 12px; padding: 20px 22px; margin-bottom: 14px; }
+.card h3 { margin: 0 0 .4em; font-size: .9em; color: var(--deako-yellow); }
+.card p { margin: 0; font-size: .8em; color: var(--deako-muted); line-height: 1.5; }
+
+/* Process steps */
+.steps { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.step { display: flex; gap: 16px; align-items: flex-start; }
+.step .step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--deako-teal); color: #0d1117; font-weight: 900; font-size: .85em; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.step-body h3 { margin: 0 0 .2em; font-size: .85em; color: #fff; font-weight: 700; }
+.step-body p { margin: 0; font-size: .78em; color: var(--deako-muted); line-height: 1.4; }
+
+/* Support contact */
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 20px; }
+.contact-item { background: var(--deako-panel); border: 1px solid var(--deako-border); border-radius: 10px; padding: 16px 18px; }
+.contact-item .label { font-size: .65em; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--deako-teal); margin-bottom: .3em; }
+.contact-item .value { font-size: .85em; color: #fff; font-weight: 600; }
+
+/* Team */
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
+.team-card { background: var(--deako-panel); border: 1px solid var(--deako-border); border-radius: 12px; padding: 18px 16px; }
+.team-card .name { font-size: .88em; font-weight: 800; color: #fff; margin-bottom: .15em; }
+.team-card .role { font-size: .72em; color: var(--deako-teal); font-weight: 700; margin-bottom: .4em; }
+.team-card .contact { font-size: .7em; color: var(--deako-muted); line-height: 1.6; }
+
+/* Demo slide */
+.demo-slide { padding: 0 !important; position: relative; }
+.demo-slide iframe { width: 100%; height: 100%; border: none; display: block; }
+.demo-hint { position: absolute; bottom: 10px; right: 14px; font-size: .6em; color: rgba(126,207,224,0.5); z-index: 10; pointer-events: none; letter-spacing: .06em; }
+
+/* Objections */
+.objection { background: #1a0a0a; border: 1px solid #3a1515; border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; font-size: .8em; color: #cc8888; font-style: italic; }
+.response { background: var(--deako-panel); border: 1px solid var(--deako-border); border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; font-size: .8em; color: var(--deako-text); }
+
+/* Smart scene highlight */
+.scene-box { background: linear-gradient(135deg, #0a1f2a 0%, var(--deako-panel) 100%); border: 1px solid var(--deako-teal2); border-radius: 14px; padding: 28px 32px; margin-top: 16px; }
+.scene-box h3 { color: var(--deako-yellow); font-size: 1.1em; margin-bottom: .5em; }
+.scene-box p { font-size: .85em; color: var(--deako-text); margin-bottom: .4em; }
+
+/* Modular system */
+.module-steps { display: flex; align-items: center; gap: 0; margin-top: 24px; flex-wrap: wrap; }
+.module-item { background: var(--deako-panel); border: 1px solid var(--deako-border); border-radius: 10px; padding: 14px 16px; text-align: center; flex: 1; min-width: 100px; }
+.module-item .icon { font-size: 1.4em; margin-bottom: .3em; }
+.module-item p { font-size: .68em; color: var(--deako-muted); margin: 0; line-height: 1.3; }
+.module-arrow { color: var(--deako-teal); font-size: 1.4em; padding: 0 6px; flex-shrink: 0; }
+
+/* Final thoughts */
+.three-things { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 24px; }
+.thing { background: var(--deako-panel); border: 1px solid var(--deako-border); border-radius: 12px; padding: 20px; }
+.thing .heading { font-size: .72em; font-weight: 800; color: var(--deako-teal); letter-spacing: .1em; text-transform: uppercase; margin-bottom: .6em; }
+.thing ul li { font-size: .78em; color: var(--deako-muted); }
+
+/* Image placeholder */
+.img-placeholder { background: var(--deako-panel); border: 1px dashed var(--deako-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--deako-muted); font-size: .8em; font-style: italic; min-height: 160px; }
+
+/* Slide number */
+.reveal .slide-number { background: transparent; color: var(--deako-muted); font-size: .55em; }
+
+/* Transitions */
+.reveal .slides section { transition: none; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ══════════════════════════════════════════
+     SLIDE 1 · TITLE
+     ══════════════════════════════════════════ -->
+<section class="title-slide" data-background="#0d1117">
+  <div class="deako-logo"><em>DEAKO</em> SMART LIGHTING</div>
+  <h1>D.R. Horton<br>Sales Training</h1>
+  <p class="subtitle">Central Valley &nbsp;·&nbsp; March 4, 2026</p>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 2 · AGENDA
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Today's Agenda</div>
+  <h2>What We'll Cover</h2>
+  <ol class="agenda-list">
+    <li><span class="num">1</span> Meet the Team</li>
+    <li><span class="num">2</span> Why Homebuyers Are Choosing Smart Homes</li>
+    <li><span class="num">3</span> Deako Smart Lighting</li>
+    <li><span class="num">4</span> Live Home Demo</li>
+    <li><span class="num">5</span> Warranty &amp; Support</li>
+    <li><span class="num">6</span> Q &amp; A / Final Thoughts</li>
+  </ol>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 3 · WHY SMART LIGHTING
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Smart Lighting</div>
+  <h2>Minimalist Design with Hidden Luxury</h2>
+  <div class="pillars">
+    <div class="pillar">
+      <div class="icon">🎨</div>
+      <h3>Modern Design</h3>
+      <p>Clean, minimalist aesthetic that elevates the look and feel of every room.</p>
+    </div>
+    <div class="pillar">
+      <div class="icon">🛡</div>
+      <h3>Safety</h3>
+      <p>Protect your family and your home with automated schedules and smart controls.</p>
+    </div>
+    <div class="pillar">
+      <div class="icon">⚡</div>
+      <h3>Convenience</h3>
+      <p>Save energy through automated actions — all lights off with one tap or command.</p>
+    </div>
+    <div class="pillar">
+      <div class="icon">🌅</div>
+      <h3>Ambiance</h3>
+      <p>Layered lighting sets the perfect mood — and delivers real health benefits.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 4 · EFFORTLESS LIFESTYLE
+     ══════════════════════════════════════════ -->
+<section data-background="#0a151e">
+  <div style="text-align:center;">
+    <h2 style="font-size:2.4em; color:#fff; margin-bottom:.3em;">Effortless for Everyday Life</h2>
+    <p style="color:var(--deako-muted); font-size:1em; max-width:560px; margin: 0 auto;">
+      Smart lighting that anticipates your family's needs — whether you're home or away.
+    </p>
+    <div class="pillars" style="margin-top:32px; max-width:640px; margin-left:auto; margin-right:auto;">
+      <div class="pillar" style="text-align:center;">
+        <div class="icon">🌅</div>
+        <h3>Good Morning</h3>
+        <p>Lights ease on gradually as the household wakes up.</p>
+      </div>
+      <div class="pillar" style="text-align:center;">
+        <div class="icon">🏠</div>
+        <h3>Arrive Home</h3>
+        <p>Porch and entryway light up the moment you pull in.</p>
+      </div>
+      <div class="pillar" style="text-align:center;">
+        <div class="icon">🍽</div>
+        <h3>Dinner Time</h3>
+        <p>Dining and kitchen dim to perfect ambiance automatically.</p>
+      </div>
+      <div class="pillar" style="text-align:center;">
+        <div class="icon">🌙</div>
+        <h3>Wind Down</h3>
+        <p>Whole-home lights dim and shut off room by room.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 5 · PRODUCT DESIGN
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">The Product</div>
+  <h2>A Better Looking Switch</h2>
+  <div class="two-col" style="align-items:center;">
+    <div>
+      <ul>
+        <li>Snap-on screwless faceplate design</li>
+        <li>Clean, minimalist aesthetic</li>
+        <li>Perfectly level and aligned when side-by-side</li>
+        <li>Matching outlet receptacles available</li>
+        <li>Available in Toggle and Decorator styles</li>
+        <li>Simple swaps — no rewiring, no electrician return visits</li>
+      </ul>
+    </div>
+    <div class="img-placeholder" style="min-height:240px;">[ Deako switch product image ]</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 6 · COMPANY STATS
+     ══════════════════════════════════════════ -->
+<section data-background="#0a151e">
+  <div class="pill">10 Years in the Making</div>
+  <h2>Deako Sets the Standard</h2>
+  <p style="color:var(--deako-muted); font-size:.85em;">Quality products, distributed &amp; supported nationwide.</p>
+  <div class="stats">
+    <div class="stat"><div class="num">30M+</div><div class="label">Products Shipped</div></div>
+    <div class="stat"><div class="num">4</div><div class="label">Manufacturing Countries — Reliable Supply Chain</div></div>
+    <div class="stat"><div class="num">.04%</div><div class="label">Product Return Rate</div></div>
+    <div class="stat"><div class="num">300K+</div><div class="label">Homes Trust Deako</div></div>
+    <div class="stat"><div class="num">15</div><div class="label">Issued Patents — U.S. &amp; International</div></div>
+    <div class="stat"><div class="num">97%</div><div class="label">Customer Satisfaction Score</div></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 7 · DIVISIONAL DATA
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Your Division</div>
+  <h2>Central Valley by the Numbers</h2>
+  <div style="background:var(--deako-panel); border:1px solid var(--deako-border); border-radius:14px; padding:40px; text-align:center; margin-top:20px;">
+    <p style="color:var(--deako-muted); font-size:.9em;">[ Divisional data presented live ]</p>
+    <p style="color:var(--deako-teal); font-size:1em; font-weight:700; margin:0;">Attach rate &nbsp;·&nbsp; Revenue &nbsp;·&nbsp; Top-performing communities</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 8 · SECTION — SOLUTION OVERVIEW
+     ══════════════════════════════════════════ -->
+<section class="section-slide" data-background="#111826">
+  <div class="section-num">Section</div>
+  <h2>Solution Overview</h2>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 9 · MODULAR SYSTEM
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">How It Works</div>
+  <h2>Smart Ready &amp; Future Proof</h2>
+  <p style="color:var(--deako-muted); font-size:.85em;">The Deako Modular System uses standard junction boxes — no special wiring required.</p>
+  <div class="module-steps">
+    <div class="module-item"><div class="icon">🔌</div><p>Industry Standard<br>Junction Box</p></div>
+    <div class="module-arrow">›</div>
+    <div class="module-item"><div class="icon">🔗</div><p>Deako<br>Connector</p></div>
+    <div class="module-arrow">›</div>
+    <div class="module-item"><div class="icon">💡</div><p>Deako Simple<br>Switch</p></div>
+    <div class="module-arrow">›</div>
+    <div class="module-item"><div class="icon">🖼</div><p>Screwless<br>Faceplate</p></div>
+  </div>
+  <div class="card" style="margin-top:20px;">
+    <h3>The Result</h3>
+    <p>Any Deako switch snaps in and out in seconds. Homeowners can upgrade from simple to smart — or swap specialty switches — without a single tool or return electrician visit.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 10 · HOW IT COMES TOGETHER
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Plug &amp; Play</div>
+  <h2>How It All Comes Together</h2>
+  <div class="steps" style="margin-top:24px;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Installed at Build</h3>
+        <p>Electrician installs Deako connectors and simple switches during standard rough-in — no extra time or cost.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Buyer Chooses Their Pack</h3>
+        <p>Homebuyer selects a Deako smart switch pack — at ratification or after — rolled into their mortgage via ITM.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Simple Snap-In Upgrade</h3>
+        <p>Smart dimmers, motion sensors, nightlights, and more snap in instantly — no rewiring, no mess.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 11 · SECTION — ITM PROGRAM
+     ══════════════════════════════════════════ -->
+<section class="section-slide" data-background="#111826">
+  <div class="section-num">Section</div>
+  <h2>ITM Program</h2>
+  <p style="color:var(--deako-muted); margin-top:.6em; font-size:.9em;">"In The Mortgage"</p>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 12 · ITM DETAILS
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">In The Mortgage</div>
+  <h2>What Is ITM?</h2>
+  <div class="two-col" style="margin-top:20px;">
+    <div>
+      <div class="card">
+        <h3>What It Is</h3>
+        <p>Lets homebuyers roll a Deako pack directly into their mortgage — paying small monthly increments instead of a lump sum at closing.</p>
+      </div>
+      <div class="card">
+        <h3>How It Works</h3>
+        <p>Buyer selects a pack after ratification. Agent approves. A change order is created. Safe Haven installs the smart switches during the "Home is Connected" appointment.</p>
+      </div>
+    </div>
+    <div class="card" style="align-self:stretch; display:flex; flex-direction:column; justify-content:center; background: linear-gradient(135deg,#0a1f2a,var(--deako-panel));">
+      <p style="font-size:1.1em; color:var(--deako-teal); font-weight:800; font-style:italic; text-align:center; margin:0;">"Roll it into the mortgage."</p>
+      <p style="text-align:center; color:var(--deako-muted); font-size:.78em; margin-top:.8em;">No upfront cost. No risk to the sale. A closing tool — not a closing obstacle.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 13 · ITM PROCESS
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Step by Step</div>
+  <h2>The ITM Process</h2>
+  <div class="steps" style="margin-top:20px;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><h3>At Ratification</h3><p>Buyer adds a Deako pack. If yes, skip to Step 4.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><h3>Deako Marketing Email</h3><p>After ratification, buyer receives an automatic email from Deako and selects their pack.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><h3>Agent Notified</h3><p>You receive a notification. You have final say — reply to approve or decline.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body"><h3>Change Order + PO</h3><p>Change order is created, PO is issued, Deako sends to Safe Haven.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body"><h3>Installation</h3><p>Safe Haven installs smart switches at the "Home is Connected" appointment.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 14 · SECTION — DRH PACKAGES
+     ══════════════════════════════════════════ -->
+<section class="section-slide" data-background="#111826">
+  <div class="section-num">Section</div>
+  <h2>Deako in D.R. Horton Homes</h2>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 15 · PACKAGES
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Packages</div>
+  <h2>D.R. Horton's Packages</h2>
+  <p style="color:var(--deako-muted); font-size:.85em;">Buyer-vetted packages that help you sell and close homes <strong>faster</strong> for more profit.</p>
+  <div class="img-placeholder" style="min-height:260px; margin-top:16px;">[ Package lineup image — e.g. Essentials / Connected / Premium ]</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 16 · PACKAGES DETAIL
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Packages</div>
+  <h2>What's Included</h2>
+  <div class="img-placeholder" style="min-height:300px; margin-top:16px;">[ Package contents detail image ]</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 17 · LIVE DEMO — BROWNHAVEN
+     ══════════════════════════════════════════ -->
+<section class="demo-slide" data-background="#0d1117">
+  <iframe
+    src="./deako-floorplan-demo.html"
+    title="Brownhaven Smart Lighting Demo"
+    allow="fullscreen"
+    sandbox="allow-scripts allow-same-origin allow-forms allow-popups">
+  </iframe>
+  <div class="demo-hint">LIVE DEMO &nbsp;·&nbsp; press → to continue</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 18 · SMART SCENE EXAMPLE
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Smart Scene</div>
+  <h2>All Lights Off — Convenience</h2>
+  <div class="scene-box">
+    <h3>💡 All Lights Off</h3>
+    <p>Use the Deako app, Alexa, or <strong>press and hold the smart switch by the door</strong> to turn off all the lights at once.</p>
+    <ul style="margin-top:10px;">
+      <li>Perfect for when leaving the house</li>
+      <li>Set in the primary bedroom for end of night</li>
+      <li>Create schedules to turn off or dim specific lights</li>
+      <li>All On / All Off from a single switch press</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 19 · SECTION — WARRANTY
+     ══════════════════════════════════════════ -->
+<section class="section-slide" data-background="#111826">
+  <div class="section-num">Section</div>
+  <h2>Warranty &amp; Support</h2>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 20 · SUPPORT DETAILS
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">We've Got Them Covered</div>
+  <h2>Deako Support Is Here to Help</h2>
+  <p style="color:var(--deako-muted); font-size:.82em;">Covers all simple rocker and specialty switches included in the home purchase.</p>
+  <div class="contact-grid">
+    <div class="contact-item"><div class="label">Hours</div><div class="value">6AM – 5PM PST, Mon–Fri</div></div>
+    <div class="contact-item"><div class="label">Phone</div><div class="value">1-844-673-3256</div></div>
+    <div class="contact-item"><div class="label">Email</div><div class="value">support@deako.com</div></div>
+    <div class="contact-item"><div class="label">Self Service</div><div class="value">support.deako.com</div></div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <h3>What They Help With</h3>
+    <p>Switch not working · WiFi changes · App / Alexa issues · Schedules, groups, timers, scenes · Any Deako question or product issue — they handle it all.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 21 · SECTION — EMPLOYEE PURCHASE
+     ══════════════════════════════════════════ -->
+<section class="section-slide" data-background="#111826">
+  <div class="section-num">Bonus</div>
+  <h2>Employee Purchase Program</h2>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 22 · PRICING / EPP
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Just for You</div>
+  <h2>Employee Discount Pricing</h2>
+  <div style="background:var(--deako-panel); border:1px solid var(--deako-border); border-radius:14px; padding:40px; text-align:center; margin-top:20px;">
+    <p style="font-size:3em; font-weight:900; color:var(--deako-yellow); margin:0;">$???</p>
+    <p style="color:var(--deako-muted); font-size:.85em; margin-top:.5em;">[ Pricing revealed live during session ]</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 23 · RAFFLE / CERTIFICATION
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Get Certified</div>
+  <h2>Deako Sales Agent Training</h2>
+  <div class="two-col" style="margin-top:20px; gap:20px;">
+    <div class="card" style="border-color:var(--deako-teal);">
+      <h3 style="color:var(--deako-teal);">🎓 Get Certified Now</h3>
+      <p>Complete your Deako Sales Agent Certification and you'll be entered into our exclusive raffle for <strong>$$$</strong> in prizes.</p>
+    </div>
+    <div class="card">
+      <h3>Why Certify?</h3>
+      <p>Certified agents close faster, answer buyer questions confidently, and earn more with every Deako pack sold.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 24 · MEET THE TEAM
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Your Team</div>
+  <h2>Meet Your Deako Team Leads</h2>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="name">Eric Cunningham</div>
+      <div class="role">VP Strategic Accounts</div>
+      <div class="contact">prof@deako.com<br>(734) 233-7882</div>
+    </div>
+    <div class="team-card">
+      <div class="name">Rayna Smith</div>
+      <div class="role">National Trainer</div>
+      <div class="contact">ray@deako.com<br>(972) 824-9066</div>
+    </div>
+    <div class="team-card">
+      <div class="name">Brian Broyles</div>
+      <div class="role">National Trainer</div>
+      <div class="contact">bcb@deako.com<br>(314) 203-4686</div>
+    </div>
+    <div class="team-card">
+      <div class="name">Holly Hodges</div>
+      <div class="role">Director, National Accounts</div>
+      <div class="contact">holly@deako.com<br>(817) 851-4433</div>
+    </div>
+    <div class="team-card">
+      <div class="name">Pierce Volkman</div>
+      <div class="role">Builder Customer Support</div>
+      <div class="contact">pjens@deako.com<br>(425) 435-8389</div>
+    </div>
+    <div class="team-card" style="background:transparent; border-color:transparent; display:flex; align-items:center; justify-content:center;">
+      <p style="color:var(--deako-muted); font-size:.8em; text-align:center; font-style:italic;">Reach out anytime — we're here for you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 25 · THANK YOU
+     ══════════════════════════════════════════ -->
+<section class="section-slide" data-background="#0a151e">
+  <div class="deako-logo" style="margin-bottom:1em;"><em>DEAKO</em> SMART LIGHTING</div>
+  <h2 style="font-size:3em; color:#fff;">Thank You!</h2>
+  <p style="color:var(--deako-muted); margin-top:.5em;">Questions? Let's talk.</p>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 26 · SECTION — APPENDIX
+     ══════════════════════════════════════════ -->
+<section class="section-slide" data-background="#111826">
+  <div class="section-num">Appendix</div>
+  <h2>Reference Materials</h2>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 27 · PRODUCT LINEUP
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Products</div>
+  <h2>Deako Specialty Switches</h2>
+  <div class="two-col">
+    <div>
+      <h3 style="color:var(--deako-yellow); font-size:.85em; margin-bottom:.6em;">Smart (Connected)</h3>
+      <ul>
+        <li>Smart Switch (Gen 2)</li>
+        <li>Smart Dimmer</li>
+        <li>Smart Plug</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:var(--deako-muted); font-size:.85em; margin-bottom:.6em;">Simple (Non-Connected)</h3>
+      <ul>
+        <li>Simple Motion Sensor Switch</li>
+        <li>Simple Astronomical Timer Switch</li>
+        <li>Simple Dimmer Switch</li>
+        <li>Simple Timer Switch</li>
+        <li>Simple Ceiling Fan Controller</li>
+        <li>Simple Night Light Switch</li>
+        <li>Simple Ventilation Timer Switch</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 28 · OUTLET FAMILY
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Outlets</div>
+  <h2>Deako Outlet Family</h2>
+  <p style="color:var(--deako-muted); font-size:.85em;">Matching outlets and covers — a complete, cohesive look throughout every home.</p>
+  <ul style="margin-top:16px;">
+    <li>Deako Simple TR 15A Outlet</li>
+    <li>Deako Simple TR 20A GFCI Outlet</li>
+    <li>Deako Simple USB Type A&amp;C 15A TR Outlet</li>
+    <li>Outlet covers sold separately — 1 and 2-gang configurations</li>
+    <li>Reversible faceplate accommodates outlets on either side of switch</li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 29 · EMAIL FLOW SECTION
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Buyer Communication</div>
+  <h2>Deako Emails to Homebuyers</h2>
+  <div class="steps" style="margin-top:16px;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><h3>First Email Sent to Buyers</h3><p>Automatically triggered after ratification — buyer selects their Deako pack.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><h3>Buyer Landing Page</h3><p>Buyer is directed to a Deako-branded page to browse packages and make their selection.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><h3>You Receive This Email</h3><p>Agent is notified. Reply to approve or decline — you have final say on qualification.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 30 · BACKPLATES
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Installation</div>
+  <h2>Selecting the Right Backplate Mix</h2>
+  <ul style="margin-top:16px;">
+    <li>Available in 1–4 gang configurations</li>
+    <li>2 and 3-gang versions available with outlet (left or right side)</li>
+    <li>Faceplate is reversible to accommodate outlets on either side of the switch</li>
+  </ul>
+  <div class="img-placeholder" style="min-height:180px; margin-top:20px;">[ Backplate configuration diagram ]</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 31 · OBJECTIONS
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Handling Objections</div>
+  <h2>What We Hear &amp; How to Respond</h2>
+  <div style="margin-top:16px; max-height:420px; overflow-y:auto;">
+    <div class="objection">"This will add cost to the home."</div>
+    <div class="response">Deako packs roll into the mortgage via ITM — buyers pay small monthly increments, not a lump sum. No cost to construction.</div>
+
+    <div class="objection">"Buyers won't qualify."</div>
+    <div class="response">Agents approve/reject all requests before anything enters the system. Unqualified buyers can pay cash or finance directly through Deako.</div>
+
+    <div class="objection">"The home won't appraise."</div>
+    <div class="response">Smart lighting packs are a non-construction change — they don't affect the appraisal.</div>
+
+    <div class="objection">"I don't want to risk the sale."</div>
+    <div class="response">You have full control. One reply to the Deako email removes any buyer who doesn't qualify. Zero risk to your closing.</div>
+
+    <div class="objection">"I'm reducing the home price and don't want funds used for upgrades."</div>
+    <div class="response">Deako packs allow Horton to maintain purchase price while still offering a non-construction incentive — a win for both sides.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SLIDE 32 · FINAL THOUGHTS
+     ══════════════════════════════════════════ -->
+<section>
+  <div class="pill">Before You Go</div>
+  <h2>If I Could Leave You with Three Things</h2>
+  <div class="three-things" style="margin-top:20px;">
+    <div class="thing">
+      <div class="heading">Deako…</div>
+      <ul>
+        <li>Adds real value to the home</li>
+        <li>Is a partner in the selling process</li>
+        <li>Is a tool in your belt of success</li>
+      </ul>
+    </div>
+    <div class="thing">
+      <div class="heading">Find What Matters</div>
+      <ul>
+        <li>Safety — vacation mode, schedules</li>
+        <li>Scenes — All Off / All On at the switch</li>
+        <li>Convenience — motion sensor</li>
+        <li>Make it personal</li>
+      </ul>
+    </div>
+    <div class="thing">
+      <div class="heading">I'm Here for You</div>
+      <ul>
+        <li>Text, call, or email anytime</li>
+        <li>Available for 1-on-1 sessions</li>
+        <li>Certifications — let's do this</li>
+        <li>Support every step of the way</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div><!-- /.slides -->
+</div><!-- /.reveal -->
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1280,
+  height: 720,
+  margin: 0,
+  // Disable keyboard when iframe is focused
+  keyboard: true,
+});
+
+// When the demo slide is active, let the iframe capture keyboard events
+Reveal.on('slidechanged', event => {
+  const iframe = event.currentSlide.querySelector('iframe');
+  if (iframe) {
+    iframe.addEventListener('mouseenter', () => Reveal.configure({ keyboard: false }));
+    iframe.addEventListener('mouseleave', () => Reveal.configure({ keyboard: true }));
+  } else {
+    Reveal.configure({ keyboard: true });
+  }
+});
+</script>
+</body>
+</html>
