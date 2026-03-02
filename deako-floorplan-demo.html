@@ -71,8 +71,20 @@
   #scnt{color:#334;font-size:11px}
   #scnt span{color:#f5c842;font-weight:700}
   .dtag{font-size:10px;color:#2a3348;letter-spacing:.06em}
-  #debug-btn{position:fixed;bottom:10px;right:10px;z-index:9999;padding:8px 14px;background:#cc0000;color:#fff;border:2px solid #ff4444;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;opacity:1}
-  #debug-btn:hover{background:#ff0000}
+  #debug-btn{position:fixed;bottom:10px;right:10px;z-index:9999;padding:8px 14px;background:#cc0000;color:#fff;border:2px solid #ff4444;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+  #debug-btn:hover{background:#ff2222}
+  #mapper-panel{position:fixed;left:10px;top:50%;transform:translateY(-50%);background:#111826;border:1px solid #2a3348;border-radius:10px;padding:10px;width:148px;z-index:9999;display:none;flex-direction:column;gap:6px;max-height:80vh}
+  #mapper-panel.show{display:flex}
+  #mapper-title{color:#7ecfe0;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #1a2535;padding-bottom:6px}
+  #mapper-room-list{display:flex;flex-direction:column;gap:3px;overflow-y:auto;max-height:320px}
+  .mrb{padding:5px 8px;border-radius:5px;border:1px solid #1a2535;background:transparent;color:#556;font-size:11px;font-weight:700;cursor:pointer;text-align:left}
+  .mrb:hover{border-color:#f5c842;color:#f5c842}
+  .mrb.active{background:#1a2535;border-color:#7ecfe0;color:#7ecfe0}
+  #mapper-info{font-size:10px;color:#445;font-family:monospace;white-space:pre;background:#0a0e17;padding:6px;border-radius:5px;min-height:36px}
+  #mapper-hint{font-size:9px;color:#334;font-style:italic}
+  .mapper-action{padding:6px;border-radius:6px;border:none;font-size:11px;font-weight:700;cursor:pointer;width:100%}
+  #mapper-copy-btn{background:#f5c842;color:#0d1117}.#mapper-copy-btn:hover{background:#ffd84a}
+  #mapper-exit-btn{background:#1b2233;color:#778;border:1px solid #2a3348}.#mapper-exit-btn:hover{color:#aaa}
 
   /* Dimmer popup */
   #dimmer-popup{
@@ -126,7 +138,15 @@
   <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" crossorigin="anonymous" draggable="false" alt="">
   <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
 </div>
-<button id="debug-btn" onclick="toggleDebug()">⊞ Debug</button>
+<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button>
+<div id="mapper-panel">
+  <div id="mapper-title">Room Mapper</div>
+  <div id="mapper-room-list"></div>
+  <div id="mapper-info"></div>
+  <div id="mapper-hint">Click a room, then drag on the floor plan to set its boundary.</div>
+  <button class="mapper-action" id="mapper-copy-btn" onclick="copyCoords()">📋 Copy Coords</button>
+  <button class="mapper-action" id="mapper-exit-btn" onclick="toggleDebug()">✕ Exit Mapper</button>
+</div>
 
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
@@ -578,34 +598,174 @@ function deleteScene(key) {
 
 renderSceneButtons();
 
-// ── DEBUG MODE ──
-let debugOn = false;
+// ── MAPPER ──
+let mapperOn = false;
+let activeMapRoom = null;
+let mapDragStart = null;
+let mapPreviewRect = null;
+
 function toggleDebug() {
-  debugOn = !debugOn;
-  document.getElementById("debug-btn").textContent = debugOn ? "✕ Debug" : "⊞ Debug";
-  document.getElementById("debug-btn").style.background = debugOn ? "#1a3a1a" : "#222";
-
-  // Remove any existing debug elements
-  svg.querySelectorAll(".dbg").forEach(el => el.remove());
-
-  if (debugOn) {
-    const colors = ["#f00","#0f0","#00f","#ff0","#f0f","#0ff","#f80","#08f","#8f0","#80f","#f08","#0f8","#888","#fff"];
-    ROOMS.forEach((r, i) => {
-      const mk=(tag,attrs)=>{const el=document.createElementNS("http://www.w3.org/2000/svg",tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));el.classList.add("dbg");return el;};
-      const c = colors[i % colors.length];
-      const rect = mk("rect",{x:r.x,y:r.y,width:r.w,height:r.h,fill:"none",stroke:c,"stroke-width":"0.5",opacity:"0.9"});
-      const label = mk("text",{x:r.x+r.w/2,y:r.y+r.h/2,"text-anchor":"middle","dominant-baseline":"middle","font-size":"2.5","font-weight":"700","font-family":"system-ui,sans-serif",fill:c,"pointer-events":"none"});
-      label.textContent = r.label;
-      svg.appendChild(rect);
-      svg.appendChild(label);
-    });
-    // Show SVG info
-    setStatus(`SVG: ${svg.style.left} left, ${svg.style.top} top, ${svg.style.width} × ${svg.style.height} | img: ${fpimg.offsetWidth}×${fpimg.offsetHeight} natural: ${fpimg.naturalWidth}×${fpimg.naturalHeight}`);
+  mapperOn = !mapperOn;
+  const btn = document.getElementById("debug-btn");
+  if (mapperOn) {
+    btn.textContent = "✕ Exit Mapper";
+    btn.style.background = "#334";
+    openMapper();
   } else {
-    ROOMS.forEach(r => renderRoom(r.id));
-    updateCount(); updateImg();
-    setStatus("Tap a room to toggle · Long-press to dim");
+    btn.textContent = "⊞ Mapper";
+    btn.style.background = "#cc0000";
+    closeMapper();
   }
+}
+
+function openMapper() {
+  // Show panel
+  document.getElementById("mapper-panel").classList.add("show");
+
+  // Draw all room outlines + drag overlay + preview rect
+  refreshMapperOutlines();
+
+  const overlay = document.createElementNS("http://www.w3.org/2000/svg","rect");
+  overlay.setAttribute("x","0"); overlay.setAttribute("y","0");
+  overlay.setAttribute("width","100"); overlay.setAttribute("height","100");
+  overlay.setAttribute("fill","transparent");
+  overlay.id = "map-overlay"; overlay.classList.add("dbg");
+  overlay.style.cursor = "crosshair"; overlay.style.pointerEvents = "all";
+  svg.appendChild(overlay);
+
+  mapPreviewRect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+  mapPreviewRect.setAttribute("fill","rgba(126,207,224,0.15)");
+  mapPreviewRect.setAttribute("stroke","#7ecfe0");
+  mapPreviewRect.setAttribute("stroke-width","0.5");
+  mapPreviewRect.setAttribute("stroke-dasharray","1.5,0.7");
+  mapPreviewRect.classList.add("dbg");
+  mapPreviewRect.style.display = "none";
+  mapPreviewRect.style.pointerEvents = "none";
+  svg.appendChild(mapPreviewRect);
+
+  overlay.addEventListener("mousedown", onMapDown);
+  overlay.addEventListener("mousemove", onMapMove);
+  overlay.addEventListener("mouseup",   onMapUp);
+  overlay.addEventListener("touchstart", e=>{e.preventDefault();onMapDown(e.touches[0]);},{passive:false});
+  overlay.addEventListener("touchmove",  e=>{e.preventDefault();onMapMove(e.touches[0]);},{passive:false});
+  overlay.addEventListener("touchend",   e=>onMapUp(e.changedTouches[0]));
+
+  // Populate room list
+  const list = document.getElementById("mapper-room-list");
+  list.innerHTML = "";
+  ROOMS.forEach(r => {
+    const b = document.createElement("button");
+    b.className = "mrb"; b.id = "mrb-"+r.id; b.textContent = r.label;
+    b.onclick = () => selectMapRoom(r.id);
+    list.appendChild(b);
+  });
+  selectMapRoom(ROOMS[0].id);
+}
+
+function closeMapper() {
+  document.getElementById("mapper-panel").classList.remove("show");
+  svg.querySelectorAll(".dbg").forEach(el => el.remove());
+  activeMapRoom = null; mapDragStart = null; mapPreviewRect = null;
+  ROOMS.forEach(r => renderRoom(r.id));
+  updateCount(); updateImg();
+  setStatus("Tap a room to toggle · Long-press to dim");
+}
+
+function svgPoint(e) {
+  const r = svg.getBoundingClientRect();
+  return {
+    x: Math.round(((e.clientX - r.left) / r.width)  * 10000) / 100,
+    y: Math.round(((e.clientY - r.top)  / r.height) * 10000) / 100
+  };
+}
+
+function onMapDown(e) {
+  if (!activeMapRoom) return;
+  mapDragStart = svgPoint(e);
+  if (mapPreviewRect) mapPreviewRect.style.display = "block";
+}
+function onMapMove(e) {
+  if (!mapDragStart) return;
+  const p = svgPoint(e);
+  const x = Math.min(mapDragStart.x, p.x), y = Math.min(mapDragStart.y, p.y);
+  const w = Math.abs(p.x - mapDragStart.x),  h = Math.abs(p.y - mapDragStart.y);
+  if (mapPreviewRect) {
+    mapPreviewRect.setAttribute("x",x); mapPreviewRect.setAttribute("y",y);
+    mapPreviewRect.setAttribute("width",w); mapPreviewRect.setAttribute("height",h);
+  }
+  showMapInfo(x, y, w, h);
+}
+function onMapUp(e) {
+  if (!mapDragStart || !activeMapRoom) return;
+  const p = svgPoint(e);
+  const x = Math.round(Math.min(mapDragStart.x, p.x) * 100) / 100;
+  const y = Math.round(Math.min(mapDragStart.y, p.y) * 100) / 100;
+  const w = Math.round(Math.abs(p.x - mapDragStart.x) * 100) / 100;
+  const h = Math.round(Math.abs(p.y - mapDragStart.y) * 100) / 100;
+  if (w > 0.5 && h > 0.5) {
+    const room = ROOMS.find(r => r.id === activeMapRoom);
+    if (room) { room.x=x; room.y=y; room.w=w; room.h=h; }
+    refreshMapperOutlines();
+    showMapInfo(x, y, w, h);
+    // Auto-advance to next room
+    const idx = ROOMS.findIndex(r => r.id === activeMapRoom);
+    if (idx < ROOMS.length - 1) selectMapRoom(ROOMS[idx+1].id);
+  }
+  mapDragStart = null;
+  if (mapPreviewRect) mapPreviewRect.style.display = "none";
+}
+
+function selectMapRoom(id) {
+  activeMapRoom = id;
+  document.querySelectorAll(".mrb").forEach(b => b.classList.remove("active"));
+  const btn = document.getElementById("mrb-"+id);
+  if (btn) { btn.classList.add("active"); btn.scrollIntoView({block:"nearest"}); }
+  const r = ROOMS.find(r => r.id === id);
+  if (r) showMapInfo(r.x, r.y, r.w, r.h);
+  refreshMapperOutlines();
+}
+
+function showMapInfo(x, y, w, h) {
+  document.getElementById("mapper-info").textContent =
+    `x:${x.toFixed(2)}  y:${y.toFixed(2)}\nw:${w.toFixed(2)}  h:${h.toFixed(2)}`;
+}
+
+function refreshMapperOutlines() {
+  const overlay = document.getElementById("map-overlay");
+  const preview = mapPreviewRect;
+  svg.querySelectorAll(".dbg-outline").forEach(el => el.remove());
+  ROOMS.forEach(r => {
+    const isActive = r.id === activeMapRoom;
+    const mk = (tag, attrs) => {
+      const el = document.createElementNS("http://www.w3.org/2000/svg",tag);
+      Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v));
+      el.classList.add("dbg","dbg-outline"); return el;
+    };
+    const rect = mk("rect",{x:r.x,y:r.y,width:r.w,height:r.h,
+      fill: isActive ? "rgba(126,207,224,0.08)" : "rgba(245,200,66,0.05)",
+      stroke: isActive ? "#7ecfe0" : "#f5c842",
+      "stroke-width": isActive ? "0.55" : "0.3",
+      "pointer-events":"none"});
+    const label = mk("text",{x:r.x+r.w/2,y:r.y+r.h/2,
+      "text-anchor":"middle","dominant-baseline":"middle",
+      "font-size":"2.2","font-weight":"700","font-family":"system-ui,sans-serif",
+      fill: isActive ? "#7ecfe0" : "#f5c842","pointer-events":"none"});
+    label.textContent = r.label;
+    // Insert before overlay so it stays on top
+    if (overlay) { svg.insertBefore(rect, overlay); svg.insertBefore(label, overlay); }
+    else { svg.appendChild(rect); svg.appendChild(label); }
+  });
+}
+
+function copyCoords() {
+  const lines = ROOMS.map(r =>
+    `  {id:"${r.id}", label:"${r.label}", x:${r.x.toFixed(2)}, y:${r.y.toFixed(2)}, w:${r.w.toFixed(2)}, h:${r.h.toFixed(2)}}`
+  ).join(",\n");
+  navigator.clipboard.writeText(`const ROOMS = [\n${lines}\n];`).then(() => {
+    const btn = document.getElementById("mapper-copy-btn");
+    btn.textContent = "✓ Copied!";
+    setTimeout(() => btn.textContent = "📋 Copy Coords", 2000);
+  });
 }
 </script>
 </body>
