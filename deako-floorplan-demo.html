@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.18</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.19</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -415,7 +415,8 @@ ROOMS.forEach(r => {
 let foyerSwitchNext = "off"; // first click = all off
 [
   {x:43.8, y:74.8, interactive:true}, // foyer — toggles all off / all on
-  {x:68.0, y:46.5, interactive:true},  // owner's suite — bottom wall right of door swing
+  {x:65.8, y:45.8, interactive:true},  // owner's suite — left wall at door into suite
+  {x:7.2,  y:61.0, interactive:true},  // mud room — just inside exterior left wall door
 ].forEach(pos=>{
   const si = document.createElementNS("http://www.w3.org/2000/svg","image");
   si.setAttribute("href","https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Smart_Dimmer_1080p_Square.png?v=1746725590");
