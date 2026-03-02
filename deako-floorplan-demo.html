@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.4</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.5</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -351,7 +351,7 @@ ROOMS.forEach(r => {
   radR.style.display="none"; radR.style.pointerEvents="none"; radR.style.transition="opacity .35s";
 
   // Dim % badge (moved up to leave room for slider)
-  const badge=mk("text",{class:"dim-badge",x:r.x+r.w/2,y:r.y+r.h*0.38,"text-anchor":"middle","dominant-baseline":"middle","font-size":"1.8","font-weight":"700","font-family":"system-ui,sans-serif",fill:"rgba(255,230,100,0.9)","letter-spacing":"0.02"});
+  const badge=mk("text",{class:"dim-badge",x:r.x+r.w/2,y:r.y+2,"text-anchor":"middle","dominant-baseline":"middle","font-size":"1.8","font-weight":"900","font-family":"system-ui,sans-serif",fill:"rgba(255,230,100,0.95)","letter-spacing":"0.02"});
   badge.style.pointerEvents="none"; badge.style.display="none";
 
   const dot=mk("circle",{class:"dot",cx:r.x+r.w-1.8,cy:r.y+2,r:"1.1",fill:"rgba(255,255,255,0.1)"});
