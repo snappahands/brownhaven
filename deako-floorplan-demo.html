@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.10</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.11</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -247,6 +247,7 @@ const ROOMS = [
   {id:"deck",    label:"Rear Deck",     x:38.12, y:4.67,  w:26.96, h:14.79},
 ];
 const DEFAULT_SCENES = [
+  {key:"morning", emoji:"☀", name:"Good Morning",  rooms:[{id:"owners",lv:70},{id:"laundry",lv:80},{id:"mudroom",lv:80},{id:"foyer",lv:100},{id:"dining",lv:100},{id:"kitchen",lv:100}]},
   {key:"arrive",  emoji:"🏠", name:"Arrive Home",  rooms:[{id:"porch",lv:100},{id:"foyer",lv:100},{id:"mudroom",lv:100},{id:"kitchen",lv:70},{id:"great",lv:80}]},
   {key:"dinner",  emoji:"🍽", name:"Dinner",        rooms:[{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}]},
   {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
@@ -267,9 +268,10 @@ const DEFAULT_SCENES = [
     {t:60000, id:"obath",   lv:0},
     {t:65000, id:"owners",  lv:0},
   ]},
-  {key:"morning", emoji:"☀", name:"Good Morning",  rooms:[{id:"owners",lv:70},{id:"laundry",lv:80},{id:"mudroom",lv:80},{id:"foyer",lv:100},{id:"dining",lv:100},{id:"kitchen",lv:100}]},
 ];
 let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || DEFAULT_SCENES.map(s=>({...s,rooms:[...s.rooms]}));
+// Migrate scene order to match DEFAULT_SCENES
+(()=>{ const order=DEFAULT_SCENES.map(s=>s.key); if(scenesData[0]?.key!==order[0]){scenesData.sort((a,b)=>{const ai=order.indexOf(a.key),bi=order.indexOf(b.key);return(ai<0?999:ai)-(bi<0?999:bi);});localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
 // Migrate vacation scene if stored version is outdated
 (()=>{ const v=scenesData.find(s=>s.key==="vacation"); const d=DEFAULT_SCENES.find(s=>s.key==="vacation"); if(v&&JSON.stringify(v.steps)!==JSON.stringify(d.steps)){delete v.staggerMs;delete v.rooms;v.steps=[...d.steps];localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
 
