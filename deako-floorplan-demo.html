@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.5</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.6</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -250,10 +250,12 @@ const DEFAULT_SCENES = [
   {key:"arrive",  emoji:"🏠", name:"Arrive Home",  rooms:[{id:"porch",lv:100},{id:"foyer",lv:100},{id:"mudroom",lv:100},{id:"kitchen",lv:70},{id:"great",lv:80}]},
   {key:"dinner",  emoji:"🍽", name:"Dinner",        rooms:[{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}]},
   {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
-  {key:"vacation",emoji:"🔒", name:"Vacation Mode", rooms:[{id:"porch",lv:100},{id:"deck",lv:100},{id:"foyer",lv:100},{id:"great",lv:50},{id:"owners",lv:30}]},
+  {key:"vacation",emoji:"🔒", name:"Vacation Mode", staggerMs:10000, rooms:[{id:"porch",lv:55},{id:"foyer",lv:100},{id:"kitchen",lv:75},{id:"dining",lv:60},{id:"great",lv:45},{id:"owners",lv:70}]},
   {key:"morning", emoji:"☀", name:"Good Morning",  rooms:[{id:"owners",lv:70},{id:"laundry",lv:80},{id:"mudroom",lv:80},{id:"foyer",lv:100},{id:"dining",lv:100},{id:"kitchen",lv:100}]},
 ];
 let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || DEFAULT_SCENES.map(s=>({...s,rooms:[...s.rooms]}));
+// Migrate vacation scene if stored version is old (no staggerMs)
+(()=>{ const v=scenesData.find(s=>s.key==="vacation"); if(v&&!v.staggerMs){const d=DEFAULT_SCENES.find(s=>s.key==="vacation");Object.assign(v,{staggerMs:d.staggerMs,rooms:[...d.rooms]});localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
 
 // State: brightness 0=off, 1–100=dim level
 let levels = {};
@@ -610,6 +612,7 @@ function runScene(btn, key) {
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
   const sc = scenesData.find(s=>s.key===key); if(!sc) return;
   setStatus(sc.emoji+" "+sc.name+" Scene");
+  const stagger = sc.staggerMs || 220;
   sc.rooms.forEach((item,i)=>{
     setTimeout(()=>{
       levels[item.id]=item.lv;
@@ -623,7 +626,7 @@ function runScene(btn, key) {
         delete roomTimerSettings[item.id];
         saveTimerSettings();
       }
-    }, i*220);
+    }, i*stagger);
   });
 }
 
