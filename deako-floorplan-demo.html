@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.20</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.21</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -415,7 +415,7 @@ ROOMS.forEach(r => {
 let foyerSwitchNext = "off"; // first click = all off
 [
   {x:43.8, y:74.8, interactive:true}, // foyer — toggles all off / all on
-  {x:65.9, y:22.5, interactive:true},  // owner's suite — top of left wall at entry door
+  {x:65.2, y:26.5, interactive:true},  // owner's suite — left wall at entry door
   {x:5.8,  y:62.5, interactive:true},  // mud room — right at exterior left wall door
 ].forEach(pos=>{
   const si = document.createElementNS("http://www.w3.org/2000/svg","image");
@@ -730,7 +730,8 @@ function renderSceneRows() {
   scenesData.forEach(sc => {
     const div = document.createElement("div");
     div.className = "scene-row";
-    const roomSummary = sc.rooms.map(r=>{ const rm=ROOMS.find(x=>x.id===r.id); return (rm?rm.label:r.id)+" "+r.lv+"%"; }).join(", ");
+    const items = sc.rooms || (sc.steps||[]).filter(s=>s.lv>0);
+    const roomSummary = items.map(r=>{ const rm=ROOMS.find(x=>x.id===r.id); return (rm?rm.label:r.id)+" "+r.lv+"%"; }).join(", ");
     div.innerHTML = `
       <div class="sr-info">
         <div class="sr-name">${sc.emoji} ${sc.name}</div>
@@ -756,7 +757,8 @@ function openSceneEditor(key) {
   const container = document.getElementById("se-rooms");
   container.innerHTML = "";
   ROOMS.forEach(r => {
-    const existing = sc ? sc.rooms.find(x=>x.id===r.id) : null;
+    const scRooms = sc ? (sc.rooms || []) : [];
+    const existing = scRooms.find(x=>x.id===r.id);
     const checked  = !!existing;
     const lv       = existing ? existing.lv : 100;
     const timerVal = existing ? (existing.timer || 0) : 0;
@@ -795,7 +797,7 @@ function saveScene() {
     .map(r => ({ id: r.id, lv: parseInt(document.getElementById("sesl-"+r.id).value), timer: parseInt(document.getElementById("setmr-"+r.id).value) || 0 }));
   if (editingKey) {
     const sc = scenesData.find(s=>s.key===editingKey);
-    sc.emoji=emoji; sc.name=name; sc.rooms=rooms;
+    sc.emoji=emoji; sc.name=name; sc.rooms=rooms; delete sc.steps;
   } else {
     scenesData.push({ key:"scene_"+Date.now(), emoji, name, rooms });
   }
