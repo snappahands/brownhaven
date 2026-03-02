@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.0</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.1</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -350,14 +350,26 @@ ROOMS.forEach(r => {
   const radR=mk("rect",{class:"rad-rect",x:r.x,y:r.y,width:r.w,height:r.h,rx:"0.4",fill:`url(#${radId})`});
   radR.style.display="none"; radR.style.pointerEvents="none"; radR.style.transition="opacity .35s";
 
-  // Dim % badge
-  const badge=mk("text",{class:"dim-badge",x:r.x+r.w/2,y:r.y+r.h-2.5,"text-anchor":"middle","dominant-baseline":"middle","font-size":"2.2","font-weight":"700","font-family":"system-ui,sans-serif",fill:"rgba(255,230,100,0.9)","letter-spacing":"0.02"});
+  // Dim % badge (moved up to leave room for slider)
+  const badge=mk("text",{class:"dim-badge",x:r.x+r.w/2,y:r.y+r.h*0.38,"text-anchor":"middle","dominant-baseline":"middle","font-size":"2.2","font-weight":"700","font-family":"system-ui,sans-serif",fill:"rgba(255,230,100,0.9)","letter-spacing":"0.02"});
   badge.style.pointerEvents="none"; badge.style.display="none";
 
   const dot=mk("circle",{class:"dot",cx:r.x+r.w-1.8,cy:r.y+2,r:"1.1",fill:"rgba(255,255,255,0.1)"});
   dot.style.transition="fill .3s"; dot.style.pointerEvents="none";
 
-  [glowR,fillR,radR,badge,dot].forEach(el=>g.appendChild(el));
+  // In-room dim slider
+  const slPad=1.0, slY=r.y+r.h-1.5, slH=0.8, slTW=r.w-slPad*2;
+  const slGroup=document.createElementNS("http://www.w3.org/2000/svg","g");
+  slGroup.classList.add("sl-group"); slGroup.style.display="none"; slGroup.style.pointerEvents="all"; slGroup.style.cursor="ew-resize";
+  const slHit =mk("rect",{x:r.x+slPad-0.5,y:slY-1.2,width:slTW+1,height:slH+2.4,fill:"transparent"});
+  const slTrack=mk("rect",{class:"sl-track",x:r.x+slPad,y:slY,width:slTW,height:slH,rx:"0.4",fill:"rgba(0,0,0,0.45)"});
+  const slFill =mk("rect",{class:"sl-fill", x:r.x+slPad,y:slY,width:slTW,height:slH,rx:"0.4",fill:"#f5c842"});
+  const slThumb=mk("circle",{class:"sl-thumb",cx:r.x+slPad+slTW,cy:slY+slH/2,r:"1.3",fill:"#f5c842",stroke:"rgba(255,255,255,0.85)","stroke-width":"0.28"});
+  [slHit,slTrack,slFill,slThumb].forEach(el=>slGroup.appendChild(el));
+  slGroup.addEventListener("mousedown", e=>{e.stopPropagation();startSliderDrag(r.id,e);});
+  slGroup.addEventListener("touchstart",e=>{e.stopPropagation();e.preventDefault();startSliderDrag(r.id,e.touches[0]);},{passive:false});
+
+  [glowR,fillR,radR,badge,dot,slGroup].forEach(el=>g.appendChild(el));
 
   // Click = toggle, long press = open dimmer
   g.addEventListener("mousedown",  e => startPress(r.id, e));
@@ -371,6 +383,29 @@ ROOMS.forEach(r => {
 
 let pressTarget = null;
 let didLongPress = false;
+
+// ── IN-ROOM SLIDER DRAG ──
+let sliderDrag = null;
+function startSliderDrag(id, e) {
+  const r = ROOMS.find(rm=>rm.id===id);
+  sliderDrag = {id, x0: r.x+1.0, trackW: r.w-2.0};
+  doSliderDrag(e);
+}
+function doSliderDrag(e) {
+  if (!sliderDrag) return;
+  const svgRect = svg.getBoundingClientRect();
+  const cx = e.clientX !== undefined ? e.clientX : e.touches[0].clientX;
+  const svgX = (cx - svgRect.left) / svgRect.width * 100;
+  const pct = Math.max(0, Math.min(1, (svgX - sliderDrag.x0) / sliderDrag.trackW));
+  const val = Math.max(5, Math.round(pct * 100));
+  levels[sliderDrag.id] = val;
+  renderRoom(sliderDrag.id);
+  updateCount(); updateImg();
+}
+window.addEventListener("mousemove", e => { if (sliderDrag) doSliderDrag(e); });
+window.addEventListener("mouseup",   () => { sliderDrag = null; });
+window.addEventListener("touchmove", e => { if (sliderDrag) { e.preventDefault(); doSliderDrag(e.touches[0]); } }, {passive:false});
+window.addEventListener("touchend",  () => { sliderDrag = null; });
 
 function startPress(id, e) {
   pressTarget = id;
@@ -414,6 +449,9 @@ function renderRoom(id) {
   const rr=g.querySelector(".rad-rect");
   const bg=g.querySelector(".dim-badge");
   const dt=g.querySelector(".dot");
+  const sg=g.querySelector(".sl-group");
+  const sf=g.querySelector(".sl-fill");
+  const sth=g.querySelector(".sl-thumb");
   const on = lv > 0;
   const a = lv / 100;
 
@@ -426,6 +464,14 @@ function renderRoom(id) {
     dt.setAttribute("fill",`rgba(255,216,74,${0.4+a*0.6})`);
     bg.style.display="block";
     bg.textContent = lv+"%";
+    if (sg) {
+      sg.style.display="block";
+      const r = ROOMS.find(rm=>rm.id===id);
+      const trackW = r.w - 2.0;
+      const fillW = Math.max(0, (lv/100) * trackW);
+      sf.setAttribute("width", fillW);
+      sth.setAttribute("cx", r.x + 1.0 + fillW);
+    }
   } else {
     gl.style.display="none";
     fr.setAttribute("fill","rgba(255,255,255,0.02)");
@@ -434,6 +480,7 @@ function renderRoom(id) {
     rr.style.display="none";
     dt.setAttribute("fill","rgba(255,255,255,0.1)");
     bg.style.display="none";
+    if (sg) sg.style.display="none";
   }
 }
 
