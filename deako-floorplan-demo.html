@@ -163,7 +163,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.7</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.8</span></span>
 </div>
 
 <!-- Scene Manager Modal -->
@@ -252,26 +252,26 @@ const DEFAULT_SCENES = [
   {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
   {key:"vacation",emoji:"🔒", name:"Vacation Mode", steps:[
     {t:0,     id:"porch",   lv:55},
-    {t:10000, id:"foyer",   lv:100},
-    {t:20000, id:"kitchen", lv:75},
-    {t:30000, id:"dining",  lv:60},
-    {t:40000, id:"great",   lv:45},
-    {t:50000, id:"owners",  lv:70},
-    {t:50000, id:"foyer",   lv:0},
-    {t:55000, id:"dining",  lv:0},
-    {t:60000, id:"kitchen", lv:0},
-    {t:65000, id:"deck",    lv:80},
-    {t:70000, id:"obath",   lv:60},
-    {t:75000, id:"porch",   lv:0},
-    {t:75000, id:"great",   lv:0},
-    {t:75000, id:"deck",    lv:0},
-    {t:75000, id:"obath",   lv:0},
+    {t:5000,  id:"foyer",   lv:100},
+    {t:10000, id:"kitchen", lv:75},
+    {t:15000, id:"dining",  lv:60},
+    {t:20000, id:"great",   lv:45},
+    {t:25000, id:"owners",  lv:70},
+    {t:35000, id:"foyer",   lv:0},
+    {t:40000, id:"dining",  lv:0},
+    {t:45000, id:"kitchen", lv:0},
+    {t:50000, id:"deck",    lv:80},
+    {t:55000, id:"obath",   lv:60},
+    {t:60000, id:"great",   lv:0},
+    {t:60000, id:"deck",    lv:0},
+    {t:60000, id:"obath",   lv:0},
+    {t:65000, id:"owners",  lv:20},
   ]},
   {key:"morning", emoji:"☀", name:"Good Morning",  rooms:[{id:"owners",lv:70},{id:"laundry",lv:80},{id:"mudroom",lv:80},{id:"foyer",lv:100},{id:"dining",lv:100},{id:"kitchen",lv:100}]},
 ];
 let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || DEFAULT_SCENES.map(s=>({...s,rooms:[...s.rooms]}));
-// Migrate vacation scene if stored version doesn't have steps
-(()=>{ const v=scenesData.find(s=>s.key==="vacation"); if(v&&!v.steps){const d=DEFAULT_SCENES.find(s=>s.key==="vacation");delete v.staggerMs;delete v.rooms;v.steps=[...d.steps];localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
+// Migrate vacation scene if stored version is outdated
+(()=>{ const v=scenesData.find(s=>s.key==="vacation"); const d=DEFAULT_SCENES.find(s=>s.key==="vacation"); if(v&&(!v.steps||v.steps[1]?.t!==d.steps[1]?.t)){delete v.staggerMs;delete v.rooms;v.steps=[...d.steps];localStorage.setItem("bhScenes",JSON.stringify(scenesData));} })();
 
 // State: brightness 0=off, 1–100=dim level
 let levels = {};
