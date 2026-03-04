@@ -213,13 +213,7 @@
 
 <header>
   <div class="logo">deako<em>.</em><small>Smart Lighting Demo</small></div>
-  <div class="hbtns">
-    <button class="btn bon" onclick="allOn()">☀ All On</button>
-    <button class="btn boff" onclick="allOff()">⏻ All Off</button>
-  </div>
 </header>
-
-<div class="scenes" id="scenes-row"></div>
 
 <div id="fpbox">
   <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" crossorigin="anonymous" draggable="false" alt="">
@@ -238,7 +232,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.53</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.54</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -921,20 +915,6 @@ function runScene(btn, key) {
 
 // ── SCENE BUTTONS ──────────────────────────────────────────────────────────
 function renderSceneButtons() {
-  const row = document.getElementById("scenes-row");
-  row.innerHTML = "";
-  scenesData.forEach(sc => {
-    const b = document.createElement("button");
-    b.className = "sbtn";
-    b.textContent = sc.emoji+" "+sc.name;
-    b.onclick = () => runScene(b, sc.key);
-    row.appendChild(b);
-  });
-  const mgr = document.createElement("button");
-  mgr.className = "sbtn sbtn-mgr";
-  mgr.textContent = "⚙ Scenes";
-  mgr.onclick = openSceneMgr;
-  row.appendChild(mgr);
   renderIphoneScenes();
 }
 
