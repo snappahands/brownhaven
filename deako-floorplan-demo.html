@@ -173,10 +173,10 @@
   .iapp-scene-name{color:#000;font-size:15px;font-weight:700}
   .iapp-scene-card.active .iapp-scene-name{color:#007AFF}
   .iapp-room-list{display:flex;flex-direction:column;gap:8px}
-  .iapp-room-row{display:flex;align-items:center;padding:13px 16px;background:#fff;border:none;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .iapp-room-row:active{transform:scale(.98)}
+  .iapp-room-row{display:flex;align-items:center;padding:13px 16px;background:#fff;border:none;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);cursor:pointer;-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden;user-select:none;touch-action:pan-y}
   .iapp-room-row.on{background:#fff}
-  .iapp-room-info{flex:1;min-width:0}
+  .iapp-room-fill{position:absolute;top:0;left:0;height:100%;background:rgba(0,0,0,0.08);pointer-events:none}
+  .iapp-room-info{flex:1;min-width:0;position:relative;z-index:1}
   .iapp-room-name{color:#000;font-size:15px;font-weight:700}
   .iapp-room-status{color:#8e8e93;font-size:13px;font-weight:400;margin-top:1px}
   .iapp-room-row.on .iapp-room-status{color:#007AFF;font-weight:600}
@@ -219,7 +219,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.48</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.49</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1219,10 +1219,61 @@ function renderIphoneRooms() {
   ROOMS.forEach(r => {
     const lv = levels[r.id];
     const on = lv > 0;
+
     const row = document.createElement("div");
     row.className = "iapp-room-row" + (on ? " on" : "");
-    row.innerHTML = `<div class="iapp-room-info"><div class="iapp-room-name">${r.label}</div><div class="iapp-room-status">${on ? lv+"%" : "Off"}</div></div>`;
-    row.addEventListener("click", () => toggle(r.id));
+
+    const fill = document.createElement("div");
+    fill.className = "iapp-room-fill";
+    fill.style.width = (on ? lv : 0) + "%";
+
+    const info = document.createElement("div");
+    info.className = "iapp-room-info";
+    const nameEl = document.createElement("div");
+    nameEl.className = "iapp-room-name";
+    nameEl.textContent = r.label;
+    const statusEl = document.createElement("div");
+    statusEl.className = "iapp-room-status";
+    statusEl.textContent = on ? lv + "%" : "Off";
+    info.appendChild(nameEl);
+    info.appendChild(statusEl);
+
+    row.appendChild(fill);
+    row.appendChild(info);
+
+    let dragStartX = null;
+    let isDragging = false;
+
+    row.addEventListener("pointerdown", e => {
+      row.setPointerCapture(e.pointerId);
+      dragStartX = e.clientX;
+      isDragging = false;
+    });
+    row.addEventListener("pointermove", e => {
+      if (dragStartX === null) return;
+      if (Math.abs(e.clientX - dragStartX) > 6) isDragging = true;
+      if (!isDragging) return;
+      const rect = row.getBoundingClientRect();
+      const newLv = Math.max(0, Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
+      levels[r.id] = newLv;
+      fill.style.width = newLv + "%";
+      statusEl.textContent = newLv > 0 ? newLv + "%" : "Off";
+      row.classList.toggle("on", newLv > 0);
+      renderRoom(r.id);
+      updateImg();
+      document.getElementById("ln").textContent = Object.values(levels).filter(v => v > 0).length;
+    });
+    row.addEventListener("pointerup", () => {
+      if (!isDragging && dragStartX !== null) toggle(r.id);
+      else if (isDragging) updateCount();
+      dragStartX = null;
+      isDragging = false;
+    });
+    row.addEventListener("pointercancel", () => {
+      dragStartX = null;
+      isDragging = false;
+    });
+
     list.appendChild(row);
   });
 }
