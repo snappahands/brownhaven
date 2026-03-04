@@ -26,7 +26,7 @@
   .dv-shadow{width:72%;height:14px;background:radial-gradient(ellipse at 50% 30%,rgba(0,0,0,0.28) 0%,transparent 72%);border-radius:50%;margin-top:-6px;flex-shrink:0}
   .dv-shadow.wide{width:88%}
   .dv-label{color:#7a786e;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:6px}
-  .speech-bubble{position:absolute;bottom:100%;left:50%;width:310px;display:none;z-index:10;transform-origin:bottom center}
+  .speech-bubble{position:absolute;bottom:17%;left:50%;width:310px;display:none;z-index:10;transform-origin:bottom center}
   .speech-bubble.show{display:block;animation:bubble-in .25s ease forwards}
   .speech-bubble.hiding{display:block;animation:bubble-out .2s ease forwards}
   .bubble-img{width:100%;display:block;mix-blend-mode:multiply}
@@ -207,6 +207,60 @@
   .iapp-tab-icon{width:26px;height:26px}
   .iapp-tab-lbl{font-size:9px;font-weight:600;letter-spacing:.02em;display:none}
   .iapp-tab.active .iapp-tab-lbl{display:block}
+
+  /* ── ME (Account) view ────────────────────────────────────────────────── */
+  .iapp-me-view{display:none;flex:1;flex-direction:column;overflow:hidden;background:#efefef}
+  .iapp-me-view.active{display:flex}
+  .iapp-me-title{color:#000;font-size:30px;font-weight:900;letter-spacing:-.02em;padding:4px 18px 14px;flex-shrink:0}
+  .iapp-me-scroll{flex:1;overflow-y:auto;padding:0 14px 10px}
+  .iapp-me-scroll::-webkit-scrollbar{width:0}
+  .iapp-me-section-label{color:#8e8e93;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin:14px 0 6px 4px}
+  .iapp-me-group{background:#fff;border-radius:12px;overflow:hidden;margin-bottom:4px}
+  .iapp-me-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;font-size:15px;font-weight:600;color:#000;cursor:pointer}
+  .iapp-me-row-border{border-top:1px solid #e5e5e5}
+  .iapp-me-chevron{color:#c7c7c7;font-size:20px;font-weight:300;line-height:1}
+  .iapp-me-version{text-align:center;color:#007AFF;font-size:13px;margin:20px 0 8px}
+
+  /* ── SHOP view ─────────────────────────────────────────────────────────── */
+  .iapp-shop-view{display:none;flex:1;flex-direction:column;overflow:hidden;background:#efefef}
+  .iapp-shop-view.active{display:flex}
+  .iapp-shop-title{color:#000;font-size:30px;font-weight:900;letter-spacing:-.02em;padding:4px 18px 10px;flex-shrink:0}
+  .iapp-shop-scroll{flex:1;overflow-y:auto;padding:0 14px 10px}
+  .iapp-shop-scroll::-webkit-scrollbar{width:0}
+  .iapp-shop-hero{position:relative;background:linear-gradient(150deg,#5c4128 0%,#2e1a0a 45%,#181008 100%);border-radius:16px;overflow:hidden;height:190px;display:flex;align-items:flex-start;justify-content:flex-end;padding:16px 12px}
+  .iapp-shop-switches{display:flex;gap:10px;transform:rotate(3deg)}
+  .iapp-shop-sw{width:46px;height:74px;background:#fff;border-radius:5px;box-shadow:0 6px 18px rgba(0,0,0,0.55);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:10px}
+  .iapp-shop-sw-dots{display:flex;gap:3px}
+  .iapp-shop-sw-dot{width:5px;height:5px;border-radius:50%;background:#7ecfe0;opacity:.85}
+  .iapp-shop-sw-dot:first-child{opacity:.4}
+  .iapp-shop-sw-dot:last-child{opacity:.6}
+  .iapp-shop-promo-card{background:#000;border-radius:16px;margin-top:-24px;padding:22px 20px 20px;position:relative;z-index:1}
+  .iapp-shop-promo-title{color:#fff;font-size:21px;font-weight:800;margin-bottom:10px}
+  .iapp-shop-promo-text{color:rgba(255,255,255,.75);font-size:13.5px;line-height:1.55;margin-bottom:18px}
+  .iapp-shop-promo-text strong{color:#fff}
+  .iapp-shop-save-btn{display:inline-flex;align-items:center;gap:5px;border:1.5px solid rgba(255,255,255,.35);border-radius:22px;padding:9px 20px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;background:transparent}
+  .iapp-shop-save-chevron{color:rgba(255,255,255,.5);font-size:16px}
+
+  /* ── SCHEDULES view ───────────────────────────────────────────────────── */
+  .iapp-sched-view{display:none;flex:1;flex-direction:column;overflow:hidden;background:#efefef}
+  .iapp-sched-view.active{display:flex}
+  .iapp-sched-scroll{flex:1;overflow-y:auto;padding:0 14px 10px}
+  .iapp-sched-scroll::-webkit-scrollbar{width:0}
+  .iapp-sched-back{color:#007AFF;font-size:22px;font-weight:300;padding:8px 2px 0;cursor:pointer}
+  .iapp-sched-heading{color:#000;font-size:17px;font-weight:700;text-align:center;margin:-22px 0 18px}
+  .iapp-sched-list{display:flex;flex-direction:column;gap:10px}
+  .iapp-sched-card{background:#fff;border-radius:14px;padding:16px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  .iapp-sched-card-top{display:flex;align-items:center;gap:12px}
+  .iapp-sched-icon{font-size:22px;flex-shrink:0}
+  .iapp-sched-info{flex:1;min-width:0}
+  .iapp-sched-name{color:#000;font-size:15px;font-weight:700;margin-bottom:3px}
+  .iapp-sched-desc{color:#6e6e73;font-size:13px;line-height:1.4}
+
+  /* Header visibility per tab */
+  .iapp-header.hidden{display:none}
+  /* Home view hide/show */
+  #iapp-home-view{display:none}
+  #iapp-home-view.active{display:flex}
 </style>
 </head>
 <body>
@@ -255,7 +309,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.67</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.68</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -282,8 +336,8 @@
         <div class="iapp-logo">My Home</div>
         <button class="iapp-gear" onclick="openSceneMgr()">⚙</button>
       </div>
-      <!-- Scrollable content -->
-      <div class="iapp-scroll">
+      <!-- Scrollable content (Home tab) -->
+      <div class="iapp-scroll active" id="iapp-home-view">
         <div>
           <div class="iapp-sec-label">Scenes</div>
           <div class="iapp-scene-grid" id="iapp-scenes"></div>
@@ -293,21 +347,102 @@
           <div class="iapp-room-list" id="iapp-rooms"></div>
         </div>
       </div>
+      <!-- Me / Account view -->
+      <div class="iapp-me-view" id="iapp-me-view">
+        <div class="iapp-me-title">Me</div>
+        <div class="iapp-me-scroll">
+          <div class="iapp-me-section-label">Profile</div>
+          <div class="iapp-me-group">
+            <div class="iapp-me-row">My Information<span class="iapp-me-chevron">›</span></div>
+          </div>
+          <div class="iapp-me-section-label">Common Questions</div>
+          <div class="iapp-me-group">
+            <div class="iapp-me-row">How do I...<span class="iapp-me-chevron">›</span></div>
+            <div class="iapp-me-row iapp-me-row-border">3rd party integrations<span class="iapp-me-chevron">›</span></div>
+          </div>
+          <div class="iapp-me-section-label">Support</div>
+          <div class="iapp-me-group">
+            <div class="iapp-me-row">Contact<span class="iapp-me-chevron">›</span></div>
+            <div class="iapp-me-row iapp-me-row-border">Bug reporting<span class="iapp-me-chevron">›</span></div>
+            <div class="iapp-me-row iapp-me-row-border">Feature request<span class="iapp-me-chevron">›</span></div>
+          </div>
+          <div class="iapp-me-group">
+            <div class="iapp-me-row">Logout<span class="iapp-me-chevron">›</span></div>
+          </div>
+          <div class="iapp-me-version">App version 2.20</div>
+        </div>
+      </div>
+      <!-- Shop view -->
+      <div class="iapp-shop-view" id="iapp-shop-view">
+        <div class="iapp-shop-title">Shop</div>
+        <div class="iapp-shop-scroll">
+          <div class="iapp-shop-hero">
+            <div class="iapp-shop-switches">
+              <div class="iapp-shop-sw"><div class="iapp-shop-sw-dots"><div class="iapp-shop-sw-dot"></div><div class="iapp-shop-sw-dot"></div><div class="iapp-shop-sw-dot"></div></div></div>
+              <div class="iapp-shop-sw"><div class="iapp-shop-sw-dots"><div class="iapp-shop-sw-dot"></div><div class="iapp-shop-sw-dot"></div><div class="iapp-shop-sw-dot"></div></div></div>
+            </div>
+          </div>
+          <div class="iapp-shop-promo-card">
+            <div class="iapp-shop-promo-title">15% Off For You</div>
+            <div class="iapp-shop-promo-text">As a thank you for being a <strong>Deako App</strong> user use code <strong>DEAKOAPP15</strong> to enjoy 15% off your next purchase.</div>
+            <div class="iapp-shop-save-btn">Save now <span class="iapp-shop-save-chevron">›</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Schedules view -->
+      <div class="iapp-sched-view" id="iapp-sched-view">
+        <div class="iapp-sched-scroll">
+          <div class="iapp-sched-back">‹</div>
+          <div class="iapp-sched-heading">Add Schedule</div>
+          <div class="iapp-sched-list">
+            <div class="iapp-sched-card">
+              <div class="iapp-sched-card-top">
+                <span class="iapp-sched-icon">🕐</span>
+                <div class="iapp-sched-info">
+                  <div class="iapp-sched-name">At a specified time</div>
+                  <div class="iapp-sched-desc">Run at a specific time you choose</div>
+                </div>
+                <span class="iapp-me-chevron">›</span>
+              </div>
+            </div>
+            <div class="iapp-sched-card">
+              <div class="iapp-sched-card-top">
+                <span class="iapp-sched-icon">🌅</span>
+                <div class="iapp-sched-info">
+                  <div class="iapp-sched-name">At sunrise</div>
+                  <div class="iapp-sched-desc">Run automatically at sunrise (adjusts daily)</div>
+                </div>
+                <span class="iapp-me-chevron">›</span>
+              </div>
+            </div>
+            <div class="iapp-sched-card">
+              <div class="iapp-sched-card-top">
+                <span class="iapp-sched-icon">🌇</span>
+                <div class="iapp-sched-info">
+                  <div class="iapp-sched-name">At sunset</div>
+                  <div class="iapp-sched-desc">Run automatically at sunset (adjusts daily)</div>
+                </div>
+                <span class="iapp-me-chevron">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- Tab bar -->
       <div class="iapp-tabbar">
-        <div class="iapp-tab active">
+        <div class="iapp-tab active" onclick="switchTab(0)">
           <svg class="iapp-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span class="iapp-tab-lbl">Home</span>
         </div>
-        <div class="iapp-tab">
+        <div class="iapp-tab" onclick="switchTab(1)">
           <svg class="iapp-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           <span class="iapp-tab-lbl">Schedules</span>
         </div>
-        <div class="iapp-tab">
+        <div class="iapp-tab" onclick="switchTab(2)">
           <svg class="iapp-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           <span class="iapp-tab-lbl">Store</span>
         </div>
-        <div class="iapp-tab">
+        <div class="iapp-tab" onclick="switchTab(3)">
           <svg class="iapp-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span class="iapp-tab-lbl">Account</span>
         </div>
@@ -1350,6 +1485,24 @@ function triggerDevices() {
 
 function hubClick()   { triggerDevices(); }
 function alexaClick() { triggerDevices(); }
+
+// ── IPHONE TAB SWITCHING ────────────────────────────────────────────────────
+function switchTab(idx) {
+  const tabs = document.querySelectorAll('.iapp-tab');
+  tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
+  const header = document.querySelector('.iapp-header');
+  const homeView  = document.getElementById('iapp-home-view');
+  const meView    = document.getElementById('iapp-me-view');
+  const shopView  = document.getElementById('iapp-shop-view');
+  const schedView = document.getElementById('iapp-sched-view');
+  // reset all views
+  [homeView, meView, shopView, schedView].forEach(v => v.classList.remove('active'));
+  header.classList.remove('hidden');
+  if (idx === 0) { homeView.classList.add('active'); }
+  else if (idx === 1) { schedView.classList.add('active'); header.classList.add('hidden'); }
+  else if (idx === 2) { shopView.classList.add('active');  header.classList.add('hidden'); }
+  else if (idx === 3) { meView.classList.add('active');    header.classList.add('hidden'); }
+}
 
 // Live clock for iPhone status bar
 (function iPhoneClock() {
