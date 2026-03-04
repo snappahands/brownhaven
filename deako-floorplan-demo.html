@@ -337,7 +337,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.79</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.80</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -668,7 +668,7 @@ const ROOMS = [
   {id:"deck",    label:"Rear Deck",     x:38.12, y:4.67,  w:26.96, h:14.79},
 ];
 const DEFAULT_SCENES = [
-  {key:"morning", emoji:"☀", name:"Good Morning", steps:[
+  {key:"morning", emoji:"🌞", name:"Good Morning", steps:[
     {t:0,    id:"owners",  lv:70},
     {t:0,    id:"owic",    lv:70},
     {t:0,    id:"obath",   lv:70},
@@ -718,6 +718,8 @@ let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || JSON.
   const v=scenesData.find(s=>s.key===key); const d=DEFAULT_SCENES.find(s=>s.key===key);
   if(v&&d&&JSON.stringify(v.steps)!==JSON.stringify(d.steps)){delete v.staggerMs;delete v.rooms;v.steps=JSON.parse(JSON.stringify(d.steps));localStorage.setItem("bhScenes",JSON.stringify(scenesData));}
 });
+// Migrate name and emoji for default scenes (keeps localStorage in sync with code changes)
+(()=>{ let changed=false; DEFAULT_SCENES.forEach(d=>{ const v=scenesData.find(s=>s.key===d.key); if(v&&(v.name!==d.name||v.emoji!==d.emoji)){v.name=d.name;v.emoji=d.emoji;changed=true;} }); if(changed)localStorage.setItem("bhScenes",JSON.stringify(scenesData)); })();
 
 // State: brightness 0=off, 1–100=dim level
 let levels = {};
