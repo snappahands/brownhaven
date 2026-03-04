@@ -243,7 +243,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.57</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.58</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1317,19 +1317,19 @@ function showBubble(id, text) {
   bubble.classList.add('show');
 }
 
-function hubClick() {
-  if (hubTimer) { clearTimeout(hubTimer); hubTimer = null; }
+function triggerDevices() {
+  if (hubTimer) clearTimeout(hubTimer);
+  if (alexaTimer) clearTimeout(alexaTimer);
   const action = deviceAction();
-  showBubble('hub-bubble', action === 'on' ? 'Hey Google, run All On' : 'Hey Google, run All Off');
-  hubTimer = setTimeout(() => { action === 'on' ? allOn() : allOff(); hubTimer = null; }, 2500);
+  showBubble('hub-bubble',   action === 'on' ? 'Hey Google, run All On' : 'Hey Google, run All Off');
+  showBubble('alexa-bubble', action === 'on' ? 'Alexa, run All On'      : 'Alexa, run All Off');
+  const t = setTimeout(() => { action === 'on' ? allOn() : allOff(); }, 2500);
+  hubTimer = t;
+  alexaTimer = t;
 }
 
-function alexaClick() {
-  if (alexaTimer) { clearTimeout(alexaTimer); alexaTimer = null; }
-  const action = deviceAction();
-  showBubble('alexa-bubble', action === 'on' ? 'Alexa, run All On' : 'Alexa, run All Off');
-  alexaTimer = setTimeout(() => { action === 'on' ? allOn() : allOff(); alexaTimer = null; }, 2500);
-}
+function hubClick()   { triggerDevices(); }
+function alexaClick() { triggerDevices(); }
 
 // Live clock for iPhone status bar
 (function iPhoneClock() {
