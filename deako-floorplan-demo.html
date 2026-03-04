@@ -173,13 +173,13 @@
   .iapp-scene-name{color:#000;font-size:15px;font-weight:700}
   .iapp-scene-card.active .iapp-scene-name{color:#007AFF}
   .iapp-room-list{display:flex;flex-direction:column;gap:8px}
-  .iapp-room-row{display:flex;align-items:center;padding:13px 16px;background:#fff;border:none;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .iapp-room-row{display:flex;align-items:center;padding:13px 16px;background:#fff;border:none;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .iapp-room-row:active{transform:scale(.98)}
   .iapp-room-row.on{background:#fff}
   .iapp-room-info{flex:1;min-width:0}
   .iapp-room-name{color:#000;font-size:15px;font-weight:700}
   .iapp-room-status{color:#8e8e93;font-size:13px;font-weight:400;margin-top:1px}
-  .iapp-room-row.on .iapp-room-status{color:#8e8e93}
-  .iapp-room-icons{display:flex;gap:5px;flex-shrink:0;opacity:.3;color:#000}
+  .iapp-room-row.on .iapp-room-status{color:#007AFF;font-weight:600}
   .iapp-tabbar{display:flex;justify-content:space-around;align-items:center;padding:8px 10px 14px;border-top:1px solid #e0e0e0;background:#fff;flex-shrink:0}
   .iapp-tab{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:opacity .15s;-webkit-tap-highlight-color:transparent;color:#8e8e93}
   .iapp-tab.active{color:#007AFF}
@@ -219,7 +219,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.47</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.48</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -243,7 +243,7 @@
       </div>
       <!-- App header -->
       <div class="iapp-header">
-        <div class="iapp-logo">Brownhaven</div>
+        <div class="iapp-logo">My Home</div>
         <button class="iapp-gear" onclick="openSceneMgr()">⚙</button>
       </div>
       <!-- Scrollable content -->
@@ -1221,7 +1221,8 @@ function renderIphoneRooms() {
     const on = lv > 0;
     const row = document.createElement("div");
     row.className = "iapp-room-row" + (on ? " on" : "");
-    row.innerHTML = `<div class="iapp-room-info"><div class="iapp-room-name">${r.label}</div><div class="iapp-room-status">${on ? lv+"%" : "Off"}</div></div><div class="iapp-room-icons"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l4 4-4 4 4 4-4 4M8 6l4 4-4 4"/><line x1="3" y1="3" x2="21" y2="21"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0L12 19z"/><line x1="3" y1="3" x2="21" y2="21"/></svg></div>`;
+    row.innerHTML = `<div class="iapp-room-info"><div class="iapp-room-name">${r.label}</div><div class="iapp-room-status">${on ? lv+"%" : "Off"}</div></div>`;
+    row.addEventListener("click", () => toggle(r.id));
     list.appendChild(row);
   });
 }
