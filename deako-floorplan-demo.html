@@ -13,6 +13,14 @@
   body{display:flex;flex-direction:row;padding:10px 12px;gap:12px;min-height:100vh;align-items:stretch}
   #left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
 
+  /* ── DEVICE PANEL (left) ──────────────────────────────────────────────── */
+  #device-panel{width:170px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:4px 0}
+  .dv-card{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
+  .dv-img{width:150px;object-fit:contain;border-radius:12px;display:block}
+  .dv-img.echo{height:150px}
+  .dv-img.hub{height:110px}
+  .dv-label{color:#445;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center}
+
   header{display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
   .logo{color:#fff;font-size:20px;font-weight:800;letter-spacing:.04em}
   .logo em{color:#7ecfe0;font-style:normal}
@@ -190,6 +198,17 @@
 </head>
 <body>
 
+<div id="device-panel">
+  <div class="dv-card">
+    <img src="echo-dot.jpg" class="dv-img echo" alt="Amazon Echo Dot">
+    <div class="dv-label">Amazon Alexa</div>
+  </div>
+  <div class="dv-card">
+    <img src="google-hub.jpg" class="dv-img hub" alt="Google Nest Hub">
+    <div class="dv-label">Google Home Hub</div>
+  </div>
+</div>
+
 <div id="left-panel">
 
 <header>
@@ -219,7 +238,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.49</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.50</span></span>
 </div>
 
 </div><!-- #left-panel -->
