@@ -309,7 +309,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.69</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.70</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1394,7 +1394,7 @@ function renderIphoneRooms() {
 
     const fill = document.createElement("div");
     fill.className = "iapp-room-fill";
-    fill.style.width = (on ? lv : 0) + "%";
+    fill.style.width = "0%";
 
     const info = document.createElement("div");
     info.className = "iapp-room-info";
@@ -1434,11 +1434,12 @@ function renderIphoneRooms() {
     });
     row.addEventListener("pointerup", () => {
       if (!isDragging && dragStartX !== null) toggle(r.id);
-      else if (isDragging) updateCount();
+      else if (isDragging) { updateCount(); fill.style.width = "0%"; }
       dragStartX = null;
       isDragging = false;
     });
     row.addEventListener("pointercancel", () => {
+      fill.style.width = "0%";
       dragStartX = null;
       isDragging = false;
     });
