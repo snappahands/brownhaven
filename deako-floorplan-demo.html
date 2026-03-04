@@ -238,7 +238,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.51</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.52</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1215,12 +1215,24 @@ function renderIphoneScenes() {
   const grid = document.getElementById("iapp-scenes");
   if (!grid) return;
   grid.innerHTML = "";
+
+  // All Off / All On buttons
+  [
+    {emoji:"🌑", name:"All Off",  fn: allOff},
+    {emoji:"☀",  name:"All On",   fn: allOn},
+  ].forEach(({emoji, name, fn}) => {
+    const card = document.createElement("div");
+    card.className = "iapp-scene-card";
+    card.innerHTML = `<span class="iapp-scene-emoji">${emoji}</span><span class="iapp-scene-name">${name}</span>`;
+    card.onclick = fn;
+    grid.appendChild(card);
+  });
+
   scenesData.forEach(sc => {
     const card = document.createElement("div");
     card.className = "iapp-scene-card" + (activeSceneKey === sc.key ? " active" : "");
     card.innerHTML = `<span class="iapp-scene-emoji">${sc.emoji}</span><span class="iapp-scene-name">${sc.name}</span>`;
     card.onclick = () => {
-      // Find the matching main scene button and click it so all existing logic fires
       const btn = [...document.querySelectorAll("#scenes-row .sbtn")].find(b =>
         b.textContent.trim() === sc.emoji + " " + sc.name
       );
