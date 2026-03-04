@@ -14,16 +14,18 @@
   #left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
 
   /* ── DEVICE PANEL (left) ──────────────────────────────────────────────── */
-  #device-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:40px 0}
-  .dv-card{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;cursor:pointer}
-  .dv-card:hover .dv-img{opacity:.88;transition:opacity .15s}
-  .dv-img{width:300px;object-fit:contain;border-radius:12px;display:block;transition:opacity .15s}
+  #device-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:40px 0;background:linear-gradient(170deg,#d0cfc8 0%,#dcdbd3 45%,#e3e2da 100%);border-radius:12px}
+  .dv-card{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;cursor:pointer}
+  .dv-card:active .dv-img{opacity:.82}
+  .dv-img{width:300px;object-fit:contain;display:block;mix-blend-mode:multiply}
   .dv-img.echo{height:300px}
   .dv-img.hub{height:220px}
-  .dv-label{color:#445;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center}
-  .speech-bubble{background:#fff;border-radius:14px;padding:10px 16px;font-size:12px;font-weight:600;color:#111;box-shadow:0 3px 14px rgba(0,0,0,0.28);display:none;text-align:center;max-width:230px;position:relative;line-height:1.5;animation:bubble-in .2s ease}
+  .dv-shadow{width:72%;height:14px;background:radial-gradient(ellipse at 50% 30%,rgba(0,0,0,0.28) 0%,transparent 72%);border-radius:50%;margin-top:-6px;flex-shrink:0}
+  .dv-shadow.wide{width:88%}
+  .dv-label{color:#7a786e;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:6px}
+  .speech-bubble{background:#fff;border-radius:18px;padding:20px 28px;font-size:22px;font-weight:600;color:#111;box-shadow:0 3px 14px rgba(0,0,0,0.28);display:none;text-align:center;max-width:280px;position:relative;line-height:1.5;animation:bubble-in .2s ease}
   .speech-bubble.show{display:block}
-  .speech-bubble::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);border:10px solid transparent;border-top-color:#fff;border-bottom:0}
+  .speech-bubble::after{content:'';position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);border:14px solid transparent;border-top-color:#fff;border-bottom:0}
   @keyframes bubble-in{from{opacity:0;transform:scale(.85) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
   header{display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
@@ -207,11 +209,13 @@
   <div class="dv-card" onclick="alexaClick()">
     <div class="speech-bubble" id="alexa-bubble"></div>
     <img src="echo-dot.jpg" class="dv-img echo" alt="Amazon Echo Dot">
+    <div class="dv-shadow"></div>
     <div class="dv-label">Amazon Alexa</div>
   </div>
   <div class="dv-card" onclick="hubClick()">
     <div class="speech-bubble" id="hub-bubble"></div>
     <img src="google-hub.jpg" class="dv-img hub" alt="Google Nest Hub">
+    <div class="dv-shadow wide"></div>
     <div class="dv-label">Google Home Hub</div>
   </div>
 </div>
@@ -239,7 +243,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.56</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.57</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1297,35 +1301,34 @@ function renderIphoneRooms() {
 }
 
 // ── DEVICE CLICK HANDLERS (Google Hub + Amazon Alexa) ──────────────────────
-let hubNext = 'on';
-let alexaNext = 'on';
 let hubTimer = null;
 let alexaTimer = null;
 
-function hubClick() {
-  if (hubTimer) { clearTimeout(hubTimer); hubTimer = null; }
-  const bubble = document.getElementById('hub-bubble');
-  const text = hubNext === 'on' ? 'Hey Google, run All On' : 'Hey Google, run All Off';
-  bubble.textContent = text;
-  bubble.classList.remove('show');
-  void bubble.offsetWidth; // restart animation
-  bubble.classList.add('show');
-  const action = hubNext === 'on' ? allOn : allOff;
-  hubNext = hubNext === 'on' ? 'off' : 'on';
-  hubTimer = setTimeout(() => { action(); hubTimer = null; }, 2500);
+function deviceAction() {
+  // Any lights on → All Off; all off → All On
+  return Object.values(levels).some(v => v > 0) ? 'off' : 'on';
 }
 
-function alexaClick() {
-  if (alexaTimer) { clearTimeout(alexaTimer); alexaTimer = null; }
-  const bubble = document.getElementById('alexa-bubble');
-  const text = alexaNext === 'on' ? 'Alexa, run All On' : 'Alexa, run All Off';
+function showBubble(id, text) {
+  const bubble = document.getElementById(id);
   bubble.textContent = text;
   bubble.classList.remove('show');
   void bubble.offsetWidth;
   bubble.classList.add('show');
-  const action = alexaNext === 'on' ? allOn : allOff;
-  alexaNext = alexaNext === 'on' ? 'off' : 'on';
-  alexaTimer = setTimeout(() => { action(); alexaTimer = null; }, 2500);
+}
+
+function hubClick() {
+  if (hubTimer) { clearTimeout(hubTimer); hubTimer = null; }
+  const action = deviceAction();
+  showBubble('hub-bubble', action === 'on' ? 'Hey Google, run All On' : 'Hey Google, run All Off');
+  hubTimer = setTimeout(() => { action === 'on' ? allOn() : allOff(); hubTimer = null; }, 2500);
+}
+
+function alexaClick() {
+  if (alexaTimer) { clearTimeout(alexaTimer); alexaTimer = null; }
+  const action = deviceAction();
+  showBubble('alexa-bubble', action === 'on' ? 'Alexa, run All On' : 'Alexa, run All Off');
+  alexaTimer = setTimeout(() => { action === 'on' ? allOn() : allOff(); alexaTimer = null; }, 2500);
 }
 
 // Live clock for iPhone status bar
