@@ -15,11 +15,16 @@
 
   /* ── DEVICE PANEL (left) ──────────────────────────────────────────────── */
   #device-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:40px 0}
-  .dv-card{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%}
-  .dv-img{width:300px;object-fit:contain;border-radius:12px;display:block}
+  .dv-card{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;cursor:pointer}
+  .dv-card:hover .dv-img{opacity:.88;transition:opacity .15s}
+  .dv-img{width:300px;object-fit:contain;border-radius:12px;display:block;transition:opacity .15s}
   .dv-img.echo{height:300px}
   .dv-img.hub{height:220px}
   .dv-label{color:#445;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center}
+  .speech-bubble{background:#fff;border-radius:14px;padding:10px 16px;font-size:12px;font-weight:600;color:#111;box-shadow:0 3px 14px rgba(0,0,0,0.28);display:none;text-align:center;max-width:230px;position:relative;line-height:1.5;animation:bubble-in .2s ease}
+  .speech-bubble.show{display:block}
+  .speech-bubble::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);border:10px solid transparent;border-top-color:#fff;border-bottom:0}
+  @keyframes bubble-in{from{opacity:0;transform:scale(.85) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
 
   header{display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
   .logo{color:#fff;font-size:20px;font-weight:800;letter-spacing:.04em}
@@ -199,11 +204,13 @@
 <body>
 
 <div id="device-panel">
-  <div class="dv-card">
+  <div class="dv-card" onclick="alexaClick()">
+    <div class="speech-bubble" id="alexa-bubble"></div>
     <img src="echo-dot.jpg" class="dv-img echo" alt="Amazon Echo Dot">
     <div class="dv-label">Amazon Alexa</div>
   </div>
-  <div class="dv-card">
+  <div class="dv-card" onclick="hubClick()">
+    <div class="speech-bubble" id="hub-bubble"></div>
     <img src="google-hub.jpg" class="dv-img hub" alt="Google Nest Hub">
     <div class="dv-label">Google Home Hub</div>
   </div>
@@ -232,7 +239,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.55</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.56</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1287,6 +1294,38 @@ function renderIphoneRooms() {
 
     list.appendChild(row);
   });
+}
+
+// ── DEVICE CLICK HANDLERS (Google Hub + Amazon Alexa) ──────────────────────
+let hubNext = 'on';
+let alexaNext = 'on';
+let hubTimer = null;
+let alexaTimer = null;
+
+function hubClick() {
+  if (hubTimer) { clearTimeout(hubTimer); hubTimer = null; }
+  const bubble = document.getElementById('hub-bubble');
+  const text = hubNext === 'on' ? 'Hey Google, run All On' : 'Hey Google, run All Off';
+  bubble.textContent = text;
+  bubble.classList.remove('show');
+  void bubble.offsetWidth; // restart animation
+  bubble.classList.add('show');
+  const action = hubNext === 'on' ? allOn : allOff;
+  hubNext = hubNext === 'on' ? 'off' : 'on';
+  hubTimer = setTimeout(() => { action(); hubTimer = null; }, 2500);
+}
+
+function alexaClick() {
+  if (alexaTimer) { clearTimeout(alexaTimer); alexaTimer = null; }
+  const bubble = document.getElementById('alexa-bubble');
+  const text = alexaNext === 'on' ? 'Alexa, run All On' : 'Alexa, run All Off';
+  bubble.textContent = text;
+  bubble.classList.remove('show');
+  void bubble.offsetWidth;
+  bubble.classList.add('show');
+  const action = alexaNext === 'on' ? allOn : allOff;
+  alexaNext = alexaNext === 'on' ? 'off' : 'on';
+  alexaTimer = setTimeout(() => { action(); alexaTimer = null; }, 2500);
 }
 
 // Live clock for iPhone status bar
