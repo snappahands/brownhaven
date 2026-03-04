@@ -337,7 +337,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.78</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.79</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -690,7 +690,7 @@ const DEFAULT_SCENES = [
     {t:3000, id:"great",   lv:80},
     {t:3000, id:"kitchen", lv:70},
   ]},
-  {key:"dinner",  emoji:"🍽", name:"Dinner",        rooms:[{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}]},
+  {key:"dinner",  emoji:"🍽", name:"Dinner Time",   rooms:[{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}]},
   {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
   {key:"vacation",emoji:"🔒", name:"Vacation Mode", steps:[
     {t:0,     id:"porch",   lv:55},
@@ -1491,11 +1491,11 @@ function renderIphoneScenes() {
 
   // All Off / All On buttons
   [
-    {emoji:"🌑", name:"All Off",  fn: allOff},
-    {emoji:"☀",  name:"All On",   fn: allOn},
-  ].forEach(({emoji, name, fn}) => {
+    {emoji:"🌑", name:"All Off", key:"__alloff__", fn: () => { allOff(); activeSceneKey = '__alloff__'; renderIphoneScenes(); }},
+    {emoji:"☀",  name:"All On",  key:"__allon__",  fn: () => { allOn();  activeSceneKey = '__allon__';  renderIphoneScenes(); }},
+  ].forEach(({emoji, name, key, fn}) => {
     const card = document.createElement("div");
-    card.className = "iapp-scene-card";
+    card.className = "iapp-scene-card" + (activeSceneKey === key ? " active" : "");
     card.innerHTML = `<span class="iapp-scene-emoji">${emoji}</span><span class="iapp-scene-name">${name}</span>`;
     card.onclick = fn;
     grid.appendChild(card);
@@ -1588,8 +1588,8 @@ let deviceTimer = null;
 let deviceClickState = 0;
 
 const DEVICE_STEPS = [
-  { hub: 'Hey Google, run All On',       alexa: 'Alexa, run All On',       action: () => allOn() },
-  { hub: 'Hey Google, run All Off',      alexa: 'Alexa, run All Off',      action: () => allOff() },
+  { hub: 'Hey Google, run All On',       alexa: 'Alexa, run All On',       action: () => { allOn();  activeSceneKey = '__allon__';  renderIphoneScenes(); } },
+  { hub: 'Hey Google, run All Off',      alexa: 'Alexa, run All Off',      action: () => { allOff(); activeSceneKey = '__alloff__'; renderIphoneScenes(); } },
   { hub: 'Hey Google, run Dinner Time',  alexa: 'Alexa, run Dinner Time',  action: () => runScene(null, 'dinner') },
 ];
 
