@@ -336,7 +336,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.72</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.73</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -442,7 +442,7 @@
                 <span class="iapp-me-chevron">›</span>
               </div>
             </div>
-            <div class="iapp-sched-card">
+            <div class="iapp-sched-card" onclick="showSunset()">
               <div class="iapp-sched-card-top">
                 <span class="iapp-sched-icon">🌇</span>
                 <div class="iapp-sched-info">
@@ -520,6 +520,41 @@
           <div class="iapp-settime-example">
             <div class="iapp-settime-ex-title">Example</div>
             <div class="iapp-settime-ex-text">With the current setting your next sunrise schedule would run at Mar 4 at 5:58 AM</div>
+          </div>
+          <div class="iapp-sunrise-bar"></div>
+        </div>
+        <div class="iapp-settime-footer">
+          <button class="iapp-settime-continue">Continue</button>
+        </div>
+      </div>
+      <!-- Add a Sunset sub-view -->
+      <div class="iapp-settime-view" id="iapp-sunset-view">
+        <div class="iapp-sched-nav">
+          <span class="iapp-sched-navback" onclick="backToSched()">‹</span>
+          <span class="iapp-sched-navtitle">Add a Sunset</span>
+          <span></span>
+        </div>
+        <div class="iapp-settime-scroll">
+          <div class="iapp-settime-info">
+            <div class="iapp-settime-info-title">Start a little before or after sunset</div>
+            <div class="iapp-settime-info-text">Choose how many minutes before or after sunset the devices change.</div>
+          </div>
+          <div class="iapp-me-section-label" style="margin-top:10px">AT THIS TIME</div>
+          <div class="iapp-timepick">
+            <div class="iapp-timepick-row selected iapp-timepick-offset">
+              <div class="iapp-timepick-cell">0</div><div class="iapp-timepick-cell">minutes</div><div class="iapp-timepick-cell">before</div>
+            </div>
+            <div class="iapp-timepick-row faded iapp-timepick-offset">
+              <div class="iapp-timepick-cell">1</div><div class="iapp-timepick-cell">hours</div><div class="iapp-timepick-cell">after</div>
+            </div>
+          </div>
+          <div class="iapp-me-section-label">ON THESE DAYS</div>
+          <div class="iapp-day-row">
+            <div class="iapp-day active">S</div><div class="iapp-day active">M</div><div class="iapp-day active">T</div><div class="iapp-day active">W</div><div class="iapp-day active">T</div><div class="iapp-day active">F</div><div class="iapp-day active">S</div>
+          </div>
+          <div class="iapp-settime-example">
+            <div class="iapp-settime-ex-title">Example</div>
+            <div class="iapp-settime-ex-text">With the current setting your next sunset schedule would run at Mar 4 at 6:21PM</div>
           </div>
           <div class="iapp-sunrise-bar"></div>
         </div>
@@ -1597,8 +1632,13 @@ function showSunrise() {
   document.getElementById('iapp-sunrise-view').classList.add('active');
   document.querySelector('.iapp-tabbar').style.display = 'none';
 }
+function showSunset() {
+  document.getElementById('iapp-sched-view').classList.remove('active');
+  document.getElementById('iapp-sunset-view').classList.add('active');
+  document.querySelector('.iapp-tabbar').style.display = 'none';
+}
 function backToSched() {
-  ['iapp-settime-view','iapp-sunrise-view'].forEach(id => document.getElementById(id).classList.remove('active'));
+  ['iapp-settime-view','iapp-sunrise-view','iapp-sunset-view'].forEach(id => document.getElementById(id).classList.remove('active'));
   document.getElementById('iapp-sched-view').classList.add('active');
   document.querySelector('.iapp-tabbar').style.display = '';
 }
