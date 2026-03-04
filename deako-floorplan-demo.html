@@ -336,7 +336,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.75</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.76</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1583,13 +1583,14 @@ function renderIphoneRooms() {
 }
 
 // ── DEVICE CLICK HANDLERS (Google Hub + Amazon Alexa) ──────────────────────
-let hubTimer = null;
-let alexaTimer = null;
+let deviceTimer = null;
+let deviceClickState = 0;
 
-function deviceAction() {
-  // Any lights on → All Off; all off → All On
-  return Object.values(levels).some(v => v > 0) ? 'off' : 'on';
-}
+const DEVICE_STEPS = [
+  { hub: 'Hey Google, run All On',       alexa: 'Alexa, run All On',       action: () => allOn() },
+  { hub: 'Hey Google, run All Off',      alexa: 'Alexa, run All Off',      action: () => allOff() },
+  { hub: 'Hey Google, run Dinner Time',  alexa: 'Alexa, run Dinner Time',  action: () => runScene(null, 'dinner') },
+];
 
 function showBubble(id, text) {
   const bubble = document.getElementById(id);
@@ -1608,14 +1609,18 @@ function showBubble(id, text) {
 }
 
 function triggerDevices() {
-  if (hubTimer) clearTimeout(hubTimer);
-  if (alexaTimer) clearTimeout(alexaTimer);
-  const action = deviceAction();
-  showBubble('hub-bubble',   action === 'on' ? 'Hey Google, run All On' : 'Hey Google, run All Off');
-  showBubble('alexa-bubble', action === 'on' ? 'Alexa, run All On'      : 'Alexa, run All Off');
-  const t = setTimeout(() => { action === 'on' ? allOn() : allOff(); }, 2500);
-  hubTimer = t;
-  alexaTimer = t;
+  if (deviceTimer) clearTimeout(deviceTimer);
+  if (deviceClickState >= DEVICE_STEPS.length) {
+    location.reload();
+    return;
+  }
+  const step = DEVICE_STEPS[deviceClickState];
+  showBubble('hub-bubble',   step.hub);
+  showBubble('alexa-bubble', step.alexa);
+  deviceTimer = setTimeout(() => {
+    step.action();
+    deviceClickState++;
+  }, 2500);
 }
 
 function hubClick()   { triggerDevices(); }
