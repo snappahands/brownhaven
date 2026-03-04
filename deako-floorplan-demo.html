@@ -26,11 +26,13 @@
   .dv-shadow{width:72%;height:14px;background:radial-gradient(ellipse at 50% 30%,rgba(0,0,0,0.28) 0%,transparent 72%);border-radius:50%;margin-top:-6px;flex-shrink:0}
   .dv-shadow.wide{width:88%}
   .dv-label{color:#7a786e;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:6px}
-  .speech-bubble{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);display:none;width:310px;animation:bubble-in .2s ease;z-index:10}
-  .speech-bubble.show{display:block}
+  .speech-bubble{position:absolute;bottom:100%;left:50%;width:310px;display:none;z-index:10;transform-origin:bottom center}
+  .speech-bubble.show{display:block;animation:bubble-in .25s ease forwards}
+  .speech-bubble.hiding{display:block;animation:bubble-out .2s ease forwards}
   .bubble-img{width:100%;display:block;mix-blend-mode:multiply}
   .bubble-text{position:absolute;top:0;left:8%;right:8%;height:66%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#111;white-space:nowrap}
-  @keyframes bubble-in{from{opacity:0;transform:scale(.85) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  @keyframes bubble-in{from{opacity:0;transform:translateX(-50%) scale(.88) translateY(8px)}to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
+  @keyframes bubble-out{from{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}to{opacity:0;transform:translateX(-50%) scale(.88) translateY(8px)}}
 
   header{display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
   .logo{color:#fff;font-size:20px;font-weight:800;letter-spacing:.04em}
@@ -253,7 +255,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.66</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.67</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1321,10 +1323,18 @@ function deviceAction() {
 
 function showBubble(id, text) {
   const bubble = document.getElementById(id);
-  bubble.querySelector('.bubble-text').textContent = text;
-  bubble.classList.remove('show');
-  void bubble.offsetWidth;
-  bubble.classList.add('show');
+  if (bubble.classList.contains('show')) {
+    bubble.classList.remove('show');
+    bubble.classList.add('hiding');
+    setTimeout(() => {
+      bubble.classList.remove('hiding');
+      bubble.querySelector('.bubble-text').textContent = text;
+      bubble.classList.add('show');
+    }, 220);
+  } else {
+    bubble.querySelector('.bubble-text').textContent = text;
+    bubble.classList.add('show');
+  }
 }
 
 function triggerDevices() {
