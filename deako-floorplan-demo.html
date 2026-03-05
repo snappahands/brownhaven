@@ -406,7 +406,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.6</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.7</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1546,7 +1546,10 @@ function toggleSunSchedule() {
     info.textContent = 'Lights scheduled to turn ON at sunset';
     btn.textContent = '🌅 Simulate Sunset';
     setSunPosition(170);
-    SUN_ROOMS.forEach(id => { if(levels[id]!==undefined){ levels[id]=0; renderRoom(id); }});
+    cancelAllTimers(); clearSceneStepTimers();
+    activeSceneKey = null;
+    document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
+    ROOMS.forEach(r=>{ levels[r.id]=0; renderRoom(r.id); });
     updateCount(); updateImg(); renderIphoneRooms();
     animateSunArc(170, 90, 3200, () => { setTimeout(showSunSmile, 1000); });
   }
