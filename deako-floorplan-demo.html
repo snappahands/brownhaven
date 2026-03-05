@@ -1913,7 +1913,9 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     setSunPosition(176);
     animateSunArc(176, 90, 4000, () => { setTimeout(showSunSmile, 1000); });
-    animateClock(378, 780, 4000); // 6:18 AM → 1:00 PM during sunrise arc
+    animateClock(378, 780, 4000, () => {
+      document.getElementById('sun-badge').textContent = '☀ DAYTIME';
+    }); // 6:18 AM → 1:00 PM during sunrise arc
     renderIphoneRooms();
   }, 300);
 });
@@ -2517,6 +2519,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v11.0</div>
+<div id="version-badge">v11.1</div>
 </body>
 </html>
