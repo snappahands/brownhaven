@@ -406,7 +406,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.5</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.6</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1070,6 +1070,32 @@ ROOMS.forEach(r => {
   g.addEventListener("touchend",   () => endPress(r.id));
 
   svg.appendChild(g);
+});
+
+// ── MOTION SENSOR SWITCHES ──
+[
+  {x:22.8, y:69.8, room:"laundry"},
+  {x:25.8, y:60.0, room:"pantry"},
+  {x:32.0, y:69.8, room:"powder"},
+  {x:66.2, y:51.2, room:"owic"},
+].forEach(pos=>{
+  const si = document.createElementNS("http://www.w3.org/2000/svg","image");
+  si.setAttribute("href","https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Simple_Motion_1080p_Square.png?v=1763997321");
+  si.setAttribute("x",pos.x); si.setAttribute("y",pos.y);
+  si.setAttribute("width","3.2"); si.setAttribute("height","3.2");
+  si.setAttribute("preserveAspectRatio","xMidYMid meet");
+  si.setAttribute("filter","url(#switch-shadow)");
+  si.classList.add("deako-switch");
+  si.style.pointerEvents="all";
+  si.style.cursor="pointer";
+  si.addEventListener("mousedown", e=>e.stopPropagation());
+  si.addEventListener("click", e=>{
+    e.stopPropagation();
+    levels[pos.room] = levels[pos.room] > 0 ? 0 : 80;
+    renderRoom(pos.room);
+    updateCount(); updateImg(); renderIphoneRooms();
+  });
+  svg.appendChild(si);
 });
 
 // ── DEAKO SWITCH IMAGES ──
