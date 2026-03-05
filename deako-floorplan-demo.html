@@ -22,8 +22,7 @@
   .dv-card:active .dv-img{opacity:.82}
   .dv-img{width:300px;object-fit:contain;display:block}
   .dv-img.echo{height:clamp(140px,26vh,300px);mask-image:radial-gradient(ellipse 46% 54% at 50% 52%, black 48%, transparent 82%);-webkit-mask-image:radial-gradient(ellipse 46% 54% at 50% 52%, black 48%, transparent 82%)}
-  .dv-img.hub{height:clamp(130px,25vh,270px);mask-image:radial-gradient(ellipse 46% 52% at 50% 46%, black 48%, transparent 82%);-webkit-mask-image:radial-gradient(ellipse 46% 52% at 50% 46%, black 48%, transparent 82%);filter:brightness(1.15) contrast(1.05)}
-  .dv-card:last-child::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 44%, rgba(220,215,200,0.22) 0%, transparent 70%);pointer-events:none;z-index:0}
+  .dv-img.hub{height:clamp(130px,25vh,270px);mask-image:radial-gradient(ellipse 46% 52% at 50% 46%, black 48%, transparent 82%);-webkit-mask-image:radial-gradient(ellipse 46% 52% at 50% 46%, black 48%, transparent 82%)}
   .dv-shadow{width:72%;height:14px;background:radial-gradient(ellipse at 50% 30%,rgba(0,0,0,0.28) 0%,transparent 72%);border-radius:50%;margin-top:-6px;flex-shrink:0}
   .dv-shadow.wide{width:88%}
   .dv-label{color:#7a786e;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:6px}
@@ -402,7 +401,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v4.2</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v4.3</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -954,6 +953,17 @@ function updateTimerHud() {
     const timeStr = m > 0 ? `${m}:${s}` : `${t.remaining}s`;
     return `<div class="timer-hud-row"><span class="timer-hud-label">${t.label}</span><span class="timer-hud-time">${timeStr}</span></div>`;
   }).join('');
+  // Also refresh in-room timer badges
+  active.forEach(t => {
+    const g = document.getElementById('g-'+t.id);
+    const tb = g && g.querySelector('.timer-badge');
+    if (tb) {
+      const m = Math.floor(t.remaining / 60);
+      const s = String(t.remaining % 60).padStart(2, '0');
+      tb.textContent = m > 0 ? `⏱ ${m}:${s}` : `⏱ ${t.remaining}s`;
+      tb.style.display = 'block';
+    }
+  });
 }
 
 function ensureTimerHudTick() {
@@ -1035,6 +1045,10 @@ ROOMS.forEach(r => {
   const badge=mk("text",{class:"dim-badge",x:r.x+r.w/2,y:r.y+2,"text-anchor":"middle","dominant-baseline":"middle","font-size":"1.8","font-weight":"900","font-family":"system-ui,sans-serif",fill:"rgba(255,230,100,0.95)","letter-spacing":"0.02"});
   badge.style.pointerEvents="none"; badge.style.display="none";
 
+  // In-room timer countdown badge
+  const timerBadge=mk("text",{class:"timer-badge",x:r.x+r.w/2,y:r.y+4.8,"text-anchor":"middle","dominant-baseline":"middle","font-size":"1.55","font-weight":"800","font-family":"system-ui,sans-serif",fill:"rgba(126,207,224,0.95)","letter-spacing":"0.01"});
+  timerBadge.style.pointerEvents="none"; timerBadge.style.display="none";
+
   const dot=mk("circle",{class:"dot",cx:r.x+r.w-1.8,cy:r.y+2,r:"1.1",fill:"rgba(255,255,255,0.1)"});
   dot.style.transition="fill .3s"; dot.style.pointerEvents="none";
 
@@ -1052,7 +1066,7 @@ ROOMS.forEach(r => {
   slGroup.addEventListener("touchstart",e=>{e.stopPropagation();e.preventDefault();sliderDrag={id:r.id};doSliderPos(e);},{passive:false});
   slGroup.addEventListener("touchend",  e=>{e.stopPropagation();sliderDrag=null;});
 
-  [glowR,fillR,radR,badge,dot,slGroup].forEach(el=>g.appendChild(el));
+  [glowR,fillR,radR,badge,timerBadge,dot,slGroup].forEach(el=>g.appendChild(el));
 
   // Click = toggle, long press = open dimmer
   g.addEventListener("mousedown",  e => startPress(r.id, e));
@@ -1183,6 +1197,7 @@ function renderRoom(id) {
   const fr=g.querySelector(".fill-rect");
   const rr=g.querySelector(".rad-rect");
   const bg=g.querySelector(".dim-badge");
+  const tb=g.querySelector(".timer-badge");
   const dt=g.querySelector(".dot");
   const sg=g.querySelector(".sl-group");
   const sf=g.querySelector(".sl-fill");
@@ -1207,6 +1222,19 @@ function renderRoom(id) {
       sf.setAttribute("width", fillW);
       sth.setAttribute("cx", r.x + 1.0 + fillW);
     }
+    // Timer badge: show countdown if active
+    if (tb) {
+      const ts = roomTimerStarts[id];
+      if (ts) {
+        const remaining = Math.max(0, Math.ceil((ts.start + ts.duration * 1000 - Date.now()) / 1000));
+        const m = Math.floor(remaining / 60);
+        const s = String(remaining % 60).padStart(2, '0');
+        tb.textContent = m > 0 ? `⏱ ${m}:${s}` : `⏱ ${remaining}s`;
+        tb.style.display="block";
+      } else {
+        tb.style.display="none";
+      }
+    }
   } else {
     gl.style.display="none";
     fr.setAttribute("fill","rgba(255,255,255,0.02)");
@@ -1215,6 +1243,7 @@ function renderRoom(id) {
     rr.style.display="none";
     dt.setAttribute("fill","rgba(255,255,255,0.1)");
     bg.style.display="none";
+    if (tb) tb.style.display="none";
     if (sg) sg.style.display="none";
   }
 }
