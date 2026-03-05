@@ -172,6 +172,13 @@
   .sky-star{position:absolute;background:#fff;border-radius:50%;opacity:0;transition:opacity 1.3s ease}
   #sky-scene.night .sky-star{opacity:1}
   #sky-arc-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+  /* Shooting stars */
+  @keyframes shoot{0%,78%,100%{opacity:0;width:0;transform:translate(0,0) rotate(-35deg)}79%{opacity:1;width:0;transform:translate(0,0) rotate(-35deg)}88%{opacity:1;width:55px;transform:translate(55px,22px) rotate(-35deg)}92%,100%{opacity:0;width:55px;transform:translate(70px,28px) rotate(-35deg)}}
+  .sstar{position:absolute;height:1.5px;background:linear-gradient(to right,rgba(255,255,255,0),#fff 80%);border-radius:2px;opacity:0}
+  #sky-scene.night .sstar{animation:shoot linear infinite}
+  #ss1{top:18%;left:8%;animation-duration:6s;animation-delay:1.2s}
+  #ss2{top:30%;left:45%;animation-duration:9s;animation-delay:4.5s}
+  #ss3{top:12%;left:62%;animation-duration:7.5s;animation-delay:7.8s}
   #sun-orb{position:absolute;width:22px;height:22px;border-radius:50%;
     background:radial-gradient(circle at 36% 36%,#fffbc0 0%,#ffd700 55%,#ff9500 100%);
     box-shadow:0 0 14px 5px rgba(255,210,50,.75);
@@ -380,7 +387,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.91</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.92</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -401,6 +408,9 @@
         <div id="sun-orb"></div>
         <div id="moon-orb"></div>
         <div id="sky-horizon-line"></div>
+        <div class="sstar" id="ss1"></div>
+        <div class="sstar" id="ss2"></div>
+        <div class="sstar" id="ss3"></div>
       </div>
       <div id="sun-info-row">
         <div id="sun-clock">6:18 AM</div>
@@ -1341,7 +1351,7 @@ function toggleSunSchedule() {
   if (sunIsDay) {
     // Day → Night: sun arcs from high position down and below right horizon, then sky goes dark
     sunIsDay = false;
-    animateSunArc(90, -8, 2000, () => {
+    animateSunArc(90, -8, 3200, () => {
       sky.classList.add('night');
       clock.textContent = '8:23 PM';
       badge.textContent = '🌙 SUNSET';
@@ -1363,13 +1373,13 @@ function toggleSunSchedule() {
     setSunPosition(182);
     SUN_ROOMS.forEach(id => { if(levels[id]!==undefined){ levels[id]=0; renderRoom(id); }});
     updateCount(); updateImg(); renderIphoneRooms();
-    animateSunArc(182, 90, 2000, null);
+    animateSunArc(182, 90, 3200, null);
   }
 }
 
 // Place sun at midday position on load
 window.addEventListener('load', () => {
-  setTimeout(() => setSunPosition(90), 50);
+  setTimeout(() => { setSunPosition(90); renderIphoneRooms(); }, 50);
 });
 
 // ── SETTINGS MENU ──────────────────────────────────────────────────────────
