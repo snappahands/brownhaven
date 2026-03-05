@@ -226,7 +226,8 @@
   #sky-scene.night #moon-orb{opacity:1}
   #sky-horizon-line{position:absolute;bottom:18px;left:0;right:0;height:1px;background:rgba(255,255,255,.18)}
   #sun-info-row{position:absolute;bottom:6px;left:8px;right:8px;display:flex;align-items:center;justify-content:space-between;gap:4px;z-index:2}
-  #sun-clock{color:#111;font-size:14px;font-weight:800;letter-spacing:.05em;font-variant-numeric:tabular-nums}
+  #sun-clock{color:#111;font-size:14px;font-weight:800;letter-spacing:.05em;font-variant-numeric:tabular-nums;transition:color 1.5s ease}
+  #sky-scene.night #sun-clock{color:#c8d0dc}
   #sun-badge{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:10px;background:#0f2a0f;color:#4ade80;transition:all .4s}
   #sun-badge.night{background:#12103a;color:#a5b4fc}
   #sun-sched-info{color:#7ecfe0;font-size:9px;font-weight:700;letter-spacing:.06em;line-height:1.4;text-align:center}
@@ -1810,6 +1811,32 @@ function setSkyProgress(t) {
   document.getElementById('sky-scene').style.filter = `brightness(${1 - d * 0.97})`;
 }
 
+let clockAnimId = null;
+let sunClockMins = 378; // 6:18 AM in minutes from midnight
+
+function minutesToTimeStr(m) {
+  m = ((Math.round(m) % 1440) + 1440) % 1440;
+  const totalH = Math.floor(m / 60);
+  const h12 = totalH % 12 || 12;
+  const ampm = totalH < 12 ? 'AM' : 'PM';
+  return `${h12}:${String(m % 60).padStart(2,'0')} ${ampm}`;
+}
+
+function animateClock(fromMins, toMins, duration, onDone) {
+  if (clockAnimId) cancelAnimationFrame(clockAnimId);
+  sunClockMins = fromMins;
+  const clock = document.getElementById('sun-clock');
+  const start = performance.now();
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    sunClockMins = fromMins + (toMins - fromMins) * t;
+    clock.textContent = minutesToTimeStr(sunClockMins);
+    if (t < 1) { clockAnimId = requestAnimationFrame(tick); }
+    else { clockAnimId = null; onDone && onDone(); }
+  }
+  clockAnimId = requestAnimationFrame(tick);
+}
+
 function animateSunArc(fromAngle, toAngle, duration, onDone, onStep) {
   sunAnimating = true;
   const start = performance.now();
@@ -1836,14 +1863,15 @@ function toggleSunSchedule() {
     // Day → Night: sun arcs from high position down and below right horizon, then sky goes dark
     sunIsDay = false;
     hideSunSmile();
+    animateClock(sunClockMins, 1200, 3200); // advance to 8:00 PM during sun descent
     animateSunArc(90, -8, 3200, () => {
       sky.style.filter = '';
       sky.classList.add('night');
-      clock.textContent = '8:23 PM';
       badge.textContent = '🌙 SUNSET';
       badge.className = 'night';
       info.textContent = 'Schedule triggered — lights turned ON';
       btn.textContent = '☀️ Simulate Sunrise Schedule';
+      animateClock(1200, 1560, 9000); // 8:00 PM → 2:00 AM over 9 seconds
       cancelAllTimers(); clearSceneStepTimers();
       activeSceneKey = null;
       document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
@@ -1885,6 +1913,7 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     setSunPosition(176);
     animateSunArc(176, 90, 4000, () => { setTimeout(showSunSmile, 1000); });
+    animateClock(378, 840, 4000); // 6:18 AM → 2:00 PM during sunrise arc
     renderIphoneRooms();
   }, 300);
 });
@@ -2488,6 +2517,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v10.8</div>
+<div id="version-badge">v10.9</div>
 </body>
 </html>
