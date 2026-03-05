@@ -182,7 +182,7 @@
   @keyframes sun-glow-pulse{0%,100%{filter:drop-shadow(0 0 5px rgba(255,220,40,0.55)) drop-shadow(0 0 10px rgba(255,180,0,0.3))}50%{filter:drop-shadow(0 0 14px rgba(255,235,50,1)) drop-shadow(0 0 28px rgba(255,200,0,0.7))}}
   #sun-img{width:40px;height:40px;object-fit:contain;display:block;opacity:0;transition:opacity 0.9s ease;filter:drop-shadow(0 0 5px rgba(255,210,40,0.5));position:absolute;left:-9px;top:-9px}
   #sun-img.glowing{animation:sun-glow-pulse 1.8s ease-in-out infinite}
-  #sun-orb{position:absolute;width:22px;height:22px;border-radius:50%;overflow:visible;
+  #sun-orb{position:absolute;width:22px;height:22px;border-radius:50%;overflow:visible;opacity:0;
     background:radial-gradient(circle at 36% 36%,#fffbc0 0%,#ffd700 55%,#ff9500 100%);
     box-shadow:0 0 14px 5px rgba(255,210,50,.8);transition:background .7s ease,box-shadow .7s ease}
   #sun-orb.smile-mode{background:transparent;box-shadow:none}
@@ -406,7 +406,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.3</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.4</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
