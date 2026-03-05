@@ -31,7 +31,7 @@
   .speech-bubble.wide{width:305px}
   .speech-bubble.show{display:block;animation:bubble-in .25s ease forwards}
   .speech-bubble.hiding{display:block;animation:bubble-out .2s ease forwards}
-  .bubble-img{width:100%;height:85px;object-fit:fill;display:block;mix-blend-mode:multiply}
+  .bubble-img{width:100%;display:block;mix-blend-mode:multiply}
   .bubble-text{position:absolute;top:18%;left:8%;right:8%;height:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:700;color:#111;white-space:nowrap}
   @keyframes bubble-in{from{opacity:0;transform:translateX(-50%) scale(.88) translateY(8px)}to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
   @keyframes bubble-out{from{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}to{opacity:0;transform:translateX(-50%) scale(.88) translateY(8px)}}
@@ -403,7 +403,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v6.8</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v6.9</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
