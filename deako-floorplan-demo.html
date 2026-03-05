@@ -404,7 +404,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v8.2</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v8.3</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1524,21 +1524,8 @@ function toggleSunSchedule() {
       startShootingStars();
     });
   } else {
-    // Night → Day: sky brightens, sun rises from left horizon up into the sky and stays
-    sunIsDay = true;
-    sky.classList.remove('night');
-    clock.textContent = '6:18 AM';
-    badge.textContent = '☀ SUNRISE';
-    badge.className = '';
-    info.textContent = 'Lights scheduled to turn ON at sunset';
-    btn.textContent = '🌅 Simulate Sunset';
-    setSunPosition(176);
-    cancelAllTimers(); clearSceneStepTimers();
-    activeSceneKey = null;
-    document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
-    ROOMS.forEach(r=>{ levels[r.id]=0; renderRoom(r.id); });
-    updateCount(); updateImg(); renderIphoneRooms();
-    animateSunArc(176, 90, 3200, () => { setTimeout(showSunSmile, 1000); });
+    // Night → Day: reload the page to reset everything to daytime state
+    location.reload();
   }
 }
 
