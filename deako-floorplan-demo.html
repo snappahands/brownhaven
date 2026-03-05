@@ -2627,7 +2627,7 @@ const extDrop  = document.getElementById('ext-dropzone');
 // Load saved image
 (function loadSavedExtImg() {
   const saved = localStorage.getItem('bhExtImg');
-  if (saved) { extImgEl.src = saved; extDrop.classList.add('hidden'); }
+  if (saved) { extImgEl.src = saved; extDrop.classList.add('hidden'); renderExtWindows(); }
 })();
 
 function saveExtWindows() { localStorage.setItem('bhExtWindows', JSON.stringify(extWindows)); }
@@ -2833,6 +2833,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v12.7</div>
+<div id="version-badge">v12.8</div>
 </body>
 </html>
