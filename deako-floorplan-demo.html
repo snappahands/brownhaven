@@ -396,7 +396,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v3.2</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v3.3</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1471,13 +1471,13 @@ function fireShootingStar() {
     `width:${tailLen}px`,
     'height:2px',
     // head at LEFT (leading), tail fades to the RIGHT — right-to-left direction
-    'background:linear-gradient(to left,rgba(255,255,255,0) 0%,rgba(180,220,255,0.4) 45%,rgba(220,240,255,0.85) 80%,#fff 100%)',
+    'background:linear-gradient(to left,rgba(255,255,255,0) 0%,rgba(180,220,255,0.15) 50%,rgba(220,240,255,0.45) 82%,rgba(255,255,255,0.65) 100%)',
     'border-radius:2px',
-    `left:${W + 10}px`,            // start off right edge
+    `left:${W + 10}px`,
     `top:${startY}px`,
-    `transform:rotate(-${angleDeg}deg)`,  // tilt: head lower-left, tail upper-right
-    'transform-origin:left center',       // pivot at the bright head (left end)
-    'box-shadow:0 0 3px 1px rgba(210,230,255,0.8),0 0 7px 3px rgba(160,200,255,0.35)',
+    `transform:rotate(-${angleDeg}deg)`,
+    'transform-origin:left center',
+    'box-shadow:0 0 2px 1px rgba(210,230,255,0.3)',
     'opacity:0',
     'pointer-events:none',
     'z-index:10'
@@ -1487,8 +1487,8 @@ function fireShootingStar() {
 
   el.animate([
     { opacity: 0,  transform: `translate(0,0) rotate(-${angleDeg}deg)` },
-    { opacity: 0.9, transform: `translate(${-travelX*0.08}px,${travelY*0.08}px) rotate(-${angleDeg}deg)`, offset: 0.09 },
-    { opacity: 0.9, transform: `translate(${-travelX*0.78}px,${travelY*0.78}px) rotate(-${angleDeg}deg)`, offset: 0.78 },
+    { opacity: 0.55, transform: `translate(${-travelX*0.08}px,${travelY*0.08}px) rotate(-${angleDeg}deg)`, offset: 0.09 },
+    { opacity: 0.55, transform: `translate(${-travelX*0.78}px,${travelY*0.78}px) rotate(-${angleDeg}deg)`, offset: 0.78 },
     { opacity: 0,  transform: `translate(${-travelX}px,${travelY}px) rotate(-${angleDeg}deg)` }
   ], { duration: 750 + Math.random() * 350, easing: 'linear' })
     .addEventListener('finish', () => el.remove());
