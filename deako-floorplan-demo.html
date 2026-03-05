@@ -396,7 +396,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v3.4</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v3.5</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -673,36 +673,46 @@
             <div class="iapp-adddev-card-text">Press and hold the main button for 5 seconds, then release to enter pairing mode. The switch will flash blue continuously to indicate pairing mode.</div>
           </div>
           <div class="iapp-adddev-illus">
-            <!-- Large circle: hand pressing switch -->
+            <!-- Large circle: hand pressing switch, traced from reference -->
             <div class="iapp-adddev-circle lg">
-              <svg width="150" height="150" viewBox="0 0 150 150" fill="none" stroke="#1c1c1e" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Wall plate -->
-                <rect x="52" y="28" width="46" height="60" rx="4" stroke-width="2.2" fill="#f2f2f7"/>
-                <!-- Switch paddle -->
-                <rect x="61" y="37" width="28" height="36" rx="3" stroke-width="2" fill="#e5e5ea"/>
-                <!-- Hand -->
-                <path d="M118 88 C114 82 106 78 98 80 L86 84 C80 82 76 78 70 80 L62 85 C58 87 57 93 61 95 L80 99" stroke-width="2.2" fill="none"/>
-                <path d="M80 99 L100 95 C108 93 116 96 120 104 L122 110" stroke-width="2.2" fill="none"/>
-                <path d="M61 95 L58 108 C57 114 60 120 66 120 L90 120 C96 120 102 116 104 110 L122 110" stroke-width="2.2" fill="none"/>
-                <!-- Finger pointing -->
-                <path d="M86 84 L84 68 C83 64 79 62 76 64 L74 80" stroke-width="2.2" fill="none"/>
-                <path d="M74 80 L72 65 C71 61 67 60 64 62 L62 85" stroke-width="2.2" fill="none"/>
+              <svg width="160" height="160" viewBox="0 0 160 160" fill="none" stroke="#1c1c1e" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Wall plate (portrait, left side) -->
+                <rect x="20" y="24" width="44" height="72" rx="4" stroke-width="2.2" fill="white"/>
+                <!-- Switch paddle (large, centered in plate) -->
+                <rect x="30" y="34" width="24" height="52" rx="3" stroke-width="2" fill="#e8e8e8"/>
+                <!-- INDEX FINGER: tip at (56,55), horizontal, extends right -->
+                <path d="M 56,50 C 72,48 96,47 128,47 L 128,58 C 96,58 72,59 56,61 C 51,61 49,58 49,55 C 49,52 51,50 56,50 Z" fill="white" stroke-width="2"/>
+                <!-- Knuckle creases -->
+                <line x1="88"  y1="48" x2="87"  y2="58" stroke-width="1.1"/>
+                <line x1="108" y1="47" x2="107" y2="58" stroke-width="1.1"/>
+                <!-- THREE CURLED FINGERS — humps above palm line -->
+                <path d="M 126,47 C 126,42 127,37 128,34 C 129,31 131,29 133,30 C 135,31 135,35 135,39 C 135,43 134,46 133,47" stroke-width="2" fill="none"/>
+                <path d="M 133,47 C 133,41 134,37 135,34 C 136,31 138,30 140,31 C 142,32 142,36 141,40 C 140,44 139,47 138,49" stroke-width="2" fill="none"/>
+                <path d="M 138,49 C 138,44 139,40 140,38 C 141,36 143,35 145,36 C 147,37 147,41 146,45 C 145,49 143,52 142,53" stroke-width="2" fill="none"/>
+                <!-- PALM BODY -->
+                <path d="M 126,47 L 126,100 C 126,108 122,114 116,115 C 110,116 106,110 106,102 L 106,58 L 128,58 L 128,47 Z" fill="white" stroke-width="2"/>
+                <!-- THUMB (below palm, sweeping down-left) -->
+                <path d="M 106,72 C 101,73 98,78 97,84 C 96,90 99,96 104,97 C 107,98 110,97 112,95" stroke-width="1.9" fill="none"/>
               </svg>
             </div>
-            <!-- Small circle: outlet/plug -->
+            <!-- Small circle: wall outlet with plug being inserted -->
             <div class="iapp-adddev-circle sm">
-              <svg width="72" height="72" viewBox="0 0 72 72" fill="none" stroke="#1c1c1e" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Outlet box -->
-                <rect x="18" y="14" width="36" height="30" rx="3" stroke-width="2" fill="#f2f2f7"/>
-                <!-- Outlet face slots -->
-                <rect x="25" y="21" width="5" height="8" rx="1.5" stroke-width="1.8"/>
-                <rect x="42" y="21" width="5" height="8" rx="1.5" stroke-width="1.8"/>
-                <!-- Ground slot -->
-                <path d="M33 34 L36 38 L39 34" stroke-width="1.8"/>
-                <!-- Plug being removed / sparks -->
-                <path d="M28 48 L22 60" stroke-width="2" stroke="#555"/>
-                <path d="M36 50 L32 62" stroke-width="2" stroke="#555"/>
-                <path d="M22 58 L18 55 M22 58 L20 62" stroke-width="1.6" stroke="#888"/>
+              <svg width="88" height="88" viewBox="0 0 88 88" fill="none" stroke="#1c1c1e" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Outlet box on wall -->
+                <rect x="26" y="10" width="36" height="32" rx="3" stroke-width="2" fill="white"/>
+                <!-- Left slot -->
+                <rect x="31" y="17" width="5" height="10" rx="2" stroke-width="1.6" fill="#ccc"/>
+                <!-- Right slot -->
+                <rect x="52" y="17" width="5" height="10" rx="2" stroke-width="1.6" fill="#ccc"/>
+                <!-- Ground (D-shaped hole at bottom of outlet face) -->
+                <path d="M 40,32 C 40,29 44,29 44,32" stroke-width="1.6" fill="none"/>
+                <!-- Smart plug / adapter body -->
+                <rect x="30" y="44" width="28" height="20" rx="3" stroke-width="2" fill="white"/>
+                <!-- Plug prongs going up -->
+                <line x1="36" y1="42" x2="36" y2="44" stroke-width="2.5"/>
+                <line x1="52" y1="42" x2="52" y2="44" stroke-width="2.5"/>
+                <!-- Cord below plug, splitting into leads -->
+                <path d="M 38,64 L 30,76 M 44,65 L 40,78 M 50,64 L 52,76" stroke-width="1.6"/>
               </svg>
             </div>
           </div>
@@ -1459,7 +1469,7 @@ function fireShootingStar() {
   const angleDeg = 18 + Math.random() * 12;           // 18–30° downward
   const angleRad = angleDeg * Math.PI / 180;
   const tailLen  = 55 + Math.random() * 35;            // 55–90px — subtle
-  const startY   = H * (0.04 + Math.random() * 0.38); // upper 42% of sky
+  const startY   = H * (0.05 + Math.random() * 0.55); // varies across most of sky height
 
   // Star travels right→left: starts off right edge, moves left+down
   const travelX = W + tailLen + 20;
