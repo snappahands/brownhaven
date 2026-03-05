@@ -437,7 +437,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.9</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v10.0</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
 </div>
 
 <div id="switch-picker">
@@ -1142,8 +1142,10 @@ function createMotionSwitchEl(pos, idx) {
   si.addEventListener("click", e=>{
     if (editSwitchMode) { e.stopPropagation(); return; }
     e.stopPropagation();
+    cancelTimer(pos.room);
     levels[pos.room] = levels[pos.room] > 0 ? 0 : 80;
     renderRoom(pos.room); updateCount(); updateImg(); renderIphoneRooms();
+    if (levels[pos.room] > 0) startRoomTimer(pos.room, 5);
   });
   g.appendChild(si);
   return g;
