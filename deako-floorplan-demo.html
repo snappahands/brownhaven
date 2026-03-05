@@ -178,12 +178,10 @@
   .sky-star{position:absolute;background:#fff;border-radius:50%;opacity:0;transition:opacity 1.3s ease}
   #sky-scene.night .sky-star{opacity:1}
 /* Shooting stars drawn via JS */
-  @keyframes sunray-pulse{0%,100%{opacity:.55}50%{opacity:1}}
-  #sun-smile.active .rays{animation:sunray-pulse 1.8s ease-in-out infinite}
-  #sun-orb{position:absolute;width:22px;height:22px;border-radius:50%;overflow:visible;
-    background:radial-gradient(circle at 36% 36%,#fffbc0 0%,#ffd700 55%,#ff9500 100%);
-    box-shadow:0 0 14px 5px rgba(255,210,50,.75);
-    transition:box-shadow .4s,background .4s}
+  @keyframes sun-glow-pulse{0%,100%{filter:drop-shadow(0 0 5px rgba(255,220,40,0.55)) drop-shadow(0 0 10px rgba(255,180,0,0.3))}50%{filter:drop-shadow(0 0 12px rgba(255,235,50,1)) drop-shadow(0 0 24px rgba(255,200,0,0.65))}}
+  #sun-img{width:48px;height:48px;object-fit:contain;display:block;filter:drop-shadow(0 0 5px rgba(255,210,40,0.5))}
+  #sun-img.glowing{animation:sun-glow-pulse 1.8s ease-in-out infinite}
+  #sun-orb{position:absolute;width:48px;height:48px;background:none;border-radius:0;overflow:visible}
   #moon-orb{position:absolute;width:18px;height:18px;border-radius:50%;
     background:#d8d8b8;box-shadow:inset -4px -2px 0 2px #b0b090,0 0 10px 3px rgba(200,200,160,.4);
     opacity:0;transition:opacity .8s ease,top .05s,left .05s;top:14px;right:18px}
@@ -404,7 +402,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.4</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.5</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -419,7 +417,7 @@
         <div class="sky-star" style="width:2px;height:2px;top:6%;left:90%"></div>
         <div class="sky-star" style="width:1px;height:1px;top:42%;left:28%"></div>
         <div class="sky-star" style="width:1px;height:1px;top:22%;left:50%"></div>
-        <div id="sun-orb"><svg id="sun-smile" viewBox="0 0 60 60" style="position:absolute;width:60px;height:60px;left:-19px;top:-19px;opacity:0;transition:opacity 0.9s ease;pointer-events:none"><g class="rays" stroke="rgba(255,218,40,0.65)" stroke-width="2.2" stroke-linecap="round"><line x1="43" y1="30" x2="53" y2="30"/><line x1="39.2" y1="20.8" x2="46.3" y2="13.7"/><line x1="30" y1="17" x2="30" y2="7"/><line x1="20.8" y1="20.8" x2="13.7" y2="13.7"/><line x1="17" y1="30" x2="7" y2="30"/><line x1="20.8" y1="39.2" x2="13.7" y2="46.3"/><line x1="30" y1="43" x2="30" y2="53"/><line x1="39.2" y1="39.2" x2="46.3" y2="46.3"/></g><circle cx="25" cy="27" r="1.6" fill="rgba(195,95,0,0.42)"/><circle cx="35" cy="27" r="1.6" fill="rgba(195,95,0,0.42)"/><path d="M23 33 Q30 39 37 33" stroke="rgba(195,95,0,0.42)" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+        <div id="sun-orb"><img id="sun-img" src="sun.png" alt="sun"></div>
         <div id="moon-orb"></div>
         <div id="sky-horizon-line"></div>
       </div>
@@ -810,6 +808,7 @@
     <div class="dim-timer-label">⏱ Timer</div>
     <div class="dim-timer-btns">
       <button class="dim-tbtn active" id="dt-0"   onclick="setDimTimer(0)">Off</button>
+      <button class="dim-tbtn"        id="dt-5"   onclick="setDimTimer(5)">5s</button>
       <button class="dim-tbtn"        id="dt-10"  onclick="setDimTimer(10)">10s</button>
       <button class="dim-tbtn"        id="dt-300" onclick="setDimTimer(300)">5 min</button>
     </div>
@@ -974,7 +973,7 @@ function ensureTimerHudTick() {
 }
 function setDimTimer(val) {
   dimTimerSelected = val;
-  [0, 10, 300].forEach(v => {
+  [0, 5, 10, 300].forEach(v => {
     document.getElementById("dt-"+v).classList.toggle("active", dimTimerSelected === v);
   });
 }
@@ -1457,12 +1456,12 @@ let sunIsDay = true;
 let sunAnimating = false;
 
 function showSunSmile() {
-  const s = document.getElementById('sun-smile');
-  if (s) { s.style.opacity = '1'; s.classList.add('active'); }
+  const img = document.getElementById('sun-img');
+  if (img) img.classList.add('glowing');
 }
 function hideSunSmile() {
-  const s = document.getElementById('sun-smile');
-  if (s) { s.style.opacity = '0'; s.classList.remove('active'); }
+  const img = document.getElementById('sun-img');
+  if (img) img.classList.remove('glowing');
 }
 
 function getSkyDimensions() {
@@ -1481,8 +1480,8 @@ function setSunPosition(angleDeg) {
   const x = cx + r * Math.cos(rad);
   const y = cy - r * Math.sin(rad);
   const orb = document.getElementById('sun-orb');
-  orb.style.left = (x - 11) + 'px';
-  orb.style.top  = (y - 11) + 'px';
+  orb.style.left = (x - 24) + 'px';
+  orb.style.top  = (y - 24) + 'px';
   // fade near both horizons (right ~0° and left ~180°)
   const fadeRight = Math.max(0, Math.min(1, angleDeg / 16));
   const fadeLeft  = Math.max(0, Math.min(1, (180 - angleDeg) / 16));
@@ -1691,6 +1690,7 @@ function openSceneEditor(key) {
       <span class="se-rpct" id="sepct-${r.id}">${lv}%</span>
       <select class="se-rtimer" id="setmr-${r.id}">
         <option value="0" ${timerVal===0?"selected":""}>⏱ Off</option>
+        <option value="5" ${timerVal===5?"selected":""}>5s</option>
         <option value="10" ${timerVal===10?"selected":""}>10s</option>
         <option value="300" ${timerVal===300?"selected":""}>5min</option>
       </select>`;
@@ -2044,7 +2044,7 @@ function triggerDevices() {
   deviceTimer = setTimeout(() => {
     step.action();
     deviceClickState++;
-  }, 2500);
+  }, 1500);
 }
 
 function hubClick()   { triggerDevices(); }
