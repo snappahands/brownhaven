@@ -406,7 +406,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v8.6</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v8.7</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1510,9 +1510,11 @@ function toggleSunSchedule() {
     // Day → Night: sun arcs from high position down and below right horizon, then sky goes dark
     sunIsDay = false;
     hideSunSmile();
-    setTimeout(() => document.getElementById('device-panel').classList.add('night'), 1600);
-    animateSunArc(90, -8, 3200, () => {
+    setTimeout(() => {
       sky.classList.add('night');
+      document.getElementById('device-panel').classList.add('night');
+    }, 1600);
+    animateSunArc(90, -8, 3200, () => {
       clock.textContent = '8:23 PM';
       badge.textContent = '🌙 SUNSET';
       badge.className = 'night';
