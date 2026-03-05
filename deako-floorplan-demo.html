@@ -1964,10 +1964,43 @@ function toggleSunSchedule() {
       startShootingStars();
     }, setSkyProgress);
   } else {
-    // Night → Day: show notice, then animate sunrise
+    // Night → Day: show notice, then do in-place sunrise reset
     btn.textContent = 'Notice: All exterior lights turn off';
     btn.disabled = true;
-    setTimeout(() => location.reload(), 5500);
+    setTimeout(() => {
+      // Reset all lights off
+      cancelAllTimers(); clearSceneStepTimers();
+      activeSceneKey = null;
+      document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
+      ROOMS.forEach(r => { levels[r.id] = 0; renderRoom(r.id); });
+      updateCount(); updateImg(); renderIphoneRooms();
+
+      // Reset exterior overlays to daytime
+      const nOvl = document.getElementById('ext-night-overlay');
+      const sOvl = document.getElementById('ext-sky-overlay');
+      if (nOvl) { nOvl.style.transition = 'opacity 2s'; nOvl.style.opacity = '0'; }
+      if (sOvl) sOvl.style.opacity = '0';
+      refreshExtWindowLevels();
+
+      // Reset interior sky
+      sky.style.filter = '';
+      sky.classList.remove('night');
+      stopShootingStars();
+
+      // Animate sun rising
+      sunIsDay = true;
+      badge.textContent = '🌅 SUNRISE';
+      badge.className = '';
+      info.textContent = 'Lights scheduled to turn ON at sunset';
+      setSunPosition(176);
+      animateSunArc(176, 90, 4000, () => {
+        setTimeout(showSunSmile, 1000);
+        badge.textContent = '☀ DAYTIME';
+      });
+      animateClock(378, 780, 4000, () => {});
+      btn.textContent = '🌙 Simulate Sunset Schedule';
+      btn.disabled = false;
+    }, 5500);
   }
 }
 
@@ -2026,6 +2059,7 @@ function fireShootingStar() {
   const travelY = travelX * Math.tan(angleRad);
 
   const el = document.createElement('div');
+  el.classList.add('shooting-star');
   el.style.cssText = [
     'position:absolute',
     `width:${tailLen}px`,
@@ -2059,6 +2093,10 @@ function fireShootingStar() {
 function startShootingStars() {
   clearTimeout(_ssTimer);
   _ssTimer = setTimeout(fireShootingStar, 800);
+}
+function stopShootingStars() {
+  clearTimeout(_ssTimer); _ssTimer = null;
+  document.querySelectorAll('.shooting-star').forEach(el => el.remove());
 }
 
 // ── SETTINGS MENU ──────────────────────────────────────────────────────────
@@ -2835,6 +2873,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v12.9</div>
+<div id="version-badge">v13.0</div>
 </body>
 </html>
