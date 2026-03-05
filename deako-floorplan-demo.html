@@ -174,11 +174,11 @@
   #sky-scene.night .sky-star{opacity:1}
 /* Shooting stars drawn via JS */
   @keyframes sun-glow-pulse{0%,100%{filter:drop-shadow(0 0 5px rgba(255,220,40,0.55)) drop-shadow(0 0 10px rgba(255,180,0,0.3))}50%{filter:drop-shadow(0 0 14px rgba(255,235,50,1)) drop-shadow(0 0 28px rgba(255,200,0,0.7))}}
-  #sun-img{width:48px;height:48px;object-fit:contain;display:block;mix-blend-mode:multiply;opacity:0;transition:opacity 0.9s ease;filter:drop-shadow(0 0 5px rgba(255,210,40,0.5))}
+  #sun-img{width:40px;height:40px;object-fit:contain;display:block;opacity:0;transition:opacity 0.9s ease;filter:drop-shadow(0 0 5px rgba(255,210,40,0.5));position:absolute;left:-11px;top:-11px}
   #sun-img.glowing{animation:sun-glow-pulse 1.8s ease-in-out infinite}
-  #sun-orb{position:absolute;width:48px;height:48px;border-radius:50%;overflow:visible;
+  #sun-orb{position:absolute;width:18px;height:18px;border-radius:50%;overflow:visible;
     background:radial-gradient(circle at 36% 36%,#fffbc0 0%,#ffd700 55%,#ff9500 100%);
-    box-shadow:0 0 18px 6px rgba(255,210,50,.8);transition:background .7s ease,box-shadow .7s ease}
+    box-shadow:0 0 14px 5px rgba(255,210,50,.8);transition:background .7s ease,box-shadow .7s ease}
   #sun-orb.smile-mode{background:transparent;box-shadow:none}
   #sun-orb.smile-mode #sun-img{opacity:1}
   #moon-orb{position:absolute;width:18px;height:18px;border-radius:50%;
@@ -401,7 +401,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.8</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.9</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -416,7 +416,7 @@
         <div class="sky-star" style="width:2px;height:2px;top:6%;left:90%"></div>
         <div class="sky-star" style="width:1px;height:1px;top:42%;left:28%"></div>
         <div class="sky-star" style="width:1px;height:1px;top:22%;left:50%"></div>
-        <div id="sun-orb"><img id="sun-img" src="sun.png" alt="sun"></div>
+        <div id="sun-orb"><img id="sun-img" src="sun.jpg" alt="sun"></div>
         <div id="moon-orb"></div>
         <div id="sky-horizon-line"></div>
       </div>
@@ -1471,8 +1471,8 @@ function setSunPosition(angleDeg) {
   const x = cx + r * Math.cos(rad);
   const y = cy - r * Math.sin(rad);
   const orb = document.getElementById('sun-orb');
-  orb.style.left = (x - 24) + 'px';
-  orb.style.top  = (y - 24) + 'px';
+  orb.style.left = (x - 9) + 'px';
+  orb.style.top  = (y - 9) + 'px';
   // fade near both horizons (right ~0° and left ~180°)
   const fadeRight = Math.max(0, Math.min(1, angleDeg / 16));
   const fadeLeft  = Math.max(0, Math.min(1, (180 - angleDeg) / 16));
@@ -1538,8 +1538,30 @@ function toggleSunSchedule() {
   }
 }
 
+// Strip near-gray/white background pixels from sun image using canvas
+function removeSunBg(img) {
+  try {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const d = ctx.getImageData(0, 0, c.width, c.height);
+    const px = d.data;
+    for (let i = 0; i < px.length; i += 4) {
+      const sat = Math.max(px[i],px[i+1],px[i+2]) - Math.min(px[i],px[i+1],px[i+2]);
+      if (sat < 40 && px[i] > 155) px[i+3] = 0; // near-white/gray → transparent
+    }
+    ctx.putImageData(d, 0, 0);
+    img.src = c.toDataURL('image/png');
+  } catch(e) {}
+}
+
 // On load: animate sun rising from just above left horizon to top of arc, then hold there
 window.addEventListener('load', () => {
+  const sunImg = document.getElementById('sun-img');
+  if (sunImg.complete) removeSunBg(sunImg);
+  else sunImg.addEventListener('load', () => removeSunBg(sunImg), {once:true});
+
   setTimeout(() => {
     setSunPosition(170);
     animateSunArc(170, 90, 4000, () => { setTimeout(showSunSmile, 1000); });
