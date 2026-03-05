@@ -401,7 +401,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v4.4</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v4.5</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1046,7 +1046,7 @@ ROOMS.forEach(r => {
   badge.style.pointerEvents="none"; badge.style.display="none";
 
   // In-room timer countdown badge
-  const timerBadge=mk("text",{class:"timer-badge",x:r.x+r.w/2,y:r.y+4.8,"text-anchor":"middle","dominant-baseline":"middle","font-size":"1.55","font-weight":"800","font-family":"system-ui,sans-serif",fill:"rgba(126,207,224,0.95)","letter-spacing":"0.01"});
+  const timerBadge=mk("text",{class:"timer-badge",x:r.x+r.w/2,y:r.y+4.8,"text-anchor":"middle","dominant-baseline":"middle","font-size":"1.85","font-weight":"900","font-family":"system-ui,sans-serif",fill:"rgba(126,207,224,1)","letter-spacing":"0.01"});
   timerBadge.style.pointerEvents="none"; timerBadge.style.display="none";
 
   const dot=mk("circle",{class:"dot",cx:r.x+r.w-1.8,cy:r.y+2,r:"1.1",fill:"rgba(255,255,255,0.1)"});
