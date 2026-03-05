@@ -29,6 +29,7 @@
   .dv-label{color:#7a786e;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:6px}
   .speech-bubble{position:absolute;bottom:72%;left:50%;width:250px;display:none;z-index:10;transform-origin:bottom center}
   .speech-bubble.wide{width:305px}
+  .speech-bubble.wide .bubble-img{width:250px;transform:scaleX(1.22);transform-origin:left center}
   .speech-bubble.show{display:block;animation:bubble-in .25s ease forwards}
   .speech-bubble.hiding{display:block;animation:bubble-out .2s ease forwards}
   .bubble-img{width:100%;display:block;mix-blend-mode:multiply}
@@ -403,7 +404,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v6.9</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v7.0</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -2060,11 +2061,10 @@ function triggerDevices() {
     return;
   }
   const step = DEVICE_STEPS[deviceClickState];
-  const smallText = deviceClickState === 2;
   ['hub-bubble','alexa-bubble'].forEach(id => {
     const el = document.getElementById(id);
-    el.classList.remove('wide');
-    el.querySelector('.bubble-text').style.fontSize = smallText ? '13px' : '';
+    el.classList.toggle('wide', deviceClickState === 2);
+    el.querySelector('.bubble-text').style.fontSize = '';
   });
   showBubble('hub-bubble',   step.hub);
   showBubble('alexa-bubble', step.alexa);
