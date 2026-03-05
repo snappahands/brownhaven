@@ -1770,7 +1770,7 @@ function allOff() {
   document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
   renderIphoneScenes();
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
-  updateCount(); updateImg(); setStatus("All Lights Off");
+  updateCount(); updateImg(); refreshExtWindowLevels(); setStatus("All Lights Off");
 }
 const FSS_ROOMS = ["porch","foyer","great","kitchen","dining"];
 function fssOn() {
@@ -1790,7 +1790,7 @@ function fssOff() {
   renderIphoneScenes();
   batchRender(() => {
     FSS_ROOMS.forEach(id=>{ levels[id]=0; renderRoom(id); });
-    updateCount(); updateImg(); setStatus("4SS All Off");
+    updateCount(); updateImg(); refreshExtWindowLevels(); setStatus("4SS All Off");
   });
 }
 function runScene(btn, key) {
@@ -1802,6 +1802,8 @@ function runScene(btn, key) {
   activeSceneKey = key;
   renderIphoneScenes();
   ROOMS.forEach(r=>{levels[r.id]=0;renderRoom(r.id);});
+  // At night keep exterior lights on
+  if (!sunIsDay) { ['porch','deck'].forEach(id=>{ levels[id]=80; renderRoom(id); }); }
   const sc = scenesData.find(s=>s.key===key); if(!sc) return;
   setStatus(sc.emoji+" "+sc.name+" Scene");
   if (sc.steps) {
@@ -2833,6 +2835,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v12.8</div>
+<div id="version-badge">v12.9</div>
 </body>
 </html>
