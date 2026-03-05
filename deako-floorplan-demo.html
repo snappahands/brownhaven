@@ -472,7 +472,7 @@
         </div>
       </div>
       <div id="sun-sched-info">Lights scheduled to turn ON at sunset</div>
-      <button id="sun-toggle-btn" onclick="toggleSunSchedule()">🌙 Simulate Sunset</button>
+      <button id="sun-toggle-btn" onclick="toggleSunSchedule()">🌙 Simulate Sunset Schedule</button>
     </div>
   <div class="iphone-frame">
     <div class="iphone-island">
@@ -1843,7 +1843,7 @@ function toggleSunSchedule() {
       badge.textContent = '🌙 SUNSET';
       badge.className = 'night';
       info.textContent = 'Schedule triggered — lights turned ON';
-      btn.textContent = '☀️ Simulate Sunrise';
+      btn.textContent = '☀️ Simulate Sunrise Schedule';
       cancelAllTimers(); clearSceneStepTimers();
       activeSceneKey = null;
       document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
@@ -2488,6 +2488,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v10.7</div>
+<div id="version-badge">v10.8</div>
 </body>
 </html>
