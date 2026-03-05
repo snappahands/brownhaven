@@ -1860,10 +1860,11 @@ function toggleSunSchedule() {
   const btn    = document.getElementById('sun-toggle-btn');
 
   if (sunIsDay) {
-    // Day → Night: sun arcs from high position down and below right horizon, then sky goes dark
+    // Day → Night
     sunIsDay = false;
     hideSunSmile();
-    animateClock(sunClockMins, 1200, 3200); // advance to 8:00 PM during sun descent (starts from wherever clock is)
+    btn.textContent = 'Exterior lights turn on';
+    animateClock(sunClockMins, 1200, 3200);
     animateSunArc(90, -8, 3200, () => {
       sky.style.filter = '';
       sky.classList.add('night');
@@ -1881,8 +1882,10 @@ function toggleSunSchedule() {
       startShootingStars();
     }, setSkyProgress);
   } else {
-    // Night → Day: reload the page to reset everything to daytime state
-    location.reload();
+    // Night → Day: show message briefly then reload
+    btn.textContent = 'All exterior lights turn off';
+    btn.disabled = true;
+    setTimeout(() => location.reload(), 2500);
   }
 }
 
@@ -2519,6 +2522,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v11.3</div>
+<div id="version-badge">v11.4</div>
 </body>
 </html>
