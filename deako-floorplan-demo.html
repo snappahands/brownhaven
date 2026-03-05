@@ -439,7 +439,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v10.1</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v10.2</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
 </div>
 
 <div id="switch-picker">
@@ -1168,16 +1168,13 @@ renderMotionSwitches();
 
 // ── DEAKO SWITCH IMAGES ──
 const DEAKO_SW_DEFAULTS = [
-  {x:43.8, y:74.8, interactive:true},
-  {x:63.8, y:28.2, interactive:true},
-  {x:13.0, y:57.2, interactive:true},
-  {x:36.2, y:53.0, interactive:true, clickFn:"dinner"},
-  {x:36.2, y:55.4, interactive:true, clickFn:"allon"},
+  {x:43.8, y:74.8},
+  {x:63.8, y:28.2},
+  {x:13.0, y:57.2},
+  {x:36.2, y:53.0},
+  {x:36.2, y:55.4},
 ];
 let builtinSwitchPos = JSON.parse(localStorage.getItem('bhSwitchPos') || 'null') || DEAKO_SW_DEFAULTS.map(p=>({...p}));
-let foyerSwitchNext = "off";
-let greatSwitchNext = "dinner";
-let allOnOffNext = "on";
 
 function createDeakoSwitchEl(pos, idx) {
   const g = document.createElementNS("http://www.w3.org/2000/svg","g");
@@ -1190,31 +1187,24 @@ function createDeakoSwitchEl(pos, idx) {
   si.setAttribute("preserveAspectRatio","xMidYMid meet");
   si.setAttribute("filter","url(#switch-shadow)");
   si.classList.add("deako-switch");
-  if (pos.interactive) {
-    si.style.cursor="pointer";
-    g.addEventListener('mousedown', e=>{
-      if (!editSwitchMode) return;
-      e.stopPropagation(); e.preventDefault();
-      const {x,y} = svgCoordsFromEvent(e);
-      swDrag = {g, pos, ox:x-pos.x, oy:y-pos.y, builtinType:'dimmer', builtinIdx:idx};
-    });
-    si.addEventListener("click", e=>{
-      if (editSwitchMode) { e.stopPropagation(); return; }
-      e.stopPropagation();
-      if (pos.clickFn === "dinner") {
-        if (greatSwitchNext==="dinner") { runScene(null,"dinner"); greatSwitchNext="on"; }
-        else                            { allOn();                 greatSwitchNext="dinner"; }
-      } else if (pos.clickFn === "allon") {
-        if (allOnOffNext==="on") { fssOn();  allOnOffNext="off"; }
-        else                     { fssOff(); allOnOffNext="on"; }
-      } else {
-        if (foyerSwitchNext==="off") { allOff(); foyerSwitchNext="on"; }
-        else                         { allOn();  foyerSwitchNext="off"; }
-      }
-    });
-  } else {
-    si.style.pointerEvents="none";
-  }
+  si.style.cursor="pointer";
+  g.addEventListener('mousedown', e=>{
+    if (!editSwitchMode) return;
+    e.stopPropagation(); e.preventDefault();
+    const {x,y} = svgCoordsFromEvent(e);
+    swDrag = {g, pos, ox:x-pos.x, oy:y-pos.y, builtinType:'dimmer', builtinIdx:idx};
+  });
+  si.addEventListener("click", e=>{
+    if (editSwitchMode) { e.stopPropagation(); return; }
+    e.stopPropagation();
+    const room = findRoomAtPoint(pos.x+1.6, pos.y+1.6);
+    if (room && levels[room] !== undefined) {
+      cancelTimer(room);
+      levels[room] = levels[room] > 0 ? 0 : 80;
+      renderRoom(room); updateCount(); updateImg(); renderIphoneRooms();
+      if (levels[room] > 0 && roomTimerSettings[room]) startRoomTimer(room, roomTimerSettings[room]);
+    }
+  });
   g.appendChild(si);
   return g;
 }
