@@ -227,7 +227,7 @@
   #sky-horizon-line{position:absolute;bottom:18px;left:0;right:0;height:1px;background:rgba(255,255,255,.18)}
   #sun-info-row{position:absolute;bottom:6px;left:8px;right:8px;display:flex;align-items:center;justify-content:space-between;gap:4px;z-index:2}
   #sun-clock{color:#111;font-size:14px;font-weight:800;letter-spacing:.05em;font-variant-numeric:tabular-nums;transition:color 1.5s ease}
-  #sky-scene.night #sun-clock{color:#c8d0dc}
+  #sky-scene.night #sun-clock{color:#c8d0dc;font-size:11px;letter-spacing:.12em}
   #sun-badge{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:10px;background:#0f2a0f;color:#4ade80;transition:all .4s}
   #sun-badge.night{background:#12103a;color:#a5b4fc}
   #sun-sched-info{color:#7ecfe0;font-size:9px;font-weight:700;letter-spacing:.06em;line-height:1.4;text-align:center}
@@ -1863,7 +1863,7 @@ function toggleSunSchedule() {
     // Day → Night: sun arcs from high position down and below right horizon, then sky goes dark
     sunIsDay = false;
     hideSunSmile();
-    animateClock(sunClockMins, 1200, 3200); // advance to 8:00 PM during sun descent
+    animateClock(sunClockMins, 1200, 3200); // advance to 8:00 PM during sun descent (starts from wherever clock is)
     animateSunArc(90, -8, 3200, () => {
       sky.style.filter = '';
       sky.classList.add('night');
@@ -1871,7 +1871,7 @@ function toggleSunSchedule() {
       badge.className = 'night';
       info.textContent = 'Schedule triggered — lights turned ON';
       btn.textContent = '☀️ Simulate Sunrise Schedule';
-      animateClock(1200, 1560, 9000); // 8:00 PM → 2:00 AM over 9 seconds
+      clock.textContent = 'NIGHTTIME';
       cancelAllTimers(); clearSceneStepTimers();
       activeSceneKey = null;
       document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
@@ -1913,7 +1913,7 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     setSunPosition(176);
     animateSunArc(176, 90, 4000, () => { setTimeout(showSunSmile, 1000); });
-    animateClock(378, 840, 4000); // 6:18 AM → 2:00 PM during sunrise arc
+    animateClock(378, 780, 4000); // 6:18 AM → 1:00 PM during sunrise arc
     renderIphoneRooms();
   }, 300);
 });
@@ -2517,6 +2517,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v10.9</div>
+<div id="version-badge">v11.0</div>
 </body>
 </html>
