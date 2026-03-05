@@ -155,11 +155,6 @@
   .dim-off{background:#0d1117;color:#778;border:1px solid #2a3348}.dim-off:hover{color:#aaa}
   .dim-close{background:#f5c842;color:#1a1a2e}.dim-close:hover{background:#ffd84a}
   #dimmer-overlay{position:fixed;inset:0;z-index:998;display:none}
-  /* Timer HUD */
-  #timer-hud{position:fixed;bottom:20px;left:20px;display:none;flex-direction:column;gap:5px;z-index:500;pointer-events:none}
-  .timer-hud-row{background:rgba(8,12,20,0.92);border:1px solid #1e3050;border-radius:8px;padding:5px 12px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(6px)}
-  .timer-hud-label{font-size:11px;font-weight:600;color:#8aa0b8;letter-spacing:.03em}
-  .timer-hud-time{font-size:13px;font-weight:800;color:#7ecfe0;font-variant-numeric:tabular-nums;min-width:30px;text-align:right}
   #dimmer-overlay.show{display:block}
 
   /* ── IPHONE PANEL ─────────────────────────────────────────────────────── */
@@ -406,7 +401,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.7</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.8</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -798,7 +793,6 @@
 
 <!-- Dimmer popup -->
 <div id="dimmer-overlay" onclick="closeDimmer()"></div>
-<div id="timer-hud"></div>
 <div id="dimmer-popup">
   <div id="dimmer-title">Room Name</div>
   <div id="dimmer-subtitle">Dimmer Control</div>
@@ -937,29 +931,18 @@ function startRoomTimer(id, seconds) {
 }
 
 function updateTimerHud() {
-  const hud = document.getElementById('timer-hud');
-  if (!hud) return;
   const now = Date.now();
   const active = Object.keys(roomTimerStarts).map(id => {
     const { start, duration } = roomTimerStarts[id];
     const remaining = Math.max(0, Math.ceil((start + duration * 1000 - now) / 1000));
-    const label = ROOMS.find(r => r.id === id)?.label || id;
-    return { id, label, remaining };
-  }).filter(t => t.remaining > 0).sort((a, b) => a.remaining - b.remaining);
+    return { id, remaining };
+  }).filter(t => t.remaining > 0);
 
   if (active.length === 0) {
-    hud.style.display = 'none';
     if (timerHudTick) { clearInterval(timerHudTick); timerHudTick = null; }
     return;
   }
-  hud.style.display = 'flex';
-  hud.innerHTML = active.map(t => {
-    const m = Math.floor(t.remaining / 60);
-    const s = String(t.remaining % 60).padStart(2, '0');
-    const timeStr = m > 0 ? `${m}:${s}` : `${t.remaining}s`;
-    return `<div class="timer-hud-row"><span class="timer-hud-label">${t.label}</span><span class="timer-hud-time">${timeStr}</span></div>`;
-  }).join('');
-  // Also refresh in-room timer badges
+  // Refresh in-room timer badges
   active.forEach(t => {
     const g = document.getElementById('g-'+t.id);
     const tb = g && g.querySelector('.timer-badge');
