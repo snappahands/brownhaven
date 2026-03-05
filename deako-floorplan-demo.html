@@ -190,7 +190,7 @@
     opacity:0;transition:opacity .8s ease,top .05s,left .05s;top:14px;right:18px}
   #sky-scene.night #moon-orb{opacity:1}
   #sky-horizon-line{position:absolute;bottom:18px;left:0;right:0;height:1px;background:rgba(255,255,255,.18)}
-  #sun-info-row{display:flex;align-items:center;justify-content:space-between;gap:4px}
+  #sun-info-row{position:absolute;bottom:6px;left:8px;right:8px;display:flex;align-items:center;justify-content:space-between;gap:4px;z-index:2}
   #sun-clock{color:#c8d8e8;font-size:14px;font-weight:800;letter-spacing:.05em;font-variant-numeric:tabular-nums}
   #sun-badge{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:10px;background:#0f2a0f;color:#4ade80;transition:all .4s}
   #sun-badge.night{background:#12103a;color:#a5b4fc}
@@ -404,7 +404,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v7.3</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v7.4</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -422,10 +422,10 @@
         <div id="sun-orb"><img id="sun-img" src="sun.jpg" alt="sun"></div>
         <div id="moon-orb"></div>
         <div id="sky-horizon-line"></div>
-      </div>
-      <div id="sun-info-row">
-        <div id="sun-clock">6:18 AM</div>
-        <div id="sun-badge">☀ SUNRISE</div>
+        <div id="sun-info-row">
+          <div id="sun-clock">6:18 AM</div>
+          <div id="sun-badge">☀ SUNRISE</div>
+        </div>
       </div>
       <div id="sun-sched-info">Lights scheduled to turn ON at sunset</div>
       <button id="sun-toggle-btn" onclick="toggleSunSchedule()">🌅 Simulate Sunset</button>
