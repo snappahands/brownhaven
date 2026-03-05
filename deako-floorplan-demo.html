@@ -1553,6 +1553,12 @@ function renderRoom(id) {
   });
 }
 
+function refreshNightlightGlows() {
+  svg.querySelectorAll('[data-nl-room]').forEach(el => {
+    el.style.display = levels[el.dataset.nlRoom] > 0 ? 'none' : '';
+  });
+}
+
 function updateImg() {
   const vals = Object.values(levels);
   const avg = vals.reduce((s,v)=>s+v,0) / (vals.length*100);
@@ -1560,6 +1566,7 @@ function updateImg() {
 }
 function updateCount() {
   document.getElementById("ln").textContent = Object.values(levels).filter(v=>v>0).length;
+  refreshNightlightGlows();
   renderIphoneRooms();
 }
 function setStatus(m){ document.getElementById("stxt").textContent=m.toUpperCase(); }
@@ -2479,6 +2486,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v10.4</div>
+<div id="version-badge">v10.5</div>
 </body>
 </html>
