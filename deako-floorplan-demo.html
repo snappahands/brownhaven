@@ -1422,7 +1422,8 @@ window.addEventListener('mouseup', () => {
 window.addEventListener('keydown', e => { if (e.key === 'Escape' && placingSwitch) exitPlacementMode(); });
 
 renderUserSwitches();
-refreshNightlightGlows();
+// Hide all nightlight glows on load; they activate once rooms are turned on then off
+svg.querySelectorAll('[data-nl-room]').forEach(el => el.style.display = 'none');
 
 let pressTarget = null;
 let didLongPress = false;
@@ -2487,6 +2488,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v10.6</div>
+<div id="version-badge">v10.7</div>
 </body>
 </html>
