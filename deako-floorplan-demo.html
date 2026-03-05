@@ -1871,7 +1871,7 @@ function toggleSunSchedule() {
       badge.className = 'night';
       info.textContent = 'Schedule triggered — lights turned ON';
       btn.textContent = '☀️ Simulate Sunrise Schedule';
-      clock.textContent = 'NIGHTTIME';
+      clock.textContent = '';
       cancelAllTimers(); clearSceneStepTimers();
       activeSceneKey = null;
       document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
@@ -2519,6 +2519,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v11.2</div>
+<div id="version-badge">v11.3</div>
 </body>
 </html>
