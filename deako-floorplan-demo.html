@@ -116,6 +116,9 @@
   #mapper-copy-btn{background:#f5c842;color:#0d1117}.#mapper-copy-btn:hover{background:#ffd84a}
   #mapper-exit-btn{background:#1b2233;color:#778;border:1px solid #2a3348}.#mapper-exit-btn:hover{color:#aaa}
 
+  /* Deako switch hover */
+  .deako-switch{transition:transform 0.15s ease;transform-box:fill-box;transform-origin:center;cursor:pointer}
+  .deako-switch:hover{transform:scale(2)}
   /* Dimmer popup */
   #dimmer-popup{
     position:fixed;
@@ -401,7 +404,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v6.0</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v6.1</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1084,6 +1087,7 @@ let allOnOffNext = "on"; // first click = all on
   si.setAttribute("width","3.2"); si.setAttribute("height","3.2");
   si.setAttribute("preserveAspectRatio","xMidYMid meet");
   si.setAttribute("filter","url(#switch-shadow)");
+  si.classList.add("deako-switch");
   if (pos.rotate) {
     const cx = pos.x + 1.6, cy = pos.y + 1.6;
     si.setAttribute("transform",`rotate(${pos.rotate},${cx},${cy})`);
