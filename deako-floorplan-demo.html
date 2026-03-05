@@ -138,6 +138,7 @@
   #ext-view.active{display:block}
   #ext-img{width:100%;height:100%;object-fit:contain;display:block;user-select:none;draggable:false}
   #ext-sky-overlay{position:absolute;top:0;left:0;width:100%;height:52%;background:linear-gradient(to bottom,rgba(0,0,0,1) 0%,rgba(0,0,0,0.55) 65%,rgba(0,0,0,0) 100%);pointer-events:none;opacity:0}
+  #ext-night-overlay{position:absolute;inset:0;background:rgba(2,8,28,0.52);pointer-events:none;opacity:0;transition:opacity 2s}
   #ext-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
   #ext-view.ext-map-mode #ext-svg{pointer-events:all;cursor:crosshair}
   .ext-win-label{font-size:2px;fill:#7ecfe0;font-weight:700;text-anchor:middle;dominant-baseline:middle;pointer-events:none;display:none;letter-spacing:.04em;text-transform:uppercase}
@@ -472,6 +473,7 @@
     </div>
     <img id="ext-img" alt="" draggable="false">
     <div id="ext-sky-overlay"></div>
+    <div id="ext-night-overlay"></div>
     <svg id="ext-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
     <div id="ext-room-popup">
       <label>Assign room to window</label>
@@ -1953,6 +1955,10 @@ function toggleSunSchedule() {
       ROOMS.forEach(r=>{ levels[r.id]=0; renderRoom(r.id); });
       SUN_ROOMS.forEach(id => { if(levels[id]!==undefined){ levels[id]=80; renderRoom(id); }});
       updateCount(); updateImg(); renderIphoneRooms();
+      // Darken full exterior to nighttime + ensure window lights are updated
+      const nOvl = document.getElementById('ext-night-overlay');
+      if (nOvl) nOvl.style.opacity = '1';
+      refreshExtWindowLevels();
       startShootingStars();
     }, setSkyProgress);
   } else {
@@ -2827,6 +2833,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v12.6</div>
+<div id="version-badge">v12.7</div>
 </body>
 </html>
