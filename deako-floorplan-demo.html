@@ -1880,7 +1880,11 @@ function setSunPosition(angleDeg) {
 function setSkyProgress(t) {
   // Start darkening at 60% through the descent
   const d = Math.max(0, (t - 0.6) / 0.4);
-  document.getElementById('sky-scene').style.filter = `brightness(${1 - d * 0.97})`;
+  const b = 1 - d * 0.97;
+  document.getElementById('sky-scene').style.filter = `brightness(${b})`;
+  // Mirror darkening onto exterior house photo
+  const extImg = document.getElementById('ext-img');
+  if (extImg && extImg.src) extImg.style.filter = `brightness(${b})`;
 }
 
 let clockAnimId = null;
@@ -1963,6 +1967,8 @@ function toggleSunSchedule() {
       clearTimeout(_ssTimer);
 
       sky.classList.remove('night');
+      sky.style.filter = '';
+      document.getElementById('ext-img').style.filter = '';
       document.getElementById('device-panel').classList.remove('night');
 
       badge.textContent = '☀ SUNRISE';
@@ -2853,6 +2859,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v12.0</div>
+<div id="version-badge">v12.1</div>
 </body>
 </html>
