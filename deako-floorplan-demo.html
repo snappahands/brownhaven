@@ -172,19 +172,19 @@
   .sky-star{position:absolute;background:#fff;border-radius:50%;opacity:0;transition:opacity 1.3s ease}
   #sky-scene.night .sky-star{opacity:1}
   #sky-arc-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
-  /* Shooting stars */
+  /* Shooting stars — fixed width, translate-only so overflow:hidden won't clip */
   @keyframes shoot{
-    0%,74%{opacity:0;width:0;transform:translate(0,0) rotate(-35deg)}
-    76%{opacity:0;width:4px;transform:translate(4px,1.6px) rotate(-35deg)}
-    80%{opacity:1;width:24px;transform:translate(24px,9.6px) rotate(-35deg)}
-    88%{opacity:1;width:80px;transform:translate(80px,32px) rotate(-35deg)}
-    94%,100%{opacity:0;width:80px;transform:translate(96px,38px) rotate(-35deg)}
+    0%,70%{opacity:0;transform:translate(-80px,0) rotate(-35deg)}
+    75%{opacity:0;transform:translate(-60px,0) rotate(-35deg)}
+    80%{opacity:1;transform:translate(-20px,0) rotate(-35deg)}
+    90%{opacity:1;transform:translate(90px,0) rotate(-35deg)}
+    96%,100%{opacity:0;transform:translate(110px,0) rotate(-35deg)}
   }
-  .sstar{position:absolute;height:4px;background:linear-gradient(to right,rgba(255,255,255,0) 0%,rgba(255,255,255,0.6) 30%,#fff 70%,#fffbe0 100%);border-radius:3px;opacity:0;filter:blur(0.5px);box-shadow:0 0 8px 3px rgba(255,255,255,1),0 0 18px 6px rgba(180,210,255,0.8),0 0 32px 10px rgba(150,190,255,0.4)}
+  .sstar{position:absolute;width:80px;height:3px;background:linear-gradient(to right,rgba(255,255,255,0) 0%,rgba(255,255,255,0.5) 40%,#fff 100%);border-radius:2px;opacity:0;box-shadow:0 0 8px 3px rgba(255,255,255,0.95),0 0 20px 6px rgba(180,210,255,0.7)}
   #sky-scene.night .sstar{animation:shoot linear infinite}
-  #ss1{top:16%;left:6%;animation-duration:5s;animation-delay:-3.6s}
-  #ss2{top:28%;left:42%;animation-duration:6s;animation-delay:-1.2s}
-  #ss3{top:10%;left:65%;animation-duration:4.5s;animation-delay:-0.4s}
+  #ss1{top:20%;left:5%;animation-duration:5s;animation-delay:-3.5s}
+  #ss2{top:10%;left:12%;animation-duration:7s;animation-delay:-1.0s}
+  #ss3{top:32%;left:8%;animation-duration:6s;animation-delay:-4.2s}
   #sun-orb{position:absolute;width:22px;height:22px;border-radius:50%;
     background:radial-gradient(circle at 36% 36%,#fffbc0 0%,#ffd700 55%,#ff9500 100%);
     box-shadow:0 0 14px 5px rgba(255,210,50,.75);
@@ -393,7 +393,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.95</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.96</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1376,18 +1376,18 @@ function toggleSunSchedule() {
     badge.className = '';
     info.textContent = 'Lights scheduled to turn ON at sunset';
     btn.textContent = '🌅 Simulate Sunset';
-    setSunPosition(182);
+    setSunPosition(170);
     SUN_ROOMS.forEach(id => { if(levels[id]!==undefined){ levels[id]=0; renderRoom(id); }});
     updateCount(); updateImg(); renderIphoneRooms();
-    animateSunArc(182, 90, 3200, null);
+    animateSunArc(170, 90, 3200, null);
   }
 }
 
-// On load: animate sun rising from left horizon to top of arc, then hold there
+// On load: animate sun rising from just above left horizon to top of arc, then hold there
 window.addEventListener('load', () => {
   setTimeout(() => {
-    setSunPosition(182);
-    animateSunArc(182, 90, 4000, null);
+    setSunPosition(170);
+    animateSunArc(170, 90, 4000, null);
     renderIphoneRooms();
   }, 300);
 });
