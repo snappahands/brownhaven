@@ -1112,10 +1112,20 @@ defs.innerHTML = `<filter id="glow" x="-40%" y="-40%" width="180%" height="180%"
 <filter id="switch-shadow" x="-20%" y="-20%" width="140%" height="140%">
   <feDropShadow dx="0" dy="0.15" stdDeviation="0.35" flood-color="rgba(0,0,0,0.7)"/>
 </filter>
-<filter id="win-glow" x="-40%" y="-40%" width="180%" height="180%">
-  <feGaussianBlur stdDeviation="1.2" result="blur"/>
+<filter id="win-glow" x="-50%" y="-50%" width="200%" height="200%">
+  <feGaussianBlur stdDeviation="1.8" result="blur"/>
   <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
 </filter>
+<filter id="win-outer-glow" x="-80%" y="-80%" width="260%" height="260%">
+  <feGaussianBlur stdDeviation="2.8"/>
+</filter>
+<radialGradient id="win-light-grad" cx="50%" cy="38%" r="65%" gradientUnits="objectBoundingBox">
+  <stop offset="0%"   stop-color="rgba(255,252,210,1)"/>
+  <stop offset="22%"  stop-color="rgba(255,230,140,0.92)"/>
+  <stop offset="55%"  stop-color="rgba(255,195,80,0.72)"/>
+  <stop offset="85%"  stop-color="rgba(255,160,40,0.35)"/>
+  <stop offset="100%" stop-color="rgba(255,130,20,0)"/>
+</radialGradient>
 <filter id="nightlight-blur" x="-100%" y="-100%" width="300%" height="300%">
   <feGaussianBlur stdDeviation="1.4"/>
 </filter>
@@ -2650,56 +2660,73 @@ function extSvgCoords(e) {
 
 function renderExtWindows() {
   extSvgEl.querySelectorAll('.ext-win-g').forEach(el => el.remove());
+  const ns = 'http://www.w3.org/2000/svg';
   extWindows.forEach(w => {
     const roomData = ROOMS.find(r => r.id === w.room);
     const lv = w.room ? (levels[w.room] || 0) : 0;
-    const alpha = lv / 100 * 0.78;
 
-    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    const g = document.createElementNS(ns,'g');
     g.classList.add('ext-win-g'); g.dataset.winId = w.id;
 
-    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    rect.setAttribute('x', w.x); rect.setAttribute('y', w.y);
-    rect.setAttribute('width', w.w); rect.setAttribute('height', w.h);
-    rect.setAttribute('rx','0.8');
-    rect.setAttribute('fill', `rgba(255,205,80,${alpha})`);
-    if (lv > 0) rect.setAttribute('filter','url(#win-glow)');
-    rect.classList.add('ext-win-rect');
+    // ── Light layers (controlled via group opacity) ──────────────────────
+    const lightG = document.createElementNS(ns,'g');
+    lightG.classList.add('ext-win-light');
+    lightG.style.opacity = lv / 100;
 
-    // Outline always visible in map mode
-    const outline = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    // Layer 1: warm outer spill — light bleeding around window frame
+    const spill = document.createElementNS(ns,'rect');
+    spill.setAttribute('x', w.x - 1.2); spill.setAttribute('y', w.y - 1.0);
+    spill.setAttribute('width', w.w + 2.4); spill.setAttribute('height', w.h + 2.0);
+    spill.setAttribute('rx','2'); spill.setAttribute('fill','rgba(255,175,50,0.55)');
+    spill.setAttribute('filter','url(#win-outer-glow)');
+
+    // Layer 2: main interior light (radial gradient — bright center like a fixture)
+    const main = document.createElementNS(ns,'rect');
+    main.setAttribute('x', w.x); main.setAttribute('y', w.y);
+    main.setAttribute('width', w.w); main.setAttribute('height', w.h);
+    main.setAttribute('rx','0.6'); main.setAttribute('fill','url(#win-light-grad)');
+    main.setAttribute('filter','url(#win-glow)');
+
+    // Layer 3: bright fixture hotspot — small ellipse near top-center
+    const spot = document.createElementNS(ns,'ellipse');
+    spot.setAttribute('cx', w.x + w.w * 0.5);
+    spot.setAttribute('cy', w.y + w.h * 0.32);
+    spot.setAttribute('rx', Math.max(w.w * 0.18, 0.8));
+    spot.setAttribute('ry', Math.max(w.h * 0.14, 0.6));
+    spot.setAttribute('fill','rgba(255,255,235,0.9)');
+
+    lightG.appendChild(spill); lightG.appendChild(main); lightG.appendChild(spot);
+
+    // ── Map-mode overlays ─────────────────────────────────────────────────
+    const outline = document.createElementNS(ns,'rect');
     outline.setAttribute('x', w.x); outline.setAttribute('y', w.y);
     outline.setAttribute('width', w.w); outline.setAttribute('height', w.h);
-    outline.setAttribute('rx','0.8');
-    outline.setAttribute('fill','none');
-    outline.setAttribute('stroke','rgba(126,207,224,0.6)');
-    outline.setAttribute('stroke-width','0.35');
+    outline.setAttribute('rx','0.6'); outline.setAttribute('fill','none');
+    outline.setAttribute('stroke','rgba(126,207,224,0.7)');
+    outline.setAttribute('stroke-width','0.4');
     outline.classList.add('ext-win-outline');
     outline.style.display = extMapMode ? 'block' : 'none';
 
-    // Room label
-    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+    const label = document.createElementNS(ns,'text');
     label.setAttribute('x', w.x + w.w/2); label.setAttribute('y', w.y + w.h/2);
     label.classList.add('ext-win-label');
     label.textContent = roomData ? roomData.label : w.room;
 
-    // Delete badge
-    const dc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    const dc = document.createElementNS(ns,'circle');
     dc.setAttribute('cx', w.x + w.w); dc.setAttribute('cy', w.y);
     dc.setAttribute('r','2.2'); dc.setAttribute('fill','#cc0000');
     dc.classList.add('ext-win-del');
-    const dt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    const dt = document.createElementNS(ns,'text');
     dt.setAttribute('x', w.x + w.w); dt.setAttribute('y', w.y + 0.8);
     dt.setAttribute('text-anchor','middle'); dt.setAttribute('font-size','2.8');
-    dt.setAttribute('fill','#fff'); dt.classList.add('ext-win-del');
-    dt.textContent = '×';
+    dt.setAttribute('fill','#fff'); dt.classList.add('ext-win-del'); dt.textContent = '×';
     [dc, dt].forEach(el => el.addEventListener('click', e => {
       e.stopPropagation();
       extWindows = extWindows.filter(win => win.id !== w.id);
       saveExtWindows(); renderExtWindows();
     }));
 
-    g.appendChild(rect); g.appendChild(outline); g.appendChild(label);
+    g.appendChild(lightG); g.appendChild(outline); g.appendChild(label);
     g.appendChild(dc); g.appendChild(dt);
     extSvgEl.appendChild(g);
   });
@@ -2709,12 +2736,8 @@ function refreshExtWindowLevels() {
   extWindows.forEach(w => {
     const g = extSvgEl.querySelector(`[data-win-id="${w.id}"]`);
     if (!g) return;
-    const rect = g.querySelector('.ext-win-rect');
-    if (!rect) return;
-    const lv = w.room ? (levels[w.room] || 0) : 0;
-    rect.setAttribute('fill', `rgba(255,205,80,${lv/100*0.78})`);
-    if (lv > 0) rect.setAttribute('filter','url(#win-glow)');
-    else rect.removeAttribute('filter');
+    const lightG = g.querySelector('.ext-win-light');
+    if (lightG) lightG.style.opacity = (w.room ? (levels[w.room] || 0) : 0) / 100;
   });
 }
 
@@ -2830,6 +2853,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v11.9</div>
+<div id="version-badge">v12.0</div>
 </body>
 </html>
