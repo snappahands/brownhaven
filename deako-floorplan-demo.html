@@ -135,6 +135,7 @@
   #scnt{color:#334;font-size:11px}
   #scnt span{color:#f5c842;font-weight:700}
   .dtag{font-size:10px;color:#7ecfe0;letter-spacing:.06em}
+  #version-badge{position:fixed;bottom:10px;right:14px;z-index:99999;font-weight:900;color:#7ecfe0;font-size:13px;letter-spacing:.05em;pointer-events:none;text-shadow:0 1px 6px rgba(0,0,0,0.8)}
   #debug-btn{position:relative;z-index:9999;padding:5px 12px;background:#cc0000;color:#fff;border:1px solid #ff4444;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:16px}
   #debug-btn:hover{background:#ff2222}
   #mapper-panel{position:fixed;left:10px;top:50%;transform:translateY(-50%);background:#111826;border:1px solid #2a3348;border-radius:10px;padding:10px;width:148px;z-index:9999;display:none;flex-direction:column;gap:6px;max-height:80vh}
@@ -439,7 +440,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v10.2</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
 </div>
 
 <div id="switch-picker">
@@ -1054,12 +1055,13 @@ defs.innerHTML = `<filter id="glow" x="-40%" y="-40%" width="180%" height="180%"
 <filter id="switch-shadow" x="-20%" y="-20%" width="140%" height="140%">
   <feDropShadow dx="0" dy="0.15" stdDeviation="0.35" flood-color="rgba(0,0,0,0.7)"/>
 </filter>
-<filter id="nightlight-blur" x="-80%" y="-80%" width="260%" height="260%">
-  <feGaussianBlur stdDeviation="0.9"/>
+<filter id="nightlight-blur" x="-100%" y="-100%" width="300%" height="300%">
+  <feGaussianBlur stdDeviation="1.4"/>
 </filter>
-<radialGradient id="nightlight-glow" cx="50%" cy="70%" r="50%">
-  <stop offset="0%"   stop-color="rgba(255,200,80,0.9)"/>
-  <stop offset="45%"  stop-color="rgba(255,160,40,0.45)"/>
+<radialGradient id="nightlight-glow" cx="50%" cy="65%" r="50%">
+  <stop offset="0%"   stop-color="rgba(255,210,90,0.95)"/>
+  <stop offset="35%"  stop-color="rgba(255,175,50,0.6)"/>
+  <stop offset="70%"  stop-color="rgba(255,140,20,0.25)"/>
   <stop offset="100%" stop-color="rgba(255,120,0,0)"/>
 </radialGradient>`;
 svg.appendChild(defs);
@@ -1250,14 +1252,29 @@ function createUserSwitchEl(sw) {
   g.dataset.swId = sw.id;
   g.setAttribute('transform',`translate(${sw.x},${sw.y})`);
 
-  // Nightlight glow — warm amber radial glow from the light bar at bottom of switch
+  // Nightlight glow — warm amber radial glow, clipped to its room, only when room is off
   if (sw.href && sw.href.includes('Nightlight')) {
+    const roomData = sw.room ? ROOMS.find(r => r.id === sw.room) : null;
     const glow = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
     glow.setAttribute('cx','1.6'); glow.setAttribute('cy','3.0');
-    glow.setAttribute('rx','7'); glow.setAttribute('ry','5');
+    glow.setAttribute('rx','12'); glow.setAttribute('ry','9');
     glow.setAttribute('fill','url(#nightlight-glow)');
     glow.setAttribute('filter','url(#nightlight-blur)');
     glow.classList.add('nightlight-glow-el');
+    if (sw.room) glow.dataset.nlRoom = sw.room;
+    if (roomData) {
+      // Clip rect in local group space (group is translated by sw.x, sw.y)
+      const clipId = 'nl-clip-' + sw.id;
+      const cp = document.createElementNS('http://www.w3.org/2000/svg','clipPath');
+      cp.setAttribute('id', clipId);
+      const cr = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      cr.setAttribute('x', roomData.x - sw.x); cr.setAttribute('y', roomData.y - sw.y);
+      cr.setAttribute('width', roomData.w);     cr.setAttribute('height', roomData.h);
+      cp.appendChild(cr); defs.appendChild(cp);
+      glow.setAttribute('clip-path', `url(#${clipId})`);
+    }
+    // Only visible when the room light is off
+    glow.style.display = (sw.room && levels[sw.room] > 0) ? 'none' : '';
     g.appendChild(glow);
   }
 
@@ -1306,6 +1323,7 @@ function deleteUserSwitch(id) {
   userSwitches = userSwitches.filter(s => s.id !== id);
   saveUserSwitches();
   svg.querySelector(`[data-sw-id="${id}"]`)?.remove();
+  document.getElementById('nl-clip-' + id)?.remove();
 }
 
 function renderUserSwitches() {
@@ -1395,6 +1413,10 @@ window.addEventListener('mouseup', () => {
   } else {
     swDrag.sw.room = findRoomAtPoint(swDrag.sw.x+1.6, swDrag.sw.y+1.6);
     saveUserSwitches();
+    // Recreate element so nightlight clip path updates to new room
+    svg.querySelector(`[data-sw-id="${swDrag.sw.id}"]`)?.remove();
+    document.getElementById('nl-clip-' + swDrag.sw.id)?.remove();
+    svg.appendChild(createUserSwitchEl(swDrag.sw));
   }
   swDrag = null;
 });
@@ -1526,6 +1548,10 @@ function renderRoom(id) {
     if (tb) tb.style.display="none";
     if (sg) sg.style.display="none";
   }
+  // Show nightlight glows only when the room is off
+  svg.querySelectorAll(`[data-nl-room="${id}"]`).forEach(el => {
+    el.style.display = lv > 0 ? 'none' : '';
+  });
 }
 
 function updateImg() {
@@ -2454,5 +2480,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
+<div id="version-badge">v10.3</div>
 </body>
 </html>
