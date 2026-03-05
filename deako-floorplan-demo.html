@@ -162,7 +162,7 @@
   #dimmer-overlay.show{display:block}
 
   /* ── IPHONE PANEL ─────────────────────────────────────────────────────── */
-  #right-panel{width:310px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:4px 0}
+  #right-panel{width:310px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;padding:32px 0 4px}
   .right-panel-top{display:flex;flex-direction:row;align-items:flex-start;width:100%;gap:8px}
   .deako-app-promo{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;width:72px}
   .deako-app-icon{width:62px;height:62px;background:#dcdcd8;border-radius:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.15);flex-shrink:0}
@@ -201,7 +201,7 @@
   #sun-toggle-btn:hover{background:#132436}
   .iphone-frame{
     width:284px;background:linear-gradient(160deg,#2c2c30 0%,#1c1c20 100%);
-    border-radius:46px;padding:7px 10px 8px;position:relative;margin-top:-52px;
+    border-radius:46px;padding:7px 10px 8px;position:relative;
     box-shadow:0 0 0 1px #3c3c40,inset 0 0 0 1.5px #2a2a2e,0 40px 100px rgba(0,0,0,.9),0 8px 32px rgba(0,0,0,.6)
   }
   /* Volume buttons left */
@@ -404,7 +404,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v7.5</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v7.6</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
