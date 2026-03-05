@@ -406,7 +406,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.4</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.5</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -2037,21 +2037,42 @@ const DEVICE_STEPS = [
 ];
 
 let sceneBubbleTimer = null;
+
+function sizeSceneBubble(el, text) {
+  const c = document.createElement('canvas');
+  const ctx = c.getContext('2d');
+  ctx.font = '700 17px -apple-system,BlinkMacSystemFont,sans-serif';
+  const tw = ctx.measureText(text).width;
+  const w = Math.max(250, Math.min(440, Math.ceil(tw / 0.76) + 20));
+  el.style.width = w + 'px';
+  const img = el.querySelector('.bubble-img');
+  const scale = w / 250;
+  img.style.width = '250px';
+  img.style.transform = scale > 1 ? `scaleX(${scale.toFixed(3)})` : '';
+  img.style.transformOrigin = 'left center';
+}
+
+function resetBubbleSize(el) {
+  el.style.width = '';
+  const img = el.querySelector('.bubble-img');
+  img.style.width = '';
+  img.style.transform = '';
+}
+
 function showSceneBubbles(name) {
   if (sceneBubbleTimer) clearTimeout(sceneBubbleTimer);
-  ['hub-bubble','alexa-bubble'].forEach(id => {
-    const el = document.getElementById(id);
-    el.classList.remove('wide');
-    el.querySelector('.bubble-text').style.fontSize = '';
-  });
-  showBubble('alexa-bubble', 'Alexa, run ' + name);
-  showBubble('hub-bubble',   'Hey Google, run ' + name);
+  const alexaText = 'Alexa, run ' + name;
+  const hubText   = 'Hey Google, run ' + name;
+  sizeSceneBubble(document.getElementById('alexa-bubble'), alexaText);
+  sizeSceneBubble(document.getElementById('hub-bubble'),   hubText);
+  showBubble('alexa-bubble', alexaText);
+  showBubble('hub-bubble',   hubText);
   sceneBubbleTimer = setTimeout(() => {
     ['alexa-bubble','hub-bubble'].forEach(id => {
       const b = document.getElementById(id);
       b.classList.remove('show');
       b.classList.add('hiding');
-      setTimeout(() => b.classList.remove('hiding'), 220);
+      setTimeout(() => { b.classList.remove('hiding'); resetBubbleSize(b); }, 220);
     });
   }, 3000);
 }
@@ -2083,6 +2104,7 @@ function triggerDevices() {
     const el = document.getElementById(id);
     el.classList.toggle('wide', deviceClickState === 2);
     el.querySelector('.bubble-text').style.fontSize = '';
+    resetBubbleSize(el);
   });
   showBubble('hub-bubble',   step.hub);
   showBubble('alexa-bubble', step.alexa);
