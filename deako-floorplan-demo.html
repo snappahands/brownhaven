@@ -1863,7 +1863,7 @@ function toggleSunSchedule() {
     // Day → Night
     sunIsDay = false;
     hideSunSmile();
-    btn.textContent = 'Exterior lights turn on';
+    btn.textContent = 'Notice: Exterior lights turn on';
     animateClock(sunClockMins, 1200, 3200);
     animateSunArc(90, -8, 3200, () => {
       sky.style.filter = '';
@@ -1871,7 +1871,7 @@ function toggleSunSchedule() {
       badge.textContent = '🌙 NIGHT TIME';
       badge.className = 'night';
       info.textContent = 'Schedule triggered — lights turned ON';
-      btn.textContent = '☀️ Simulate Sunrise Schedule';
+      setTimeout(() => { btn.textContent = '☀️ Simulate Sunrise Schedule'; }, 3000);
       clock.textContent = '';
       cancelAllTimers(); clearSceneStepTimers();
       activeSceneKey = null;
@@ -1883,9 +1883,9 @@ function toggleSunSchedule() {
     }, setSkyProgress);
   } else {
     // Night → Day: show message briefly then reload
-    btn.textContent = 'All exterior lights turn off';
+    btn.textContent = 'Notice: All exterior lights turn off';
     btn.disabled = true;
-    setTimeout(() => location.reload(), 2500);
+    setTimeout(() => location.reload(), 5500);
   }
 }
 
@@ -2522,6 +2522,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v11.4</div>
+<div id="version-badge">v11.5</div>
 </body>
 </html>
