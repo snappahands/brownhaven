@@ -1120,8 +1120,8 @@ defs.innerHTML = `<filter id="glow" x="-40%" y="-40%" width="180%" height="180%"
   <feGaussianBlur stdDeviation="2.8"/>
 </filter>
 <radialGradient id="win-light-grad" cx="50%" cy="38%" r="65%" gradientUnits="objectBoundingBox">
-  <stop offset="0%"   stop-color="rgba(255,252,210,1)"/>
-  <stop offset="22%"  stop-color="rgba(255,230,140,0.92)"/>
+  <stop offset="0%"   stop-color="rgba(255,230,120,0.97)"/>
+  <stop offset="22%"  stop-color="rgba(255,210,90,0.88)"/>
   <stop offset="55%"  stop-color="rgba(255,195,80,0.72)"/>
   <stop offset="85%"  stop-color="rgba(255,160,40,0.35)"/>
   <stop offset="100%" stop-color="rgba(255,130,20,0)"/>
@@ -2668,7 +2668,7 @@ function renderExtWindows() {
     spot.setAttribute('cy', w.y + w.h * 0.32);
     spot.setAttribute('rx', Math.max(w.w * 0.18, 0.8));
     spot.setAttribute('ry', Math.max(w.h * 0.14, 0.6));
-    spot.setAttribute('fill','rgba(255,255,235,0.9)');
+    spot.setAttribute('fill','rgba(255,225,100,0.88)');
 
     lightG.appendChild(spill); lightG.appendChild(main); lightG.appendChild(spot);
 
@@ -2828,6 +2828,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v12.2</div>
+<div id="version-badge">v12.3</div>
 </body>
 </html>
