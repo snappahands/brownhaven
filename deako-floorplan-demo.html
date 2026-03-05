@@ -19,7 +19,7 @@
   #device-panel > *{position:relative;z-index:1}
   .dv-card{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;cursor:pointer;position:relative}
   #device-panel .dv-card:first-child{margin-top:150px}
-  #device-panel .dv-card:last-child{margin-bottom:80px}
+  #device-panel .dv-card:last-child{margin-bottom:40px}
   .dv-card:active .dv-img{opacity:.82}
   .dv-img{width:260px;object-fit:contain;display:block;background:#fff;border-radius:14px;box-shadow:0 4px 18px rgba(0,0,0,0.15)}
   .dv-img.echo{height:clamp(140px,26vh,300px)}
@@ -178,10 +178,14 @@
   .sky-star{position:absolute;background:#fff;border-radius:50%;opacity:0;transition:opacity 1.3s ease}
   #sky-scene.night .sky-star{opacity:1}
 /* Shooting stars drawn via JS */
-  @keyframes sun-glow-pulse{0%,100%{filter:drop-shadow(0 0 5px rgba(255,220,40,0.55)) drop-shadow(0 0 10px rgba(255,180,0,0.3))}50%{filter:drop-shadow(0 0 12px rgba(255,235,50,1)) drop-shadow(0 0 24px rgba(255,200,0,0.65))}}
-  #sun-img{width:48px;height:48px;object-fit:contain;display:block;filter:drop-shadow(0 0 5px rgba(255,210,40,0.5))}
+  @keyframes sun-glow-pulse{0%,100%{filter:drop-shadow(0 0 5px rgba(255,220,40,0.55)) drop-shadow(0 0 10px rgba(255,180,0,0.3))}50%{filter:drop-shadow(0 0 14px rgba(255,235,50,1)) drop-shadow(0 0 28px rgba(255,200,0,0.7))}}
+  #sun-img{width:48px;height:48px;object-fit:contain;display:block;mix-blend-mode:multiply;opacity:0;transition:opacity 0.9s ease;filter:drop-shadow(0 0 5px rgba(255,210,40,0.5))}
   #sun-img.glowing{animation:sun-glow-pulse 1.8s ease-in-out infinite}
-  #sun-orb{position:absolute;width:48px;height:48px;background:none;border-radius:0;overflow:visible}
+  #sun-orb{position:absolute;width:48px;height:48px;border-radius:50%;overflow:visible;
+    background:radial-gradient(circle at 36% 36%,#fffbc0 0%,#ffd700 55%,#ff9500 100%);
+    box-shadow:0 0 18px 6px rgba(255,210,50,.8);transition:background .7s ease,box-shadow .7s ease}
+  #sun-orb.smile-mode{background:transparent;box-shadow:none}
+  #sun-orb.smile-mode #sun-img{opacity:1}
   #moon-orb{position:absolute;width:18px;height:18px;border-radius:50%;
     background:#d8d8b8;box-shadow:inset -4px -2px 0 2px #b0b090,0 0 10px 3px rgba(200,200,160,.4);
     opacity:0;transition:opacity .8s ease,top .05s,left .05s;top:14px;right:18px}
@@ -402,7 +406,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.5</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v5.6</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1048,7 +1052,7 @@ ROOMS.forEach(r => {
   badge.style.pointerEvents="none"; badge.style.display="none";
 
   // In-room timer countdown badge
-  const timerBadge=mk("text",{class:"timer-badge",x:r.x+r.w/2,y:r.y+r.h-3,"text-anchor":"middle","dominant-baseline":"middle","font-size":"1.85","font-weight":"900","font-family":"system-ui,sans-serif",fill:"rgba(126,207,224,1)","letter-spacing":"0.01"});
+  const timerBadge=mk("text",{class:"timer-badge",x:r.x+r.w/2,y:r.y+r.h-3,"text-anchor":"middle","dominant-baseline":"middle","font-size":"2.2","font-weight":"900","font-family":"system-ui,sans-serif",fill:"rgba(126,207,224,1)","letter-spacing":"0.01","paint-order":"stroke fill",stroke:"rgba(0,20,40,0.55)","stroke-width":"0.4"});
   timerBadge.style.pointerEvents="none"; timerBadge.style.display="none";
 
   const dot=mk("circle",{class:"dot",cx:r.x+r.w-1.8,cy:r.y+2,r:"1.1",fill:"rgba(255,255,255,0.1)"});
@@ -1456,11 +1460,15 @@ let sunIsDay = true;
 let sunAnimating = false;
 
 function showSunSmile() {
+  const orb = document.getElementById('sun-orb');
   const img = document.getElementById('sun-img');
-  if (img) img.classList.add('glowing');
+  if (orb) orb.classList.add('smile-mode');
+  if (img) setTimeout(() => img.classList.add('glowing'), 900);
 }
 function hideSunSmile() {
+  const orb = document.getElementById('sun-orb');
   const img = document.getElementById('sun-img');
+  if (orb) orb.classList.remove('smile-mode');
   if (img) img.classList.remove('glowing');
 }
 
@@ -1520,6 +1528,10 @@ function toggleSunSchedule() {
       badge.className = 'night';
       info.textContent = 'Schedule triggered — lights turned ON';
       btn.textContent = '🌄 Simulate Sunrise';
+      cancelAllTimers(); clearSceneStepTimers();
+      activeSceneKey = null;
+      document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));
+      ROOMS.forEach(r=>{ levels[r.id]=0; renderRoom(r.id); });
       SUN_ROOMS.forEach(id => { if(levels[id]!==undefined){ levels[id]=80; renderRoom(id); }});
       updateCount(); updateImg(); renderIphoneRooms();
       startShootingStars();
@@ -1536,7 +1548,7 @@ function toggleSunSchedule() {
     setSunPosition(170);
     SUN_ROOMS.forEach(id => { if(levels[id]!==undefined){ levels[id]=0; renderRoom(id); }});
     updateCount(); updateImg(); renderIphoneRooms();
-    animateSunArc(170, 90, 3200, () => { setTimeout(showSunSmile, 2000); });
+    animateSunArc(170, 90, 3200, () => { setTimeout(showSunSmile, 1000); });
   }
 }
 
@@ -1544,7 +1556,7 @@ function toggleSunSchedule() {
 window.addEventListener('load', () => {
   setTimeout(() => {
     setSunPosition(170);
-    animateSunArc(170, 90, 4000, () => { setTimeout(showSunSmile, 2000); });
+    animateSunArc(170, 90, 4000, () => { setTimeout(showSunSmile, 1000); });
     renderIphoneRooms();
   }, 300);
 });
