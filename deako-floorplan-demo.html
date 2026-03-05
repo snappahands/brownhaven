@@ -11,7 +11,36 @@
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%;overflow:hidden;background:#0d1117;font-family:system-ui,-apple-system,sans-serif}
   body{display:flex;flex-direction:row;padding:10px 12px;gap:12px;height:100vh;max-height:100vh;align-items:stretch;overflow:hidden}
-  #left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+  #left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;position:relative}
+
+  /* ── SWITCH PICKER PANEL ─────────────────────────────────────────────── */
+  #switch-picker{position:absolute;bottom:50px;left:0;right:0;background:#111826;border:1px solid #2a3348;border-radius:12px 12px 0 0;z-index:600;transform:translateY(100%);transition:transform .3s ease;overflow:hidden}
+  #switch-picker.open{transform:translateY(0)}
+  #sw-pick-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 6px;border-bottom:1px solid #1a2535}
+  #sw-pick-title{color:#7ecfe0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  #sw-pick-close{background:none;border:none;color:#556;font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
+  #sw-pick-close:hover{color:#fff}
+  #sw-pick-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px}
+  .sw-pick-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 4px;border-radius:8px;border:1px solid transparent;transition:all .15s}
+  .sw-pick-item:hover{background:#1a2535;border-color:#2a3348}
+  .sw-pick-item.selected{background:#1a3a4a;border-color:#7ecfe0}
+  .sw-pick-img{width:44px;height:44px;object-fit:contain;border-radius:6px;background:#fff}
+  .sw-pick-label{color:#7a8a9a;font-size:8px;font-weight:700;letter-spacing:.05em;text-align:center;line-height:1.3;text-transform:uppercase}
+  .sw-pick-item.selected .sw-pick-label{color:#7ecfe0}
+  #sw-pick-hint{color:#7ecfe0;font-size:9px;font-weight:700;letter-spacing:.06em;text-align:center;padding:6px 14px 10px}
+
+  /* ── EDIT SWITCH MODE ────────────────────────────────────────────────── */
+  #edit-switches-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a3a1a;color:#4ade80;border:1px solid #2a5a2a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
+  #edit-switches-btn:hover{background:#223a22}
+  #edit-switches-btn.active{background:#2a5a2a;border-color:#4ade80;color:#fff}
+  #switches-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2e3a;color:#7ecfe0;border:1px solid #2a4a5a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
+  #switches-btn:hover{background:#223848}
+  #switches-btn.active{background:#2a4a5a;border-color:#7ecfe0;color:#fff}
+  .edit-switch-mode .user-switch-img{cursor:grab !important}
+  .edit-switch-mode .user-switch-img:active{cursor:grabbing !important}
+  .edit-switch-mode .user-switch-img{transform:none !important;transition:none !important}
+  .sw-del-badge{display:none;cursor:pointer;pointer-events:all}
+  .edit-switch-mode .sw-del-badge{display:block}
 
   /* ── DEVICE PANEL (left) ──────────────────────────────────────────────── */
   #device-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:20px 0;position:relative}
@@ -406,7 +435,16 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.6</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.7</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
+</div>
+
+<div id="switch-picker">
+  <div id="sw-pick-header">
+    <span id="sw-pick-title">Deako Specialty Switches</span>
+    <button id="sw-pick-close" onclick="closeSwitchPicker()">✕</button>
+  </div>
+  <div id="sw-pick-grid"></div>
+  <div id="sw-pick-hint">Select a switch, then click anywhere on the floor plan to place it</div>
 </div>
 
 </div><!-- #left-panel -->
@@ -1142,6 +1180,175 @@ let allOnOffNext = "on"; // first click = all on
   }
   svg.appendChild(si);
 });
+
+// ── SWITCH PICKER & PLACEMENT ─────────────────────────────────────────────
+const SWITCH_TYPES = [
+  {id:'smart-switch',  label:'Smart Switch Gen 2',       href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Shopify_Smart_Switch_gen2_1080p_Square.png?v=1763997990'},
+  {id:'smart-dimmer',  label:'Smart Dimmer',             href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Smart_Dimmer_1080p_Square.png?v=1746725590'},
+  {id:'smart-plug',    label:'Smart Plug',               href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Smart_Plug_1080p_Square_c19e883f-346f-45df-a3e5-b25524454468.png?v=1743099839'},
+  {id:'motion',        label:'Simple Motion Sensor',     href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Simple_Motion_1080p_Square.png?v=1763997321'},
+  {id:'astro-timer',   label:'Simple Astronomical Timer',href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Simple_Astronomical_1080p_Square.png?v=1742316596'},
+  {id:'simple-dimmer', label:'Simple Dimmer Switch',     href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Simple_Dimmer_1080p_Square_e6ab1d40-0f6b-4a7a-9099-3451daae4e1e.png?v=1763997321'},
+  {id:'simple-timer',  label:'Simple Timer Switch',      href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Simple_Timer_1080p_Square.png?v=1742316524'},
+  {id:'ceiling-fan',   label:'Simple Ceiling Fan',       href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Shopify_Simple_Ceiling_Fan_w_faceplate_1080p_Square.png?v=1742316420'},
+  {id:'nightlight',    label:'Simple Night Light',       href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Simple_Nightlight_1080p_Square.png?v=1763997321'},
+  {id:'vent-timer',    label:'Simple Ventilation Timer', href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Simple_Ventilation_Timer_1080p_Square.png?v=1742316827'},
+];
+
+let userSwitches = JSON.parse(localStorage.getItem('bhUserSwitches') || '[]');
+let placingSwitch = null;
+let placeOverlay = null;
+let editSwitchMode = false;
+let swDrag = null;
+
+function saveUserSwitches() { localStorage.setItem('bhUserSwitches', JSON.stringify(userSwitches)); }
+
+function svgCoordsFromEvent(e) {
+  const r = svg.getBoundingClientRect();
+  return { x: (e.clientX - r.left) / r.width * 100, y: (e.clientY - r.top) / r.height * 100 };
+}
+function findRoomAtPoint(x, y) {
+  for (const r of ROOMS) if (x >= r.x && x <= r.x+r.w && y >= r.y && y <= r.y+r.h) return r.id;
+  return null;
+}
+
+function createUserSwitchEl(sw) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.dataset.swId = sw.id;
+  g.setAttribute('transform',`translate(${sw.x},${sw.y})`);
+
+  const si = document.createElementNS('http://www.w3.org/2000/svg','image');
+  si.setAttribute('href', sw.href);
+  si.setAttribute('x','0'); si.setAttribute('y','0');
+  si.setAttribute('width','3.2'); si.setAttribute('height','3.2');
+  si.setAttribute('preserveAspectRatio','xMidYMid meet');
+  si.setAttribute('filter','url(#switch-shadow)');
+  si.classList.add('deako-switch','user-switch-img');
+  si.style.pointerEvents = 'all';
+
+  // Delete badge (×)
+  const dc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dc.setAttribute('cx','3.0'); dc.setAttribute('cy','0.3'); dc.setAttribute('r','1.1');
+  dc.setAttribute('fill','#cc0000'); dc.classList.add('sw-del-badge');
+  const dt = document.createElementNS('http://www.w3.org/2000/svg','text');
+  dt.setAttribute('x','3.0'); dt.setAttribute('y','0.75');
+  dt.setAttribute('text-anchor','middle'); dt.setAttribute('font-size','1.6');
+  dt.setAttribute('fill','#fff'); dt.classList.add('sw-del-badge');
+  dt.textContent = '×';
+
+  dc.addEventListener('click', e => { e.stopPropagation(); deleteUserSwitch(sw.id); });
+  dt.addEventListener('click', e => { e.stopPropagation(); deleteUserSwitch(sw.id); });
+
+  g.addEventListener('mousedown', e => {
+    if (!editSwitchMode) return;
+    e.stopPropagation(); e.preventDefault();
+    const {x,y} = svgCoordsFromEvent(e);
+    swDrag = { g, sw, ox: x - sw.x, oy: y - sw.y };
+  });
+  si.addEventListener('click', e => {
+    if (editSwitchMode) { e.stopPropagation(); return; }
+    e.stopPropagation();
+    if (sw.room && levels[sw.room] !== undefined) {
+      levels[sw.room] = levels[sw.room] > 0 ? 0 : 80;
+      renderRoom(sw.room); updateCount(); updateImg(); renderIphoneRooms();
+    }
+  });
+
+  g.appendChild(si); g.appendChild(dc); g.appendChild(dt);
+  return g;
+}
+
+function deleteUserSwitch(id) {
+  userSwitches = userSwitches.filter(s => s.id !== id);
+  saveUserSwitches();
+  svg.querySelector(`[data-sw-id="${id}"]`)?.remove();
+}
+
+function renderUserSwitches() {
+  svg.querySelectorAll('[data-sw-id]').forEach(el => el.remove());
+  userSwitches.forEach(sw => svg.appendChild(createUserSwitchEl(sw)));
+}
+
+// Switch picker
+function toggleSwitchPicker() {
+  const p = document.getElementById('switch-picker');
+  const btn = document.getElementById('switches-btn');
+  if (p.classList.contains('open')) { p.classList.remove('open'); btn.classList.remove('active'); }
+  else {
+    buildSwitchPickerGrid();
+    p.classList.add('open'); btn.classList.add('active');
+  }
+}
+function closeSwitchPicker() {
+  document.getElementById('switch-picker').classList.remove('open');
+  document.getElementById('switches-btn').classList.remove('active');
+}
+function buildSwitchPickerGrid() {
+  const grid = document.getElementById('sw-pick-grid');
+  grid.innerHTML = '';
+  SWITCH_TYPES.forEach(st => {
+    const item = document.createElement('div');
+    item.className = 'sw-pick-item';
+    item.innerHTML = `<img class="sw-pick-img" src="${st.href}" alt="${st.label}"><span class="sw-pick-label">${st.label}</span>`;
+    item.onclick = () => { closeSwitchPicker(); enterPlacementMode(st); };
+    grid.appendChild(item);
+  });
+}
+
+// Placement mode
+function enterPlacementMode(switchType) {
+  placingSwitch = switchType;
+  document.getElementById('stxt').textContent = `Placing: ${switchType.label} — click floor plan to drop · Esc to cancel`;
+  placeOverlay = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  placeOverlay.setAttribute('x','0'); placeOverlay.setAttribute('y','0');
+  placeOverlay.setAttribute('width','100'); placeOverlay.setAttribute('height','100');
+  placeOverlay.setAttribute('fill','rgba(126,207,224,0.06)');
+  placeOverlay.style.cursor = 'crosshair'; placeOverlay.style.pointerEvents = 'all';
+  placeOverlay.addEventListener('click', e => {
+    e.stopPropagation();
+    const {x,y} = svgCoordsFromEvent(e);
+    const sw = { id:'us_'+Date.now(), href:placingSwitch.href, label:placingSwitch.label,
+                 x: Math.max(0,Math.min(96.8, x-1.6)), y: Math.max(0,Math.min(96.8, y-1.6)),
+                 room: findRoomAtPoint(x,y) };
+    userSwitches.push(sw); saveUserSwitches();
+    svg.appendChild(createUserSwitchEl(sw));
+    exitPlacementMode();
+  });
+  svg.appendChild(placeOverlay);
+}
+function exitPlacementMode() {
+  placingSwitch = null;
+  placeOverlay?.remove(); placeOverlay = null;
+  document.getElementById('stxt').textContent = 'Tap a room to toggle · Long-press to dim';
+}
+
+// Edit/drag mode
+function toggleEditSwitches() {
+  editSwitchMode = !editSwitchMode;
+  svg.classList.toggle('edit-switch-mode', editSwitchMode);
+  const btn = document.getElementById('edit-switches-btn');
+  btn.classList.toggle('active', editSwitchMode);
+  btn.textContent = editSwitchMode ? '✓ Done Editing' : '✏ Edit Switches';
+  document.getElementById('stxt').textContent = editSwitchMode
+    ? 'Drag switches to reposition · click × to delete · click Done when finished'
+    : 'Tap a room to toggle · Long-press to dim';
+}
+
+window.addEventListener('mousemove', e => {
+  if (!swDrag) return;
+  const {x,y} = svgCoordsFromEvent(e);
+  swDrag.sw.x = Math.max(0, Math.min(96.8, x - swDrag.ox));
+  swDrag.sw.y = Math.max(0, Math.min(96.8, y - swDrag.oy));
+  swDrag.g.setAttribute('transform',`translate(${swDrag.sw.x},${swDrag.sw.y})`);
+});
+window.addEventListener('mouseup', () => {
+  if (!swDrag) return;
+  swDrag.sw.room = findRoomAtPoint(swDrag.sw.x+1.6, swDrag.sw.y+1.6);
+  saveUserSwitches(); swDrag = null;
+});
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && placingSwitch) exitPlacementMode(); });
+
+renderUserSwitches();
 
 let pressTarget = null;
 let didLongPress = false;
