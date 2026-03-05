@@ -1200,12 +1200,9 @@ ROOMS.forEach(r => {
 });
 
 // ── MOTION SENSOR SWITCHES ──
-const MOTION_DEFAULTS = [
-  {x:22.8, y:69.8, room:"laundry"},
-  {x:25.8, y:60.0, room:"pantry"},
-  {x:32.0, y:69.8, room:"powder"},
-  {x:66.2, y:51.2, room:"owic"},
-];
+const MOTION_DEFAULTS = [];
+// Clear legacy built-in switch positions so users start with a clean overlay
+if (!localStorage.getItem('bhBuiltinCleared')) { localStorage.removeItem('bhMotionPos'); localStorage.removeItem('bhSwitchPos'); localStorage.setItem('bhBuiltinCleared','1'); }
 let builtinMotionPos = JSON.parse(localStorage.getItem('bhMotionPos') || 'null') || MOTION_DEFAULTS.map(p=>({...p}));
 
 function createMotionSwitchEl(pos, idx) {
@@ -1244,13 +1241,7 @@ function renderMotionSwitches() {
 renderMotionSwitches();
 
 // ── DEAKO SWITCH IMAGES ──
-const DEAKO_SW_DEFAULTS = [
-  {x:43.8, y:74.8},
-  {x:63.8, y:28.2},
-  {x:13.0, y:57.2},
-  {x:36.2, y:53.0},
-  {x:36.2, y:55.4},
-];
+const DEAKO_SW_DEFAULTS = [];
 let builtinSwitchPos = JSON.parse(localStorage.getItem('bhSwitchPos') || 'null') || DEAKO_SW_DEFAULTS.map(p=>({...p}));
 
 function createDeakoSwitchEl(pos, idx) {
@@ -2836,6 +2827,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v12.5</div>
+<div id="version-badge">v12.6</div>
 </body>
 </html>
