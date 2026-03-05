@@ -27,7 +27,7 @@ Interactive smart lighting demo for a Brownhaven home floor plan, built for Deak
   3. Tell the user the new version number and share the live link: https://snappahands.github.io/brownhaven/deako-floorplan-demo.html
 
 ## Current Version
-v2.26
+v12.5
 
 ## App Details (deako-floorplan-demo.html)
 - Dark-themed UI (`#0d1117` background)
@@ -51,3 +51,23 @@ dining, kitchen, great, owners, owic, obath, foyer, strg, pantry, mudroom, laund
 - Foyer: x:43.8, y:74.8
 - Owner's Suite: x:64.5, y:28.2
 - Mud Room: x:19.0, y:60.0
+const ROOMS = [
+  {id:"dining", label:"Dining", x:11.79, y:59.32, w:12.38, h:8.46},
+  {id:"kitchen", label:"Kitchen", x:12.50, y:40.60, w:25.00, h:17.51},
+  {id:"great", label:"Great Room", x:38.33, y:20.88, w:26.03, h:37.10},
+  {id:"owners", label:"Owner's Suite", x:65.60, y:20.88, w:24.59, h:27.89},
+  {id:"owic", label:"O. WIC", x:65.50, y:50.06, w:8.47, h:22.70},
+  {id:"obath", label:"O. Bath", x:74.69, y:50.19, w:15.70, h:22.44},
+  {id:"foyer", label:"Foyer", x:38.75, y:58.71, w:7.35, h:17.69},
+  {id:"strg", label:"Staircase", x:46.59, y:58.63, w:18.08, h:18.15},
+  {id:"pantry", label:"Pantry", x:25.00, y:59.14, w:8.57, h:8.82},
+  {id:"mudroom", label:"Mud Room", x:5.48, y:59.40, w:18.80, h:8.43},
+  {id:"laundry", label:"Laundry", x:13.02, y:69.00, w:11.46, h:11.93},
+  {id:"powder", label:"Powder", x:25.31, y:68.87, w:8.26, h:12.06},
+  {id:"porch", label:"Front Porch", x:37.91, y:77.82, w:26.97, h:9.47},
+  {id:"deck", label:"Rear Deck", x:38.12, y:4.67, w:26.96, h:14.79}
+];
+are you there?
+
+ls
+cd brownhaven

@@ -137,6 +137,7 @@
   #ext-view{position:absolute;inset:0;display:none;z-index:10;background:#0a0e17}
   #ext-view.active{display:block}
   #ext-img{width:100%;height:100%;object-fit:contain;display:block;user-select:none;draggable:false}
+  #ext-sky-overlay{position:absolute;top:0;left:0;width:100%;height:52%;background:linear-gradient(to bottom,rgba(0,0,0,1) 0%,rgba(0,0,0,0.55) 65%,rgba(0,0,0,0) 100%);pointer-events:none;opacity:0}
   #ext-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
   #ext-view.ext-map-mode #ext-svg{pointer-events:all;cursor:crosshair}
   .ext-win-label{font-size:2px;fill:#7ecfe0;font-weight:700;text-anchor:middle;dominant-baseline:middle;pointer-events:none;display:none;letter-spacing:.04em;text-transform:uppercase}
@@ -470,6 +471,7 @@
       <input type="file" id="ext-file-input" accept="image/*" style="display:none">
     </div>
     <img id="ext-img" alt="" draggable="false">
+    <div id="ext-sky-overlay"></div>
     <svg id="ext-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
     <div id="ext-room-popup">
       <label>Assign room to window</label>
@@ -1887,9 +1889,9 @@ function setSkyProgress(t) {
   const d = Math.max(0, (t - 0.6) / 0.4);
   const b = 1 - d * 0.97;
   document.getElementById('sky-scene').style.filter = `brightness(${b})`;
-  // Mirror darkening onto exterior house photo
-  const extImg = document.getElementById('ext-img');
-  if (extImg && extImg.src) extImg.style.filter = `brightness(${b})`;
+  // Darken only the sky portion of the exterior photo via an overlay
+  const skyOverlay = document.getElementById('ext-sky-overlay');
+  if (skyOverlay) skyOverlay.style.opacity = d;
 }
 
 let clockAnimId = null;
@@ -2725,6 +2727,7 @@ function toggleExteriorView() {
   const btn = document.getElementById('exterior-btn');
   const active = extView.classList.toggle('active');
   btn.classList.toggle('active', active);
+  btn.textContent = active ? '🏠 Interior' : '🏠 Exterior';
   if (active) refreshExtWindowLevels();
 }
 
@@ -2833,6 +2836,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v12.4</div>
+<div id="version-badge">v12.5</div>
 </body>
 </html>
