@@ -154,8 +154,7 @@
   /* Deako switch hover */
   .deako-switch{transition:transform 0.15s ease;transform-box:fill-box;transform-origin:center;cursor:pointer}
   .deako-switch:hover{transform:scale(5)}
-  @keyframes nightlight-breathe{0%,100%{opacity:.72}50%{opacity:1}}
-  .nightlight-glow-el{animation:nightlight-breathe 3.2s ease-in-out infinite;pointer-events:none}
+  .nightlight-glow-el{opacity:.55;pointer-events:none}
   /* Dimmer popup */
   #dimmer-popup{
     position:fixed;
@@ -1059,9 +1058,9 @@ defs.innerHTML = `<filter id="glow" x="-40%" y="-40%" width="180%" height="180%"
   <feGaussianBlur stdDeviation="1.4"/>
 </filter>
 <radialGradient id="nightlight-glow" cx="50%" cy="65%" r="50%">
-  <stop offset="0%"   stop-color="rgba(255,210,90,0.95)"/>
-  <stop offset="35%"  stop-color="rgba(255,175,50,0.6)"/>
-  <stop offset="70%"  stop-color="rgba(255,140,20,0.25)"/>
+  <stop offset="0%"   stop-color="rgba(255,210,90,0.75)"/>
+  <stop offset="35%"  stop-color="rgba(255,175,50,0.45)"/>
+  <stop offset="70%"  stop-color="rgba(255,140,20,0.18)"/>
   <stop offset="100%" stop-color="rgba(255,120,0,0)"/>
 </radialGradient>`;
 svg.appendChild(defs);
@@ -2480,6 +2479,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v10.3</div>
+<div id="version-badge">v10.4</div>
 </body>
 </html>
