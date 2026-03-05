@@ -131,6 +131,36 @@
   #fpimg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:block;pointer-events:none;user-select:none}
   #svgl{position:absolute;pointer-events:none}
 
+  /* ── EXTERIOR VIEW ──────────────────────────────────────────────────────── */
+  #ext-view{position:absolute;inset:0;display:none;z-index:10;background:#0a0e17}
+  #ext-view.active{display:block}
+  #ext-img{width:100%;height:100%;object-fit:contain;display:block;user-select:none;draggable:false}
+  #ext-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+  #ext-view.ext-map-mode #ext-svg{pointer-events:all;cursor:crosshair}
+  .ext-win-label{font-size:2px;fill:#7ecfe0;font-weight:700;text-anchor:middle;dominant-baseline:middle;pointer-events:none;display:none;letter-spacing:.04em;text-transform:uppercase}
+  #ext-view.ext-map-mode .ext-win-label{display:block}
+  .ext-win-del{display:none;cursor:pointer;pointer-events:all}
+  #ext-view.ext-map-mode .ext-win-del{display:block}
+  #ext-dropzone{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:2px dashed #2a3348;border-radius:10px;cursor:pointer;transition:all .2s;color:#7ecfe0;text-align:center}
+  #ext-dropzone:hover,#ext-dropzone.dragover{border-color:#7ecfe0;background:rgba(126,207,224,0.05)}
+  #ext-dropzone.hidden{display:none}
+  #ext-dropzone-icon{font-size:36px}
+  #ext-dropzone-msg{font-size:12px;font-weight:700;letter-spacing:.06em}
+  #ext-dropzone-sub{font-size:10px;color:#556;font-weight:600}
+  #ext-toolbar{position:absolute;bottom:0;left:0;right:0;display:flex;gap:6px;padding:6px 10px;background:rgba(5,8,18,0.75);border-radius:0 0 10px 10px;align-items:center}
+  .ext-tbtn{padding:4px 10px;border-radius:6px;border:1px solid #2a3348;background:#0d1117;color:#7ecfe0;font-size:10px;font-weight:700;cursor:pointer;letter-spacing:.05em;transition:all .15s}
+  .ext-tbtn:hover{background:#1a2535}.ext-tbtn.active{background:#1a3a4a;border-color:#7ecfe0}
+  #ext-room-popup{position:absolute;background:#111826;border:1px solid #2a3348;border-radius:8px;padding:10px;z-index:200;display:none;flex-direction:column;gap:7px;min-width:160px;box-shadow:0 4px 16px rgba(0,0,0,0.6)}
+  #ext-room-popup.active{display:flex}
+  #ext-room-popup label{color:#7ecfe0;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  #ext-room-select{background:#0d1117;color:#fff;border:1px solid #2a3348;border-radius:5px;padding:4px 6px;font-size:11px;width:100%}
+  #ext-popup-btns{display:flex;gap:5px}
+  #ext-popup-btns button{flex:1;padding:5px;border-radius:5px;border:1px solid #2a3348;background:#1a2535;color:#aaa;font-size:11px;font-weight:700;cursor:pointer}
+  #ext-popup-confirm{color:#7ecfe0 !important;border-color:#7ecfe0 !important}
+  #exterior-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2535;color:#7ecfe0;border:1px solid #2a4a5a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
+  #exterior-btn:hover{background:#223040}
+  #exterior-btn.active{background:#2a4a5a;border-color:#7ecfe0;color:#fff}
+
   .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
   #stxt{color:#7ecfe0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
   #scnt{color:#334;font-size:11px}
@@ -429,6 +459,31 @@
 <div id="fpbox">
   <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" crossorigin="anonymous" draggable="false" alt="">
   <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+  <!-- Exterior view overlay -->
+  <div id="ext-view">
+    <div id="ext-dropzone">
+      <div id="ext-dropzone-icon">🏠</div>
+      <div id="ext-dropzone-msg">Drop house photo here</div>
+      <div id="ext-dropzone-sub">or click to browse</div>
+      <input type="file" id="ext-file-input" accept="image/*" style="display:none">
+    </div>
+    <img id="ext-img" alt="" draggable="false">
+    <svg id="ext-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+    <div id="ext-room-popup">
+      <label>Assign room to window</label>
+      <select id="ext-room-select"></select>
+      <div id="ext-popup-btns">
+        <button id="ext-popup-confirm" onclick="confirmExtWindow()">✓ Save</button>
+        <button onclick="cancelExtWindow()">✕</button>
+      </div>
+    </div>
+    <div id="ext-toolbar">
+      <button class="ext-tbtn" id="ext-map-btn" onclick="toggleExtMapper()">📐 Map Windows</button>
+      <button class="ext-tbtn" onclick="clearExtPhoto()">🗑 New Photo</button>
+      <span style="flex:1"></span>
+      <span style="color:#556;font-size:9px;font-weight:700;letter-spacing:.05em" id="ext-map-hint"></span>
+    </div>
+  </div>
 </div>
 <div id="mapper-panel">
   <div id="mapper-title">Room Mapper</div>
@@ -442,7 +497,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button></span>
 </div>
 
 <div id="switch-picker">
@@ -1057,6 +1112,10 @@ defs.innerHTML = `<filter id="glow" x="-40%" y="-40%" width="180%" height="180%"
 <filter id="switch-shadow" x="-20%" y="-20%" width="140%" height="140%">
   <feDropShadow dx="0" dy="0.15" stdDeviation="0.35" flood-color="rgba(0,0,0,0.7)"/>
 </filter>
+<filter id="win-glow" x="-40%" y="-40%" width="180%" height="180%">
+  <feGaussianBlur stdDeviation="1.2" result="blur"/>
+  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+</filter>
 <filter id="nightlight-blur" x="-100%" y="-100%" width="300%" height="300%">
   <feGaussianBlur stdDeviation="1.4"/>
 </filter>
@@ -1572,6 +1631,7 @@ function updateImg() {
 function updateCount() {
   document.getElementById("ln").textContent = Object.values(levels).filter(v=>v>0).length;
   refreshNightlightGlows();
+  refreshExtWindowLevels();
   renderIphoneRooms();
 }
 function setStatus(m){ document.getElementById("stxt").textContent=m.toUpperCase(); }
@@ -2552,7 +2612,224 @@ function switchTab(idx) {
   });
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
+
+// ── EXTERIOR VIEW ─────────────────────────────────────────────────────────────
+let extWindows = JSON.parse(localStorage.getItem('bhExtWindows') || '[]');
+let extMapMode = false;
+let extDrawStart = null;
+let extDrawRect  = null;
+let extPendingWin = null;
+
+const extView  = document.getElementById('ext-view');
+const extSvgEl = document.getElementById('ext-svg');
+const extImgEl = document.getElementById('ext-img');
+const extDrop  = document.getElementById('ext-dropzone');
+
+// Populate room select
+(function buildExtRoomSelect() {
+  const sel = document.getElementById('ext-room-select');
+  ROOMS.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r.id; o.textContent = r.label;
+    sel.appendChild(o);
+  });
+})();
+
+// Load saved image
+(function loadSavedExtImg() {
+  const saved = localStorage.getItem('bhExtImg');
+  if (saved) { extImgEl.src = saved; extDrop.classList.add('hidden'); }
+})();
+
+function saveExtWindows() { localStorage.setItem('bhExtWindows', JSON.stringify(extWindows)); }
+
+function extSvgCoords(e) {
+  const r = extView.getBoundingClientRect();
+  return { x: (e.clientX - r.left) / r.width * 100, y: (e.clientY - r.top) / r.height * 100 };
+}
+
+function renderExtWindows() {
+  extSvgEl.querySelectorAll('.ext-win-g').forEach(el => el.remove());
+  extWindows.forEach(w => {
+    const roomData = ROOMS.find(r => r.id === w.room);
+    const lv = w.room ? (levels[w.room] || 0) : 0;
+    const alpha = lv / 100 * 0.78;
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.classList.add('ext-win-g'); g.dataset.winId = w.id;
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x', w.x); rect.setAttribute('y', w.y);
+    rect.setAttribute('width', w.w); rect.setAttribute('height', w.h);
+    rect.setAttribute('rx','0.8');
+    rect.setAttribute('fill', `rgba(255,205,80,${alpha})`);
+    if (lv > 0) rect.setAttribute('filter','url(#win-glow)');
+    rect.classList.add('ext-win-rect');
+
+    // Outline always visible in map mode
+    const outline = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    outline.setAttribute('x', w.x); outline.setAttribute('y', w.y);
+    outline.setAttribute('width', w.w); outline.setAttribute('height', w.h);
+    outline.setAttribute('rx','0.8');
+    outline.setAttribute('fill','none');
+    outline.setAttribute('stroke','rgba(126,207,224,0.6)');
+    outline.setAttribute('stroke-width','0.35');
+    outline.classList.add('ext-win-outline');
+    outline.style.display = extMapMode ? 'block' : 'none';
+
+    // Room label
+    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x', w.x + w.w/2); label.setAttribute('y', w.y + w.h/2);
+    label.classList.add('ext-win-label');
+    label.textContent = roomData ? roomData.label : w.room;
+
+    // Delete badge
+    const dc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dc.setAttribute('cx', w.x + w.w); dc.setAttribute('cy', w.y);
+    dc.setAttribute('r','2.2'); dc.setAttribute('fill','#cc0000');
+    dc.classList.add('ext-win-del');
+    const dt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    dt.setAttribute('x', w.x + w.w); dt.setAttribute('y', w.y + 0.8);
+    dt.setAttribute('text-anchor','middle'); dt.setAttribute('font-size','2.8');
+    dt.setAttribute('fill','#fff'); dt.classList.add('ext-win-del');
+    dt.textContent = '×';
+    [dc, dt].forEach(el => el.addEventListener('click', e => {
+      e.stopPropagation();
+      extWindows = extWindows.filter(win => win.id !== w.id);
+      saveExtWindows(); renderExtWindows();
+    }));
+
+    g.appendChild(rect); g.appendChild(outline); g.appendChild(label);
+    g.appendChild(dc); g.appendChild(dt);
+    extSvgEl.appendChild(g);
+  });
+}
+
+function refreshExtWindowLevels() {
+  extWindows.forEach(w => {
+    const g = extSvgEl.querySelector(`[data-win-id="${w.id}"]`);
+    if (!g) return;
+    const rect = g.querySelector('.ext-win-rect');
+    if (!rect) return;
+    const lv = w.room ? (levels[w.room] || 0) : 0;
+    rect.setAttribute('fill', `rgba(255,205,80,${lv/100*0.78})`);
+    if (lv > 0) rect.setAttribute('filter','url(#win-glow)');
+    else rect.removeAttribute('filter');
+  });
+}
+
+function toggleExteriorView() {
+  const btn = document.getElementById('exterior-btn');
+  const active = extView.classList.toggle('active');
+  btn.classList.toggle('active', active);
+  if (active) refreshExtWindowLevels();
+}
+
+function toggleExtMapper() {
+  extMapMode = !extMapMode;
+  extView.classList.toggle('ext-map-mode', extMapMode);
+  const btn = document.getElementById('ext-map-btn');
+  btn.classList.toggle('active', extMapMode);
+  btn.textContent = extMapMode ? '✓ Done Mapping' : '📐 Map Windows';
+  document.getElementById('ext-map-hint').textContent = extMapMode
+    ? 'Drag to outline a window, then assign a room' : '';
+  renderExtWindows();
+}
+
+function clearExtPhoto() {
+  if (!confirm('Remove the house photo and all window mappings?')) return;
+  localStorage.removeItem('bhExtImg');
+  localStorage.removeItem('bhExtWindows');
+  extWindows = [];
+  extImgEl.src = '';
+  extDrop.classList.remove('hidden');
+  extSvgEl.querySelectorAll('.ext-win-g').forEach(el => el.remove());
+}
+
+function confirmExtWindow() {
+  const room = document.getElementById('ext-room-select').value;
+  if (!extPendingWin) return;
+  extWindows.push({ id:'win_'+Date.now(), room, ...extPendingWin });
+  saveExtWindows();
+  extPendingWin = null;
+  document.getElementById('ext-room-popup').classList.remove('active');
+  renderExtWindows();
+}
+function cancelExtWindow() {
+  extPendingWin = null;
+  document.getElementById('ext-room-popup').classList.remove('active');
+}
+
+// Map drawing
+extSvgEl.addEventListener('mousedown', e => {
+  if (!extMapMode || e.target.classList.contains('ext-win-del')) return;
+  e.preventDefault();
+  extDrawStart = extSvgCoords(e);
+  extDrawRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  extDrawRect.setAttribute('fill','rgba(255,205,80,0.18)');
+  extDrawRect.setAttribute('stroke','#7ecfe0');
+  extDrawRect.setAttribute('stroke-width','0.4');
+  extDrawRect.setAttribute('stroke-dasharray','1.2 0.6');
+  extDrawRect.setAttribute('rx','0.8');
+  extSvgEl.appendChild(extDrawRect);
+});
+extSvgEl.addEventListener('mousemove', e => {
+  if (!extDrawRect || !extDrawStart) return;
+  const {x,y} = extSvgCoords(e);
+  extDrawRect.setAttribute('x', Math.min(extDrawStart.x,x));
+  extDrawRect.setAttribute('y', Math.min(extDrawStart.y,y));
+  extDrawRect.setAttribute('width', Math.abs(x-extDrawStart.x));
+  extDrawRect.setAttribute('height', Math.abs(y-extDrawStart.y));
+});
+extSvgEl.addEventListener('mouseup', e => {
+  if (!extDrawRect || !extDrawStart) return;
+  const {x,y} = extSvgCoords(e);
+  const rx=Math.min(extDrawStart.x,x), ry=Math.min(extDrawStart.y,y);
+  const rw=Math.abs(x-extDrawStart.x), rh=Math.abs(y-extDrawStart.y);
+  extDrawRect.remove(); extDrawRect=null; extDrawStart=null;
+  if (rw < 1 || rh < 1) return;
+  extPendingWin = {x:rx,y:ry,w:rw,h:rh};
+  const popup = document.getElementById('ext-room-popup');
+  const vr = extView.getBoundingClientRect();
+  popup.style.left = Math.min(e.clientX - vr.left, vr.width - 175) + 'px';
+  popup.style.top  = Math.min(e.clientY - vr.top,  vr.height - 110) + 'px';
+  popup.classList.add('active');
+});
+
+// File drop / browse
+extDrop.addEventListener('click', () => document.getElementById('ext-file-input').click());
+document.getElementById('ext-file-input').addEventListener('change', e => {
+  if (e.target.files[0]) loadExtImage(e.target.files[0]);
+});
+extView.addEventListener('dragover', e => { e.preventDefault(); if (!extImgEl.src) extDrop.classList.add('dragover'); });
+extView.addEventListener('dragleave', () => extDrop.classList.remove('dragover'));
+extView.addEventListener('drop', e => {
+  e.preventDefault(); extDrop.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadExtImage(file);
+});
+
+function loadExtImage(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(1, 1200 / img.naturalWidth);
+      canvas.width = Math.round(img.naturalWidth * scale);
+      canvas.height = Math.round(img.naturalHeight * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.83);
+      extImgEl.src = dataUrl;
+      extDrop.classList.add('hidden');
+      try { localStorage.setItem('bhExtImg', dataUrl); } catch(e) {}
+      renderExtWindows();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 </script>
-<div id="version-badge">v11.8</div>
+<div id="version-badge">v11.9</div>
 </body>
 </html>
