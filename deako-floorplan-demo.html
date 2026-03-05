@@ -406,7 +406,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.1</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.2</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1485,16 +1485,8 @@ function setSunPosition(angleDeg) {
   orb.style.opacity = Math.min(fadeRight, fadeLeft);
 }
 
-function lerpHex(c1, c2, t) {
-  const p = (s,i) => parseInt(s.slice(i,i+2),16);
-  return `rgb(${Math.round(p(c1,1)+(p(c2,1)-p(c1,1))*t)},${Math.round(p(c1,3)+(p(c2,3)-p(c1,3))*t)},${Math.round(p(c1,5)+(p(c2,5)-p(c1,5))*t)})`;
-}
 function setSkyProgress(t) {
-  const day   = ['2e7fc4','5aaae0','f0c76a','e07830'];
-  const night = ['03050d','090e22','1c1828','28160a'];
-  const s = day.map((c,i) => lerpHex(c, night[i], t));
-  document.getElementById('sky-scene').style.background =
-    `linear-gradient(180deg,${s[0]} 0%,${s[1]} 50%,${s[2]} 82%,${s[3]} 100%)`;
+  document.getElementById('sky-scene').style.filter = `brightness(${1 - t * 0.97})`;
 }
 
 function animateSunArc(fromAngle, toAngle, duration, onDone, onStep) {
@@ -1524,6 +1516,7 @@ function toggleSunSchedule() {
     sunIsDay = false;
     hideSunSmile();
     animateSunArc(90, -8, 3200, () => {
+      sky.style.filter = '';
       sky.classList.add('night');
       clock.textContent = '8:23 PM';
       badge.textContent = '🌙 SUNSET';
