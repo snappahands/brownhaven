@@ -101,7 +101,7 @@
   #scnt{color:#334;font-size:11px}
   #scnt span{color:#f5c842;font-weight:700}
   .dtag{font-size:10px;color:#2a3348;letter-spacing:.06em}
-  #debug-btn{position:fixed;bottom:10px;right:10px;z-index:9999;padding:8px 14px;background:#cc0000;color:#fff;border:2px solid #ff4444;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+  #debug-btn{position:absolute;bottom:8px;right:8px;z-index:9999;padding:5px 10px;background:#cc0000;color:#fff;border:2px solid #ff4444;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer}
   #debug-btn:hover{background:#ff2222}
   #mapper-panel{position:fixed;left:10px;top:50%;transform:translateY(-50%);background:#111826;border:1px solid #2a3348;border-radius:10px;padding:10px;width:148px;z-index:9999;display:none;flex-direction:column;gap:6px;max-height:80vh}
   #mapper-panel.show{display:flex}
@@ -384,14 +384,14 @@
 <div id="left-panel">
 
 <header>
-  <div class="logo">deako<em>.</em><small>Smart Lighting Demo</small></div>
+  <div class="logo" style="margin-left:14px">deako<em>.</em><small>Smart Lighting Demo</small></div>
 </header>
 
 <div id="fpbox">
   <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" crossorigin="anonymous" draggable="false" alt="">
   <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+  <button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button>
 </div>
-<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button>
 <div id="mapper-panel">
   <div id="mapper-title">Room Mapper</div>
   <div id="mapper-room-list"></div>
@@ -404,7 +404,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v6.2</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v6.3</span></span>
 </div>
 
 </div><!-- #left-panel -->
