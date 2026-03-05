@@ -397,7 +397,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v3.0</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v3.1</span></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1460,12 +1460,12 @@ function fireShootingStar() {
 
   const W = sky.clientWidth;
   const H = sky.clientHeight;
-  const angleDeg = 20 + Math.random() * 15;          // 20–35° downward
+  const angleDeg = 18 + Math.random() * 12;           // 18–30° downward
   const angleRad = angleDeg * Math.PI / 180;
-  const tailLen  = 100 + Math.random() * 60;          // 100–160px tail
-  const startY   = H * (0.04 + Math.random() * 0.35); // upper 39% of sky
+  const tailLen  = 55 + Math.random() * 35;            // 55–90px — subtle
+  const startY   = H * (0.04 + Math.random() * 0.38); // upper 42% of sky
 
-  // Travel distance so the head crosses the full sky width
+  // Star travels right→left: starts off right edge, moves left+down
   const travelX = W + tailLen + 20;
   const travelY = travelX * Math.tan(angleRad);
 
@@ -1473,15 +1473,15 @@ function fireShootingStar() {
   el.style.cssText = [
     'position:absolute',
     `width:${tailLen}px`,
-    'height:3px',
-    // tail fades left→right: transparent tail, bright blue-white head
-    'background:linear-gradient(to right,rgba(255,255,255,0) 0%,rgba(180,220,255,0.5) 45%,rgba(220,240,255,0.9) 78%,#fff 100%)',
+    'height:2px',
+    // head at LEFT (leading), tail fades to the RIGHT — right-to-left direction
+    'background:linear-gradient(to left,rgba(255,255,255,0) 0%,rgba(180,220,255,0.4) 45%,rgba(220,240,255,0.85) 80%,#fff 100%)',
     'border-radius:2px',
-    `left:${-tailLen - 10}px`,  // start fully off left edge
+    `left:${W + 10}px`,            // start off right edge
     `top:${startY}px`,
-    `transform:rotate(${angleDeg}deg)`,
-    'transform-origin:right center',  // pivot at the bright head
-    'box-shadow:0 0 4px 2px rgba(200,230,255,0.95),0 0 12px 5px rgba(150,200,255,0.6)',
+    `transform:rotate(-${angleDeg}deg)`,  // tilt: head lower-left, tail upper-right
+    'transform-origin:left center',       // pivot at the bright head (left end)
+    'box-shadow:0 0 3px 1px rgba(210,230,255,0.8),0 0 7px 3px rgba(160,200,255,0.35)',
     'opacity:0',
     'pointer-events:none',
     'z-index:10'
@@ -1490,15 +1490,14 @@ function fireShootingStar() {
   sky.appendChild(el);
 
   el.animate([
-    { opacity: 0,   transform: `translate(0,0) rotate(${angleDeg}deg)` },
-    { opacity: 1,   transform: `translate(${travelX*0.08}px,${travelY*0.08}px) rotate(${angleDeg}deg)`, offset: 0.08 },
-    { opacity: 1,   transform: `translate(${travelX*0.75}px,${travelY*0.75}px) rotate(${angleDeg}deg)`, offset: 0.75 },
-    { opacity: 0,   transform: `translate(${travelX}px,${travelY}px) rotate(${angleDeg}deg)` }
-  ], { duration: 700 + Math.random() * 300, easing: 'linear' })
+    { opacity: 0,  transform: `translate(0,0) rotate(-${angleDeg}deg)` },
+    { opacity: 0.9, transform: `translate(${-travelX*0.08}px,${travelY*0.08}px) rotate(-${angleDeg}deg)`, offset: 0.09 },
+    { opacity: 0.9, transform: `translate(${-travelX*0.78}px,${travelY*0.78}px) rotate(-${angleDeg}deg)`, offset: 0.78 },
+    { opacity: 0,  transform: `translate(${-travelX}px,${travelY}px) rotate(-${angleDeg}deg)` }
+  ], { duration: 750 + Math.random() * 350, easing: 'linear' })
     .addEventListener('finish', () => el.remove());
 
-  // Schedule next star
-  _ssTimer = setTimeout(fireShootingStar, 1800 + Math.random() * 2500);
+  _ssTimer = setTimeout(fireShootingStar, 2000 + Math.random() * 3000);
 }
 
 function startShootingStars() {
