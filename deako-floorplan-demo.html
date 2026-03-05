@@ -1883,10 +1883,39 @@ function toggleSunSchedule() {
       startShootingStars();
     }, setSkyProgress);
   } else {
-    // Night → Day: show message briefly then reload
+    // Night → Day: show notice, then animate sunrise
     btn.textContent = 'Notice: All exterior lights turn off';
     btn.disabled = true;
-    setTimeout(() => location.reload(), 5500);
+
+    setTimeout(() => {
+      sunIsDay = true;
+      clearTimeout(_ssTimer);
+
+      sky.classList.remove('night');
+      document.getElementById('device-panel').classList.remove('night');
+
+      badge.textContent = '☀ SUNRISE';
+      badge.className = '';
+      clock.textContent = '6:18 AM';
+      sunClockMins = 378;
+      info.textContent = 'Lights scheduled to turn ON at sunset';
+
+      cancelAllTimers(); clearSceneStepTimers();
+      activeSceneKey = null;
+      document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
+      SUN_ROOMS.forEach(id => { if (levels[id] !== undefined) { levels[id] = 0; renderRoom(id); } });
+      updateCount(); updateImg(); renderIphoneRooms();
+
+      setSunPosition(176);
+      animateSunArc(176, 90, 4000, () => {
+        setTimeout(showSunSmile, 1000);
+        btn.textContent = '🌙 Simulate Sunset Schedule';
+        btn.disabled = false;
+      });
+      animateClock(378, 780, 4000, () => {
+        badge.textContent = '☀ DAYTIME';
+      });
+    }, 2000);
   }
 }
 
@@ -2523,6 +2552,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v11.6</div>
+<div id="version-badge">v11.7</div>
 </body>
 </html>
