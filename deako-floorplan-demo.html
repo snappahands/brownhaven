@@ -11,7 +11,7 @@
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%;overflow:hidden;background:#0d1117;font-family:system-ui,-apple-system,sans-serif}
   body{display:flex;flex-direction:row;padding:10px 12px;gap:12px;height:100vh;max-height:100vh;align-items:stretch;overflow:hidden}
-  #left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+  #left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;padding-top:32px}
 
   /* ── DEVICE PANEL (left) ──────────────────────────────────────────────── */
   #device-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:20px 0;position:relative}
@@ -379,6 +379,12 @@
   <div class="logo">deako<em>.</em><small>Smart Lighting Demo</small></div>
 </header>
 
+<div class="statusbar">
+  <span id="stxt">Tap a room to toggle · Long-press to dim</span>
+  <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v3.8</span></span>
+</div>
+
 <div id="fpbox">
   <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" crossorigin="anonymous" draggable="false" alt="">
   <svg id="svgl" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
@@ -391,12 +397,6 @@
   <div id="mapper-hint">Click a room, then drag on the floor plan to set its boundary.</div>
   <button class="mapper-action" id="mapper-copy-btn" onclick="copyCoords()">📋 Copy Coords</button>
   <button class="mapper-action" id="mapper-exit-btn" onclick="toggleDebug()">✕ Exit Mapper</button>
-</div>
-
-<div class="statusbar">
-  <span id="stxt">Tap a room to toggle · Long-press to dim</span>
-  <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v3.7</span></span>
 </div>
 
 </div><!-- #left-panel -->
