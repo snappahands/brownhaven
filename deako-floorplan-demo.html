@@ -157,7 +157,9 @@
   #dimmer-overlay.show{display:block}
 
   /* ── IPHONE PANEL ─────────────────────────────────────────────────────── */
-  #right-panel{width:310px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:4px 0}
+  #right-panel{width:310px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:4px 0}
+  .deako-app-icon{width:72px;height:72px;background:#dcdcd8;border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.15);flex-shrink:0}
+  .deako-app-icon span{font-size:15px;font-weight:900;color:#1a1a1a;letter-spacing:-.02em}
   .iphone-frame{
     width:284px;background:linear-gradient(160deg,#2c2c30 0%,#1c1c20 100%);
     border-radius:46px;padding:14px 10px 8px;position:relative;
@@ -169,7 +171,7 @@
   .iphone-frame::after{content:'';position:absolute;right:-3px;top:138px;width:3px;height:58px;background:#252528;border-radius:0 3px 3px 0}
   .iphone-island{width:110px;height:30px;background:#000;border-radius:20px;margin:0 auto 10px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;gap:6px}
   .iphone-island-cam{width:10px;height:10px;border-radius:50%;background:#111;border:1.5px solid #222}
-  .iphone-screen{background:#efefef;border-radius:38px;overflow:hidden;height:554px;display:flex;flex-direction:column}
+  .iphone-screen{background:#efefef;border-radius:38px;overflow:hidden;height:554px;display:flex;flex-direction:column;position:relative}
   .iphone-home-bar{width:118px;height:4px;background:#3a3a3e;border-radius:2px;margin:7px auto 4px}
 
   /* Deako App UI */
@@ -184,6 +186,17 @@
   .iapp-logo{color:#000;font-size:30px;font-weight:900;letter-spacing:-.02em;line-height:1.1}
   .iapp-home-name{display:none}
   .iapp-gear{background:none;border:none;color:#000;font-size:22px;cursor:pointer;padding:4px 2px;line-height:1;margin-top:8px;opacity:.6}
+  /* Settings dropdown */
+  .iapp-settings-menu{position:absolute;top:90px;right:10px;width:210px;background:#1c1c1e;border-radius:14px;overflow:hidden;box-shadow:0 8px 28px rgba(0,0,0,.55);z-index:50;display:none}
+  .iapp-settings-menu.show{display:block}
+  .iapp-smenu-item{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.08);color:#fff;font-size:14px;font-weight:500;transition:background .12s}
+  .iapp-smenu-item:last-child{border-bottom:none}
+  .iapp-smenu-item:hover{background:rgba(255,255,255,.07)}
+  .iapp-smenu-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+  .iapp-smenu-chevron{margin-left:auto;color:#8e8e93;font-size:13px}
+  .iapp-smenu-dot{width:7px;height:7px;background:#30d158;border-radius:50%;margin-left:auto;flex-shrink:0}
+  .iapp-settings-backdrop{position:absolute;inset:0;z-index:49;display:none}
+  .iapp-settings-backdrop.show{display:block}
   .iapp-scroll{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:14px}
   .iapp-scroll::-webkit-scrollbar{width:0}
   .iapp-sec-label{color:#8e8e93;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;padding-left:2px}
@@ -337,12 +350,13 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.84</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.85</span></span>
 </div>
 
 </div><!-- #left-panel -->
 
 <div id="right-panel">
+  <div class="deako-app-icon"><span>deako.</span></div>
   <div class="iphone-frame">
     <div class="iphone-island">
       <div class="iphone-island-cam"></div>
@@ -362,7 +376,18 @@
       <!-- App header -->
       <div class="iapp-header">
         <div class="iapp-logo">My Home</div>
-        <button class="iapp-gear" onclick="openSceneMgr()">⚙</button>
+        <button class="iapp-gear" onclick="toggleSettingsMenu()">⚙</button>
+      </div>
+      <!-- Settings backdrop + dropdown -->
+      <div class="iapp-settings-backdrop" id="iapp-settings-backdrop" onclick="closeSettingsMenu()"></div>
+      <div class="iapp-settings-menu" id="iapp-settings-menu">
+        <div class="iapp-smenu-item"><span class="iapp-smenu-icon">＋</span>Add</div>
+        <div class="iapp-smenu-item" onclick="closeSettingsMenu();openSceneMgr()"><span class="iapp-smenu-icon">✏️</span>Edit</div>
+        <div class="iapp-smenu-item"><span class="iapp-smenu-icon">👤</span>Users</div>
+        <div class="iapp-smenu-item"><span class="iapp-smenu-icon">📶</span>Wi-fi settings<span class="iapp-smenu-dot"></span></div>
+        <div class="iapp-smenu-item"><span class="iapp-smenu-icon">🏠</span>Home settings</div>
+        <div class="iapp-smenu-item"><span class="iapp-smenu-icon">🔁</span>Change home<span class="iapp-smenu-chevron">›</span></div>
+        <div class="iapp-smenu-item"><span class="iapp-smenu-icon">＋</span>Add home</div>
       </div>
       <!-- Scrollable content (Home tab) -->
       <div class="iapp-scroll active" id="iapp-home-view">
@@ -1211,6 +1236,24 @@ function runScene(btn, key) {
 // ── SCENE BUTTONS ──────────────────────────────────────────────────────────
 function renderSceneButtons() {
   renderIphoneScenes();
+}
+
+// ── SETTINGS MENU ──────────────────────────────────────────────────────────
+function toggleSettingsMenu() {
+  const menu = document.getElementById("iapp-settings-menu");
+  const backdrop = document.getElementById("iapp-settings-backdrop");
+  const isOpen = menu.classList.contains("show");
+  if (isOpen) {
+    menu.classList.remove("show");
+    backdrop.classList.remove("show");
+  } else {
+    menu.classList.add("show");
+    backdrop.classList.add("show");
+  }
+}
+function closeSettingsMenu() {
+  document.getElementById("iapp-settings-menu").classList.remove("show");
+  document.getElementById("iapp-settings-backdrop").classList.remove("show");
 }
 
 // ── SCENE MANAGER ──────────────────────────────────────────────────────────
