@@ -164,7 +164,7 @@
   .deako-app-icon span{font-size:12px;font-weight:900;color:#1a1a1a;letter-spacing:-.02em}
   .deako-app-promo-text{color:#7a8a9a;font-size:8.5px;font-weight:600;text-align:center;line-height:1.35;letter-spacing:.02em;text-transform:uppercase}
   /* Sun Scheduler */
-  #sun-scheduler{flex:1;display:flex;flex-direction:column;align-items:stretch;gap:5px}
+  #sun-scheduler{width:100%;display:flex;flex-direction:column;align-items:stretch;gap:5px}
   #sky-scene{width:100%;height:100px;border-radius:10px;position:relative;overflow:hidden;cursor:pointer;
     background:linear-gradient(180deg,#2e7fc4 0%,#5aaae0 50%,#f0c76a 82%,#e07830 100%);
     transition:background 1.4s ease}
@@ -380,19 +380,12 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.90</span></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v2.91</span></span>
 </div>
 
 </div><!-- #left-panel -->
 
 <div id="right-panel">
-  <div class="right-panel-top">
-    <!-- Deako app promo (left) -->
-    <div class="deako-app-promo">
-      <div class="deako-app-icon"><span>deako.</span></div>
-      <div class="deako-app-promo-text">Look for the free Deako app in the App Store</div>
-    </div>
-    <!-- Sun scheduler (right) -->
     <div id="sun-scheduler">
       <div id="sky-scene">
         <div class="sky-star" style="width:2px;height:2px;top:18%;left:14%"></div>
@@ -416,7 +409,6 @@
       <div id="sun-sched-info">Lights scheduled to turn ON at sunset</div>
       <button id="sun-toggle-btn" onclick="toggleSunSchedule()">🌅 Simulate Sunset</button>
     </div>
-  </div>
   <div class="iphone-frame">
     <div class="iphone-island">
       <div class="iphone-island-cam"></div>
@@ -1319,9 +1311,10 @@ function setSunPosition(angleDeg) {
   const orb = document.getElementById('sun-orb');
   orb.style.left = (x - 11) + 'px';
   orb.style.top  = (y - 11) + 'px';
-  // fade sun near/below horizon
-  const fade = Math.max(0, Math.min(1, angleDeg / 18));
-  orb.style.opacity = fade;
+  // fade near both horizons (right ~0° and left ~180°)
+  const fadeRight = Math.max(0, Math.min(1, angleDeg / 16));
+  const fadeLeft  = Math.max(0, Math.min(1, (180 - angleDeg) / 16));
+  orb.style.opacity = Math.min(fadeRight, fadeLeft);
 }
 
 function animateSunArc(fromAngle, toAngle, duration, onDone) {
@@ -1346,9 +1339,9 @@ function toggleSunSchedule() {
   const btn    = document.getElementById('sun-toggle-btn');
 
   if (sunIsDay) {
-    // Day → Night: sun sets (arcs from ~100° down to 5°, then sky goes dark)
+    // Day → Night: sun arcs from high position down and below right horizon, then sky goes dark
     sunIsDay = false;
-    animateSunArc(100, 5, 1600, () => {
+    animateSunArc(90, -8, 2000, () => {
       sky.classList.add('night');
       clock.textContent = '8:23 PM';
       badge.textContent = '🌙 SUNSET';
@@ -1359,7 +1352,7 @@ function toggleSunSchedule() {
       updateCount(); updateImg(); renderIphoneRooms();
     });
   } else {
-    // Night → Day: moon fades, sun rises (arcs from 175° across to ~100°)
+    // Night → Day: sky brightens, sun rises from left horizon up into the sky and stays
     sunIsDay = true;
     sky.classList.remove('night');
     clock.textContent = '6:18 AM';
@@ -1367,17 +1360,16 @@ function toggleSunSchedule() {
     badge.className = '';
     info.textContent = 'Lights scheduled to turn ON at sunset';
     btn.textContent = '🌅 Simulate Sunset';
-    setSunPosition(175);
-    animateSunArc(175, 100, 1800, () => {
-      SUN_ROOMS.forEach(id => { if(levels[id]!==undefined){ levels[id]=0; renderRoom(id); }});
-      updateCount(); updateImg(); renderIphoneRooms();
-    });
+    setSunPosition(182);
+    SUN_ROOMS.forEach(id => { if(levels[id]!==undefined){ levels[id]=0; renderRoom(id); }});
+    updateCount(); updateImg(); renderIphoneRooms();
+    animateSunArc(182, 90, 2000, null);
   }
 }
 
-// Place sun at morning position on load
+// Place sun at midday position on load
 window.addEventListener('load', () => {
-  setTimeout(() => setSunPosition(100), 50);
+  setTimeout(() => setSunPosition(90), 50);
 });
 
 // ── SETTINGS MENU ──────────────────────────────────────────────────────────
