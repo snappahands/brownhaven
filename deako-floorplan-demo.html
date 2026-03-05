@@ -14,22 +14,22 @@
   #left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;position:relative}
 
   /* ── SWITCH PICKER PANEL ─────────────────────────────────────────────── */
-  #switch-picker{position:absolute;bottom:50px;left:0;right:0;background:#080b12;border:1px solid #1e2d42;border-top:2px solid #7ecfe0;border-radius:12px 12px 0 0;z-index:600;transform:translateY(100%);transition:transform .3s ease;overflow:hidden;box-shadow:0 -4px 24px rgba(0,0,0,0.6)}
+  #switch-picker{position:absolute;bottom:50px;left:0;right:0;background:#243447;border:1px solid #2e4460;border-top:2px solid #7ecfe0;border-radius:12px 12px 0 0;z-index:600;transform:translateY(100%);transition:transform .3s ease;overflow:hidden;box-shadow:0 -4px 24px rgba(0,0,0,0.6)}
   #switch-picker.open{transform:translateY(0)}
-  #sw-pick-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid #1a2535;background:#080b12}
+  #sw-pick-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid #2e4460;background:#1e2d3e}
   #sw-pick-title{color:#7ecfe0;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-  #sw-pick-close{background:none;border:none;color:#556;font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
+  #sw-pick-close{background:none;border:none;color:#7a9ab5;font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
   #sw-pick-close:hover{color:#fff}
-  #sw-pick-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:12px 14px}
-  .sw-pick-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:grab;padding:8px 4px;border-radius:10px;border:1px solid #1a2535;background:#0d1520;transition:all .18s}
-  .sw-pick-item:hover{background:#0f1c2e;border-color:#7ecfe0;box-shadow:0 0 10px rgba(126,207,224,0.18)}
-  .sw-pick-item.selected{background:#0f2535;border-color:#7ecfe0;box-shadow:0 0 12px rgba(126,207,224,0.25)}
+  #sw-pick-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:12px 14px;background:#243447}
+  .sw-pick-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:grab;padding:8px 4px;border-radius:10px;border:1px solid #2e4460;background:#1e2d3e;transition:all .18s}
+  .sw-pick-item:hover{background:#263d55;border-color:#7ecfe0;box-shadow:0 0 10px rgba(126,207,224,0.2)}
+  .sw-pick-item.selected{background:#1e3a52;border-color:#7ecfe0;box-shadow:0 0 12px rgba(126,207,224,0.28)}
   .sw-pick-img{width:68px;height:68px;object-fit:contain;border-radius:8px;background:#fff;padding:4px;transition:transform .18s ease;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
   .sw-pick-item:hover .sw-pick-img{transform:scale(1.18)}
   .sw-pick-label{color:#8aabbd;font-size:7.5px;font-weight:700;letter-spacing:.05em;text-align:center;line-height:1.3;text-transform:uppercase}
   .sw-pick-item:hover .sw-pick-label{color:#7ecfe0}
   .sw-pick-item.selected .sw-pick-label{color:#7ecfe0}
-  #sw-pick-hint{color:#7ecfe0;font-size:9px;font-weight:700;letter-spacing:.06em;text-align:center;padding:4px 14px 10px;opacity:0.8}
+  #sw-pick-hint{color:#7ecfe0;font-size:9px;font-weight:700;letter-spacing:.06em;text-align:center;padding:4px 14px 10px;opacity:0.8;background:#243447}
 
   /* ── EDIT SWITCH MODE ────────────────────────────────────────────────── */
   #edit-switches-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a3a1a;color:#4ade80;border:1px solid #2a5a2a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
@@ -437,7 +437,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.8</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.9</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button></span>
 </div>
 
 <div id="switch-picker">
@@ -1113,58 +1113,81 @@ ROOMS.forEach(r => {
 });
 
 // ── MOTION SENSOR SWITCHES ──
-[
+const MOTION_DEFAULTS = [
   {x:22.8, y:69.8, room:"laundry"},
   {x:25.8, y:60.0, room:"pantry"},
   {x:32.0, y:69.8, room:"powder"},
   {x:66.2, y:51.2, room:"owic"},
-].forEach(pos=>{
+];
+let builtinMotionPos = JSON.parse(localStorage.getItem('bhMotionPos') || 'null') || MOTION_DEFAULTS.map(p=>({...p}));
+
+function createMotionSwitchEl(pos, idx) {
+  const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.dataset.builtinType = 'motion'; g.dataset.builtinIdx = idx;
+  g.setAttribute('transform',`translate(${pos.x},${pos.y})`);
   const si = document.createElementNS("http://www.w3.org/2000/svg","image");
   si.setAttribute("href","https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Simple_Motion_1080p_Square.png?v=1763997321");
-  si.setAttribute("x",pos.x); si.setAttribute("y",pos.y);
+  si.setAttribute("x","0"); si.setAttribute("y","0");
   si.setAttribute("width","3.2"); si.setAttribute("height","3.2");
   si.setAttribute("preserveAspectRatio","xMidYMid meet");
   si.setAttribute("filter","url(#switch-shadow)");
   si.classList.add("deako-switch");
-  si.style.pointerEvents="all";
-  si.style.cursor="pointer";
-  si.addEventListener("mousedown", e=>e.stopPropagation());
+  si.style.pointerEvents="all"; si.style.cursor="pointer";
+  g.addEventListener('mousedown', e=>{
+    if (!editSwitchMode) return;
+    e.stopPropagation(); e.preventDefault();
+    const {x,y} = svgCoordsFromEvent(e);
+    swDrag = {g, pos, ox:x-pos.x, oy:y-pos.y, builtinType:'motion', builtinIdx:idx};
+  });
   si.addEventListener("click", e=>{
+    if (editSwitchMode) { e.stopPropagation(); return; }
     e.stopPropagation();
     levels[pos.room] = levels[pos.room] > 0 ? 0 : 80;
-    renderRoom(pos.room);
-    updateCount(); updateImg(); renderIphoneRooms();
+    renderRoom(pos.room); updateCount(); updateImg(); renderIphoneRooms();
   });
-  svg.appendChild(si);
-});
+  g.appendChild(si);
+  return g;
+}
+function renderMotionSwitches() {
+  svg.querySelectorAll('[data-builtin-type="motion"]').forEach(el=>el.remove());
+  builtinMotionPos.forEach((pos,idx) => svg.appendChild(createMotionSwitchEl(pos,idx)));
+}
+renderMotionSwitches();
 
 // ── DEAKO SWITCH IMAGES ──
-let foyerSwitchNext = "off"; // first click = all off
-let greatSwitchNext = "dinner"; // first click = dinner scene
-let allOnOffNext = "on"; // first click = all on
-[
-  {x:43.8, y:74.8, interactive:true},              // foyer — toggles all off / all on
-  {x:63.8, y:28.2, interactive:true},              // owner's suite — left wall at entry door
-  {x:13.0, y:57.2, interactive:true},              // mud room — inside the door
-  {x:36.2, y:53.0, interactive:true, clickFn:"dinner"}, // great room/kitchen wall — dinner / all on
-  {x:36.2, y:55.4, interactive:true, clickFn:"allon"},  // below great room — all on / all off
-].forEach(pos=>{
+const DEAKO_SW_DEFAULTS = [
+  {x:43.8, y:74.8, interactive:true},
+  {x:63.8, y:28.2, interactive:true},
+  {x:13.0, y:57.2, interactive:true},
+  {x:36.2, y:53.0, interactive:true, clickFn:"dinner"},
+  {x:36.2, y:55.4, interactive:true, clickFn:"allon"},
+];
+let builtinSwitchPos = JSON.parse(localStorage.getItem('bhSwitchPos') || 'null') || DEAKO_SW_DEFAULTS.map(p=>({...p}));
+let foyerSwitchNext = "off";
+let greatSwitchNext = "dinner";
+let allOnOffNext = "on";
+
+function createDeakoSwitchEl(pos, idx) {
+  const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+  g.dataset.builtinType = 'dimmer'; g.dataset.builtinIdx = idx;
+  g.setAttribute('transform',`translate(${pos.x},${pos.y})`);
   const si = document.createElementNS("http://www.w3.org/2000/svg","image");
   si.setAttribute("href","https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Smart_Dimmer_1080p_Square.png?v=1746725590");
-  si.setAttribute("x",pos.x); si.setAttribute("y",pos.y);
+  si.setAttribute("x","0"); si.setAttribute("y","0");
   si.setAttribute("width","3.2"); si.setAttribute("height","3.2");
   si.setAttribute("preserveAspectRatio","xMidYMid meet");
   si.setAttribute("filter","url(#switch-shadow)");
   si.classList.add("deako-switch");
-  if (pos.rotate) {
-    const cx = pos.x + 1.6, cy = pos.y + 1.6;
-    si.setAttribute("transform",`rotate(${pos.rotate},${cx},${cy})`);
-  }
   if (pos.interactive) {
-    si.style.pointerEvents="all";
     si.style.cursor="pointer";
-    si.addEventListener("mousedown", e=>e.stopPropagation());
+    g.addEventListener('mousedown', e=>{
+      if (!editSwitchMode) return;
+      e.stopPropagation(); e.preventDefault();
+      const {x,y} = svgCoordsFromEvent(e);
+      swDrag = {g, pos, ox:x-pos.x, oy:y-pos.y, builtinType:'dimmer', builtinIdx:idx};
+    });
     si.addEventListener("click", e=>{
+      if (editSwitchMode) { e.stopPropagation(); return; }
       e.stopPropagation();
       if (pos.clickFn === "dinner") {
         if (greatSwitchNext==="dinner") { runScene(null,"dinner"); greatSwitchNext="on"; }
@@ -1180,8 +1203,14 @@ let allOnOffNext = "on"; // first click = all on
   } else {
     si.style.pointerEvents="none";
   }
-  svg.appendChild(si);
-});
+  g.appendChild(si);
+  return g;
+}
+function renderDeakoSwitches() {
+  svg.querySelectorAll('[data-builtin-type="dimmer"]').forEach(el=>el.remove());
+  builtinSwitchPos.forEach((pos,idx) => svg.appendChild(createDeakoSwitchEl(pos,idx)));
+}
+renderDeakoSwitches();
 
 // ── SWITCH PICKER & PLACEMENT ─────────────────────────────────────────────
 const SWITCH_TYPES = [
@@ -1339,14 +1368,22 @@ function toggleEditSwitches() {
 window.addEventListener('mousemove', e => {
   if (!swDrag) return;
   const {x,y} = svgCoordsFromEvent(e);
-  swDrag.sw.x = Math.max(0, Math.min(96.8, x - swDrag.ox));
-  swDrag.sw.y = Math.max(0, Math.min(96.8, y - swDrag.oy));
-  swDrag.g.setAttribute('transform',`translate(${swDrag.sw.x},${swDrag.sw.y})`);
+  const target = swDrag.pos || swDrag.sw;
+  target.x = Math.max(0, Math.min(96.8, x - swDrag.ox));
+  target.y = Math.max(0, Math.min(96.8, y - swDrag.oy));
+  swDrag.g.setAttribute('transform',`translate(${target.x},${target.y})`);
 });
 window.addEventListener('mouseup', () => {
   if (!swDrag) return;
-  swDrag.sw.room = findRoomAtPoint(swDrag.sw.x+1.6, swDrag.sw.y+1.6);
-  saveUserSwitches(); swDrag = null;
+  if (swDrag.builtinType === 'motion') {
+    localStorage.setItem('bhMotionPos', JSON.stringify(builtinMotionPos));
+  } else if (swDrag.builtinType === 'dimmer') {
+    localStorage.setItem('bhSwitchPos', JSON.stringify(builtinSwitchPos));
+  } else {
+    swDrag.sw.room = findRoomAtPoint(swDrag.sw.x+1.6, swDrag.sw.y+1.6);
+    saveUserSwitches();
+  }
+  swDrag = null;
 });
 window.addEventListener('keydown', e => { if (e.key === 'Escape' && placingSwitch) exitPlacementMode(); });
 
