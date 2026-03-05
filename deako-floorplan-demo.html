@@ -406,7 +406,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.2</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v9.3</span> &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button></span>
 </div>
 
 </div><!-- #left-panel -->
@@ -1486,7 +1486,9 @@ function setSunPosition(angleDeg) {
 }
 
 function setSkyProgress(t) {
-  document.getElementById('sky-scene').style.filter = `brightness(${1 - t * 0.97})`;
+  // Start darkening at 60% through the descent
+  const d = Math.max(0, (t - 0.6) / 0.4);
+  document.getElementById('sky-scene').style.filter = `brightness(${1 - d * 0.97})`;
 }
 
 function animateSunArc(fromAngle, toAngle, duration, onDone, onStep) {
@@ -1931,8 +1933,8 @@ function renderIphoneScenes() {
 
   // All Off / All On buttons
   [
-    {emoji:"🌑", name:"All Off", key:"__alloff__", fn: () => { allOff(); activeSceneKey = '__alloff__'; renderIphoneScenes(); }},
-    {emoji:"☀",  name:"All On",  key:"__allon__",  fn: () => { allOn();  activeSceneKey = '__allon__';  renderIphoneScenes(); }},
+    {emoji:"🌑", name:"All Off", key:"__alloff__", fn: () => { allOff(); activeSceneKey = '__alloff__'; renderIphoneScenes(); showSceneBubbles('All Off'); }},
+    {emoji:"☀",  name:"All On",  key:"__allon__",  fn: () => { allOn();  activeSceneKey = '__allon__';  renderIphoneScenes(); showSceneBubbles('All On'); }},
   ].forEach(({emoji, name, key, fn}) => {
     const card = document.createElement("div");
     card.className = "iapp-scene-card" + (activeSceneKey === key ? " active" : "");
@@ -1949,6 +1951,7 @@ function renderIphoneScenes() {
       const btn = [...document.querySelectorAll("#scenes-row .sbtn")].find(b =>
         b.textContent.trim() === sc.emoji + " " + sc.name
       );
+      showSceneBubbles(sc.name);
       if (btn) btn.click();
       else { activeSceneKey = sc.key; runScene(null, sc.key); }
     };
@@ -2032,6 +2035,26 @@ const DEVICE_STEPS = [
   { hub: 'Hey Google, run All Off',      alexa: 'Alexa, run All Off',      action: () => { allOff(); activeSceneKey = '__alloff__'; renderIphoneScenes(); } },
   { hub: 'Hey Google, run Dinner Time',  alexa: 'Alexa, run Dinner Time',  action: () => runScene(null, 'dinner') },
 ];
+
+let sceneBubbleTimer = null;
+function showSceneBubbles(name) {
+  if (sceneBubbleTimer) clearTimeout(sceneBubbleTimer);
+  ['hub-bubble','alexa-bubble'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('wide');
+    el.querySelector('.bubble-text').style.fontSize = '';
+  });
+  showBubble('alexa-bubble', 'Alexa, run ' + name);
+  showBubble('hub-bubble',   'Hey Google, run ' + name);
+  sceneBubbleTimer = setTimeout(() => {
+    ['alexa-bubble','hub-bubble'].forEach(id => {
+      const b = document.getElementById(id);
+      b.classList.remove('show');
+      b.classList.add('hiding');
+      setTimeout(() => b.classList.remove('hiding'), 220);
+    });
+  }, 3000);
+}
 
 function showBubble(id, text) {
   const bubble = document.getElementById(id);
