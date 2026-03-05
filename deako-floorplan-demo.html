@@ -1867,7 +1867,7 @@ function toggleSunSchedule() {
     animateSunArc(90, -8, 3200, () => {
       sky.style.filter = '';
       sky.classList.add('night');
-      badge.textContent = '🌙 SUNSET';
+      badge.textContent = '🌙 NIGHT TIME';
       badge.className = 'night';
       info.textContent = 'Schedule triggered — lights turned ON';
       btn.textContent = '☀️ Simulate Sunrise Schedule';
@@ -2519,6 +2519,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v11.1</div>
+<div id="version-badge">v11.2</div>
 </body>
 </html>
