@@ -11,7 +11,7 @@
   *{margin:0;padding:0;box-sizing:border-box}
   html,body{height:100%;overflow:hidden;background:#0d1117;font-family:system-ui,-apple-system,sans-serif}
   body{display:flex;flex-direction:row;padding:10px 12px;gap:12px;height:100vh;max-height:100vh;align-items:stretch;overflow:hidden}
-  #left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;padding-top:18px}
+  #left-panel{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
 
   /* ── DEVICE PANEL (left) ──────────────────────────────────────────────── */
   #device-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:20px 0;position:relative}
@@ -22,7 +22,8 @@
   .dv-card:active .dv-img{opacity:.82}
   .dv-img{width:300px;object-fit:contain;display:block}
   .dv-img.echo{height:clamp(140px,26vh,300px);mask-image:radial-gradient(ellipse 46% 54% at 50% 52%, black 48%, transparent 82%);-webkit-mask-image:radial-gradient(ellipse 46% 54% at 50% 52%, black 48%, transparent 82%)}
-  .dv-img.hub{height:clamp(130px,25vh,270px);mask-image:radial-gradient(ellipse 46% 52% at 50% 46%, black 48%, transparent 82%);-webkit-mask-image:radial-gradient(ellipse 46% 52% at 50% 46%, black 48%, transparent 82%)}
+  .dv-img.hub{height:clamp(130px,25vh,270px);mask-image:radial-gradient(ellipse 46% 52% at 50% 46%, black 48%, transparent 82%);-webkit-mask-image:radial-gradient(ellipse 46% 52% at 50% 46%, black 48%, transparent 82%);filter:brightness(1.15) contrast(1.05)}
+  .dv-card:last-child::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 44%, rgba(220,215,200,0.22) 0%, transparent 70%);pointer-events:none;z-index:0}
   .dv-shadow{width:72%;height:14px;background:radial-gradient(ellipse at 50% 30%,rgba(0,0,0,0.28) 0%,transparent 72%);border-radius:50%;margin-top:-6px;flex-shrink:0}
   .dv-shadow.wide{width:88%}
   .dv-label{color:#7a786e;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-top:6px}
@@ -35,6 +36,7 @@
   @keyframes bubble-in{from{opacity:0;transform:translateX(-50%) scale(.88) translateY(8px)}to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
   @keyframes bubble-out{from{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}to{opacity:0;transform:translateX(-50%) scale(.88) translateY(8px)}}
 
+  header{display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
   .logo{color:#fff;font-size:20px;font-weight:800;letter-spacing:.04em}
   .logo em{color:#7ecfe0;font-style:normal}
   .logo small{font-size:10px;color:#445;font-weight:400;margin-left:10px;letter-spacing:.12em;text-transform:uppercase}
@@ -90,11 +92,11 @@
   .se-back{flex:1;padding:9px;border-radius:8px;border:1px solid #2a3348;background:transparent;color:#778;font-size:12px;font-weight:700;cursor:pointer}.se-back:hover{color:#aaa}
   .se-save{flex:2;padding:9px;border-radius:8px;border:none;background:#f5c842;color:#0d1117;font-size:12px;font-weight:800;cursor:pointer}.se-save:hover{background:#ffd84a}
 
-  #fpbox{position:relative;flex:1 1 auto;min-height:0;border-radius:10px;overflow:hidden;border:1px solid #1a2535;background:#0a0e17;margin-bottom:4px}
+  #fpbox{position:relative;flex:1 1 auto;min-height:0;border-radius:10px;overflow:hidden;border:1px solid #1a2535;background:#0a0e17}
   #fpimg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:block;pointer-events:none;user-select:none}
   #svgl{position:absolute;pointer-events:none}
 
-  .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:7px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
+  .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;padding-right:110px;background:#111826;border-radius:8px;border:1px solid #1a2535}
   #stxt{color:#7ecfe0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
   #scnt{color:#334;font-size:11px}
   #scnt span{color:#f5c842;font-weight:700}
@@ -374,12 +376,9 @@
 
 <div id="left-panel">
 
-<div class="statusbar">
+<header>
   <div class="logo">deako<em>.</em><small>Smart Lighting Demo</small></div>
-  <span id="stxt">Tap a room to toggle · Long-press to dim</span>
-  <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v4.0</span></span>
-</div>
+</header>
 
 <div id="fpbox">
   <img id="fpimg" src="https://i.ibb.co/Kp40nS53/Brown-Haven-Preview.webp" crossorigin="anonymous" draggable="false" alt="">
@@ -393,6 +392,12 @@
   <div id="mapper-hint">Click a room, then drag on the floor plan to set its boundary.</div>
   <button class="mapper-action" id="mapper-copy-btn" onclick="copyCoords()">📋 Copy Coords</button>
   <button class="mapper-action" id="mapper-exit-btn" onclick="toggleDebug()">✕ Exit Mapper</button>
+</div>
+
+<div class="statusbar">
+  <span id="stxt">Tap a room to toggle · Long-press to dim</span>
+  <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;·&nbsp; <span id="version" style="font-weight:900;color:#7ecfe0;font-size:14px;letter-spacing:.04em">v4.1</span></span>
 </div>
 
 </div><!-- #left-panel -->
