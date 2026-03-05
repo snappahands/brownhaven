@@ -16,7 +16,8 @@
   /* ── SWITCH PICKER PANEL ─────────────────────────────────────────────── */
   #switch-picker{position:absolute;bottom:50px;left:0;right:0;background:#243447;border:1px solid #2e4460;border-top:2px solid #7ecfe0;border-radius:12px 12px 0 0;z-index:600;transform:translateY(100%);transition:transform .3s ease;overflow:hidden;box-shadow:0 -4px 24px rgba(0,0,0,0.6)}
   #switch-picker.open{transform:translateY(0)}
-  #sw-pick-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid #2e4460;background:#1e2d3e}
+  #sw-pick-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;border-bottom:1px solid #2e4460;background:#1e2d3e;cursor:pointer;user-select:none}
+  #sw-pick-header:hover{background:#263d55}
   #sw-pick-title{color:#7ecfe0;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
   #sw-pick-close{background:none;border:none;color:#7a9ab5;font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
   #sw-pick-close:hover{color:#fff}
@@ -445,9 +446,9 @@
 </div>
 
 <div id="switch-picker">
-  <div id="sw-pick-header">
+  <div id="sw-pick-header" onclick="toggleSwitchPicker()">
     <span id="sw-pick-title">Deako Specialty Switches</span>
-    <button id="sw-pick-close" onclick="closeSwitchPicker()">✕</button>
+    <button id="sw-pick-close" onclick="event.stopPropagation();closeSwitchPicker()">✕</button>
   </div>
   <div id="sw-pick-grid"></div>
   <div id="sw-pick-hint">Select a switch, then click anywhere on the floor plan to place it</div>
@@ -2552,6 +2553,6 @@ function switchTab(idx) {
   setTimeout(iPhoneClock, (60 - new Date().getSeconds()) * 1000);
 })();
 </script>
-<div id="version-badge">v11.7</div>
+<div id="version-badge">v11.8</div>
 </body>
 </html>
