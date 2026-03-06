@@ -221,6 +221,39 @@
   #lib-save-current{padding:10px 22px;border-radius:8px;border:none;background:#f5c842;color:#0d1117;font-size:13px;font-weight:800;cursor:pointer}
   #lib-save-current:hover{background:#ffd84a}
   /* Name modal */
+  /* ── PRICING PANEL ─────────────────────────────────────────────────────── */
+  #pricing-panel{position:fixed;inset:0;z-index:99000;background:rgba(5,8,16,0.95);display:none;flex-direction:column;overflow:hidden}
+  #pricing-panel.open{display:flex}
+  #pricing-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid #1e2d3d;flex-shrink:0}
+  #pricing-title{color:#f5c842;font-size:17px;font-weight:800;letter-spacing:.06em}
+  #pricing-close{background:#1b2233;border:1px solid #2a3348;color:#aaa;border-radius:6px;padding:5px 14px;cursor:pointer;font-size:13px;font-weight:700}
+  #pricing-close:hover{color:#fff;border-color:#7ecfe0}
+  #pricing-body{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:22px}
+  .pr-section-title{color:#7ecfe0;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid #1e2d3d;padding-bottom:6px;margin-bottom:2px}
+  .pr-table{width:100%;border-collapse:collapse;font-size:12px}
+  .pr-table th{color:#556;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 8px;text-align:right;border-bottom:1px solid #1a2433}
+  .pr-table th:first-child,.pr-table th:nth-child(2){text-align:left}
+  .pr-table td{padding:6px 8px;border-bottom:1px solid #111a26;vertical-align:middle;text-align:right;color:#ccd}
+  .pr-table td:first-child{text-align:left;width:52px}
+  .pr-table td:nth-child(2){text-align:left;color:#eef;font-weight:600}
+  .pr-table tr:hover td{background:rgba(126,207,224,0.04)}
+  .pr-table .pr-total-col{color:#f5c842;font-weight:700}
+  .pr-img{width:44px;height:44px;border-radius:6px;object-fit:cover;background:#111;display:block}
+  .pr-input{background:#0d1421;border:1px solid #1e2d3d;border-radius:5px;color:#fff;padding:3px 6px;width:68px;text-align:right;font-size:12px;font-weight:600}
+  .pr-input:focus{outline:none;border-color:#7ecfe0}
+  .pr-input.wide{width:90px}
+  .pr-qty{width:42px}
+  .pr-count-cell{color:#aac;font-size:13px;font-weight:700}
+  .pr-foot-row td{border-top:2px solid #2a3a4a;padding-top:10px;padding-bottom:4px}
+  .pr-grand{font-size:18px;color:#f5c842;font-weight:900;text-align:right;padding:10px 8px}
+  .pr-grand-label{font-size:13px;color:#7ecfe0;font-weight:800;text-align:left;padding:10px 8px}
+  .pr-adjust-row td{border-bottom:1px solid #111a26;padding:7px 8px}
+  .pr-sub-label{color:#aaa;font-size:11px;padding-left:8px}
+  .pr-rebate-row td{color:#7ecfe0}
+  .pr-markup-row td{color:#f5c842}
+  #pricing-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2535;color:#f5c842;border:1px solid #3a3010;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
+  #pricing-btn:hover{background:#22300a}
+
   #lib-name-modal{position:fixed;inset:0;z-index:99100;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
   #lib-name-modal.open{display:flex}
   #lib-name-box{background:#111826;border:1px solid #2a3348;border-radius:14px;padding:24px;width:340px;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 40px rgba(0,0,0,0.7)}
@@ -552,7 +585,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><button id="floorplan-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" onclick="showLibraryPanel()">📚 Library</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><button id="floorplan-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" onclick="showLibraryPanel()">📚 Library</button><button id="pricing-btn" onclick="showPricingPanel()">💰 Pricing</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
 </div>
 
 <div id="switch-picker">
@@ -579,6 +612,16 @@
 </div>
 
 <!-- Project name modal -->
+<div id="pricing-panel">
+  <div id="pricing-header">
+    <div id="pricing-title">💰 Project Pricing</div>
+    <button id="pricing-close" onclick="hidePricingPanel()">✕ Close</button>
+  </div>
+  <div id="pricing-body">
+    <!-- Sections rendered by JS -->
+  </div>
+</div>
+
 <div id="lib-name-modal">
   <div id="lib-name-box">
     <div id="lib-name-title">Name this project</div>
@@ -1069,6 +1112,256 @@ function updateMapRoomName(val) {
   if (!activeMapRoom) return;
   const r = ROOMS.find(r => r.id === activeMapRoom);
   if (r) { r.label = val; refreshMapperOutlines(); }
+}
+
+// ── PRICING PANEL ────────────────────────────────────────────────────────────
+const PRICING_DEFAULTS = {
+  switchPrices: {
+    'smart-switch':  99.99,
+    'smart-dimmer': 119.99,
+    'smart-plug':    44.99,
+    'motion':        59.99,
+    'astro-timer':   59.99,
+    'simple-dimmer': 59.99,
+    'simple-timer':  59.99,
+    'ceiling-fan':   59.99,
+    'nightlight':    32.99,
+    'vent-timer':    74.99,
+  },
+  switchDiscount: 0,
+  gangPrices: { '1': 10.99, '2': 21.98, '3': 32.97, '4': 43.96 },
+  gangQty:    { '1': 0,     '2': 0,     '3': 0,     '4': 0 },
+  gangDiscount: 0,
+  rebate: 0,
+  markup: 0,
+};
+
+function loadPricingSettings() {
+  try { return Object.assign({}, PRICING_DEFAULTS, JSON.parse(localStorage.getItem('bhPricing') || 'null')); }
+  catch(e) { return Object.assign({}, PRICING_DEFAULTS); }
+}
+function savePricingSettings(s) { localStorage.setItem('bhPricing', JSON.stringify(s)); }
+
+function showPricingPanel() {
+  renderPricingPanel();
+  document.getElementById('pricing-panel').classList.add('open');
+}
+function hidePricingPanel() {
+  document.getElementById('pricing-panel').classList.remove('open');
+}
+
+function renderPricingPanel() {
+  const s = loadPricingSettings();
+  // Count placed switches by type
+  const counts = {};
+  SWITCH_TYPES.forEach(st => counts[st.id] = 0);
+  userSwitches.forEach(sw => { if (counts[sw.type] !== undefined) counts[sw.type]++; });
+
+  // Merge saved gang qty
+  const gangQty = Object.assign({'1':0,'2':0,'3':0,'4':0}, s.gangQty || {});
+
+  const body = document.getElementById('pricing-body');
+  body.innerHTML = '';
+
+  // ── SWITCHES SECTION ────────────────────────────────────────────────────
+  const swSec = document.createElement('div');
+  swSec.innerHTML = '<div class="pr-section-title">Smart Switches &amp; Controls</div>';
+  const swTable = document.createElement('table');
+  swTable.className = 'pr-table';
+  swTable.innerHTML = `<thead><tr>
+    <th></th><th>Product</th>
+    <th>MSRP</th><th>Qty</th>
+    <th>Discount&nbsp;%</th><th>Unit&nbsp;Price</th><th>Total</th>
+  </tr></thead>`;
+  const swBody = document.createElement('tbody');
+
+  SWITCH_TYPES.forEach(st => {
+    const qty = counts[st.id] || 0;
+    if (qty === 0) return;
+    const msrp = s.switchPrices[st.id] !== undefined ? s.switchPrices[st.id] : PRICING_DEFAULTS.switchPrices[st.id] || 0;
+    const disc = s.switchDiscount || 0;
+    const unit = msrp * (1 - disc / 100);
+    const total = unit * qty;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><img class="pr-img" src="${st.href}" alt="${st.label}" onerror="this.style.opacity=0.3"></td>
+      <td>${st.label}</td>
+      <td><input class="pr-input" type="number" min="0" step="0.01" value="${msrp.toFixed(2)}" data-sw-price="${st.id}"></td>
+      <td class="pr-count-cell">${qty}</td>
+      <td>—</td>
+      <td class="pr-unit-sw-${st.id}">$${unit.toFixed(2)}</td>
+      <td class="pr-total-col pr-total-sw-${st.id}">$${total.toFixed(2)}</td>`;
+    swBody.appendChild(tr);
+  });
+
+  // Discount row for all switches
+  const discRow = document.createElement('tr');
+  discRow.innerHTML = `<td colspan="4"></td>
+    <td style="text-align:left;color:#7ecfe0;font-size:11px;font-weight:700;">
+      Switch Discount&nbsp;%:&nbsp;<input class="pr-input pr-qty" type="number" min="0" max="100" step="0.5" value="${s.switchDiscount||0}" id="pr-sw-disc">
+    </td><td colspan="2"></td>`;
+  swBody.appendChild(discRow);
+  swTable.appendChild(swBody);
+  swSec.appendChild(swTable);
+  body.appendChild(swSec);
+
+  // ── BASE SYSTEM / GANGS SECTION ─────────────────────────────────────────
+  const gangSec = document.createElement('div');
+  gangSec.innerHTML = '<div class="pr-section-title">Base System — Gang Locations (Connectors)</div>';
+  const gangTable = document.createElement('table');
+  gangTable.className = 'pr-table';
+  gangTable.innerHTML = `<thead><tr>
+    <th colspan="2">Gang Type</th>
+    <th>MSRP/Location</th><th>Qty</th>
+    <th>Discount&nbsp;%</th><th>Unit&nbsp;Price</th><th>Total</th>
+  </tr></thead>`;
+  const gangTbody = document.createElement('tbody');
+  ['1','2','3','4'].forEach(g => {
+    const msrp = s.gangPrices && s.gangPrices[g] !== undefined ? s.gangPrices[g] : PRICING_DEFAULTS.gangPrices[g];
+    const qty  = gangQty[g] || 0;
+    const disc = s.gangDiscount || 0;
+    const unit = msrp * (1 - disc / 100);
+    const total = unit * qty;
+    const labels = {'1':'Single-Gang','2':'Double-Gang','3':'Triple-Gang','4':'Quad-Gang'};
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td colspan="2" style="text-align:left">${labels[g]}</td>
+      <td><input class="pr-input" type="number" min="0" step="0.01" value="${msrp.toFixed(2)}" data-gang-price="${g}"></td>
+      <td><input class="pr-input pr-qty" type="number" min="0" step="1" value="${qty}" data-gang-qty="${g}"></td>
+      <td>—</td>
+      <td class="pr-unit-gang-${g}">$${unit.toFixed(2)}</td>
+      <td class="pr-total-col pr-total-gang-${g}">$${total.toFixed(2)}</td>`;
+    gangTbody.appendChild(tr);
+  });
+  const gangDiscRow = document.createElement('tr');
+  gangDiscRow.innerHTML = `<td colspan="4"></td>
+    <td style="text-align:left;color:#7ecfe0;font-size:11px;font-weight:700;">
+      Gang Discount&nbsp;%:&nbsp;<input class="pr-input pr-qty" type="number" min="0" max="100" step="0.5" value="${s.gangDiscount||0}" id="pr-gang-disc">
+    </td><td colspan="2"></td>`;
+  gangTbody.appendChild(gangDiscRow);
+  gangTable.appendChild(gangTbody);
+  gangSec.appendChild(gangTable);
+  body.appendChild(gangSec);
+
+  // ── ADJUSTMENTS SECTION ─────────────────────────────────────────────────
+  const adjSec = document.createElement('div');
+  adjSec.innerHTML = '<div class="pr-section-title">Adjustments</div>';
+  const adjTable = document.createElement('table');
+  adjTable.className = 'pr-table';
+  const adjTbody = document.createElement('tbody');
+
+  const rebateRow = document.createElement('tr');
+  rebateRow.className = 'pr-adjust-row pr-rebate-row';
+  rebateRow.innerHTML = `<td colspan="3" style="text-align:left">💸 Rebate / Promotional Credit</td>
+    <td colspan="2" style="text-align:left">
+      $&nbsp;<input class="pr-input wide" type="number" min="0" step="1" value="${s.rebate||0}" id="pr-rebate">
+    </td><td></td>
+    <td class="pr-total-col" id="pr-rebate-display" style="color:#4caf7d">-$${parseFloat(s.rebate||0).toFixed(2)}</td>`;
+  adjTbody.appendChild(rebateRow);
+
+  const markupRow = document.createElement('tr');
+  markupRow.className = 'pr-adjust-row pr-markup-row';
+  markupRow.innerHTML = `<td colspan="3" style="text-align:left">🔧 Electrician Installation Markup</td>
+    <td colspan="2" style="text-align:left">
+      <input class="pr-input pr-qty" type="number" min="0" step="0.5" value="${s.markup||0}" id="pr-markup">&nbsp;%
+    </td><td></td>
+    <td class="pr-total-col" id="pr-markup-display" style="color:#f5c842">+$0.00</td>`;
+  adjTbody.appendChild(markupRow);
+
+  adjTable.appendChild(adjTbody);
+  adjSec.appendChild(adjTable);
+  body.appendChild(adjSec);
+
+  // ── GRAND TOTAL ─────────────────────────────────────────────────────────
+  const totalSec = document.createElement('div');
+  totalSec.innerHTML = `<table class="pr-table"><tbody>
+    <tr class="pr-foot-row">
+      <td class="pr-grand-label">PACKAGE TOTAL</td>
+      <td colspan="5"></td>
+      <td class="pr-grand" id="pr-grand-total">$0.00</td>
+    </tr></tbody></table>`;
+  body.appendChild(totalSec);
+
+  recalcPricing();
+  attachPricingListeners();
+}
+
+function recalcPricing() {
+  const s = loadPricingSettings();
+  const counts = {};
+  SWITCH_TYPES.forEach(st => counts[st.id] = 0);
+  userSwitches.forEach(sw => { if (counts[sw.type] !== undefined) counts[sw.type]++; });
+
+  const swDisc  = parseFloat(document.getElementById('pr-sw-disc')?.value   || s.switchDiscount || 0);
+  const gangDisc= parseFloat(document.getElementById('pr-gang-disc')?.value || s.gangDiscount   || 0);
+  const rebate  = parseFloat(document.getElementById('pr-rebate')?.value    || s.rebate         || 0);
+  const markup  = parseFloat(document.getElementById('pr-markup')?.value    || s.markup         || 0);
+
+  let swTotal = 0;
+  SWITCH_TYPES.forEach(st => {
+    const qty = counts[st.id] || 0;
+    if (qty === 0) return;
+    const inp = document.querySelector(`[data-sw-price="${st.id}"]`);
+    const msrp = inp ? parseFloat(inp.value) : (s.switchPrices[st.id] || 0);
+    const unit = msrp * (1 - swDisc / 100);
+    const total = unit * qty;
+    swTotal += total;
+    const unitEl  = document.querySelector(`.pr-unit-sw-${st.id}`);
+    const totalEl = document.querySelector(`.pr-total-sw-${st.id}`);
+    if (unitEl)  unitEl.textContent  = '$' + unit.toFixed(2);
+    if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
+  });
+
+  let gangTotal = 0;
+  ['1','2','3','4'].forEach(g => {
+    const priceInp = document.querySelector(`[data-gang-price="${g}"]`);
+    const qtyInp   = document.querySelector(`[data-gang-qty="${g}"]`);
+    const msrp  = priceInp ? parseFloat(priceInp.value) : (s.gangPrices[g] || 0);
+    const qty   = qtyInp   ? parseInt(qtyInp.value)     : 0;
+    const unit  = msrp * (1 - gangDisc / 100);
+    const total = unit * qty;
+    gangTotal  += total;
+    const unitEl  = document.querySelector(`.pr-unit-gang-${g}`);
+    const totalEl = document.querySelector(`.pr-total-gang-${g}`);
+    if (unitEl)  unitEl.textContent  = '$' + unit.toFixed(2);
+    if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
+  });
+
+  const subtotal = swTotal + gangTotal;
+  const markupAmt = subtotal * (markup / 100);
+  const grand = subtotal - rebate + markupAmt;
+
+  const rebateEl = document.getElementById('pr-rebate-display');
+  const markupEl = document.getElementById('pr-markup-display');
+  const grandEl  = document.getElementById('pr-grand-total');
+  if (rebateEl) rebateEl.textContent = '-$' + parseFloat(rebate).toFixed(2);
+  if (markupEl) markupEl.textContent = '+$' + markupAmt.toFixed(2);
+  if (grandEl)  grandEl.textContent  = '$' + Math.max(0, grand).toFixed(2);
+}
+
+function savePricingFromUI() {
+  const s = loadPricingSettings();
+  s.switchDiscount = parseFloat(document.getElementById('pr-sw-disc')?.value   || 0);
+  s.gangDiscount   = parseFloat(document.getElementById('pr-gang-disc')?.value || 0);
+  s.rebate  = parseFloat(document.getElementById('pr-rebate')?.value || 0);
+  s.markup  = parseFloat(document.getElementById('pr-markup')?.value || 0);
+  SWITCH_TYPES.forEach(st => {
+    const inp = document.querySelector(`[data-sw-price="${st.id}"]`);
+    if (inp) s.switchPrices[st.id] = parseFloat(inp.value) || 0;
+  });
+  ['1','2','3','4'].forEach(g => {
+    const priceInp = document.querySelector(`[data-gang-price="${g}"]`);
+    const qtyInp   = document.querySelector(`[data-gang-qty="${g}"]`);
+    if (priceInp) s.gangPrices[g] = parseFloat(priceInp.value) || 0;
+    if (qtyInp)   s.gangQty[g]   = parseInt(qtyInp.value)      || 0;
+  });
+  savePricingSettings(s);
+}
+
+function attachPricingListeners() {
+  document.querySelectorAll('#pricing-body input').forEach(inp => {
+    inp.addEventListener('input', () => { recalcPricing(); savePricingFromUI(); });
+  });
 }
 
 // ── PROJECT LIBRARY ──────────────────────────────────────────────────────────
@@ -3266,6 +3559,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v14.4</div>
+<div id="version-badge">v14.5</div>
 </body>
 </html>
