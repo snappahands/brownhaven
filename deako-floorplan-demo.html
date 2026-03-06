@@ -2018,6 +2018,7 @@ function allOn() {
     ROOMS.forEach(r=>{levels[r.id]=100;renderRoom(r.id);});
     updateCount(); updateImg(); setStatus("All Lights On");
   });
+  refreshExtWindowLevels();
   ROOMS.forEach(r=>{ if (roomTimerSettings[r.id]) startRoomTimer(r.id, roomTimerSettings[r.id]); });
 }
 function allOff() {
@@ -3152,7 +3153,7 @@ function applyViewMode() {
 }
 
 function toggleExtMapper() {
-  if (viewMode === 2) return; // don't allow mapping in split mode
+  if (viewMode === 2) { alert('Switch to full Exterior view before mapping windows.'); return; }
   extMapMode = !extMapMode;
   extView.classList.toggle('ext-map-mode', extMapMode);
   const btn = document.getElementById('ext-map-btn');
@@ -3257,6 +3258,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v14.1</div>
+<div id="version-badge">v14.2</div>
 </body>
 </html>
