@@ -1634,6 +1634,15 @@ function renderRoom(id) {
   svg.querySelectorAll(`[data-nl-room="${id}"]`).forEach(el => {
     el.style.display = lv > 0 ? 'none' : '';
   });
+  // Sync exterior window light for this room
+  if (typeof extWindows !== 'undefined') {
+    extWindows.filter(w => w.room === id).forEach(w => {
+      const g = extSvgEl.querySelector(`[data-win-id="${w.id}"]`);
+      if (!g) return;
+      const lightG = g.querySelector('.ext-win-light');
+      if (lightG) lightG.style.opacity = lv / 100;
+    });
+  }
 }
 
 function refreshNightlightGlows() {
@@ -2971,6 +2980,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v13.6</div>
+<div id="version-badge">v13.7</div>
 </body>
 </html>
