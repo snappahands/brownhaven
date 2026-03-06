@@ -1217,20 +1217,20 @@ const DEFAULT_SCENES = [
   {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
   {key:"vacation",emoji:"🔒", name:"Vacation Mode", steps:[
     {t:0,     id:"porch",   lv:55},
-    {t:5000,  id:"foyer",   lv:100},
-    {t:10000, id:"kitchen", lv:75},
-    {t:15000, id:"dining",  lv:60},
-    {t:20000, id:"great",   lv:45},
-    {t:25000, id:"owners",  lv:70},
-    {t:35000, id:"foyer",   lv:0},
-    {t:40000, id:"dining",  lv:0},
-    {t:45000, id:"kitchen", lv:0},
-    {t:50000, id:"deck",    lv:80},
-    {t:55000, id:"obath",   lv:60},
-    {t:60000, id:"great",   lv:0},
-    {t:60000, id:"deck",    lv:55},
-    {t:60000, id:"obath",   lv:0},
-    {t:65000, id:"owners",  lv:0},
+    {t:3000,  id:"foyer",   lv:100},
+    {t:8000,  id:"kitchen", lv:75},
+    {t:13000, id:"dining",  lv:60},
+    {t:18000, id:"great",   lv:45},
+    {t:23000, id:"owners",  lv:70},
+    {t:33000, id:"foyer",   lv:0},
+    {t:38000, id:"dining",  lv:0},
+    {t:43000, id:"kitchen", lv:0},
+    {t:48000, id:"deck",    lv:80},
+    {t:53000, id:"obath",   lv:60},
+    {t:58000, id:"great",   lv:0},
+    {t:58000, id:"deck",    lv:55},
+    {t:58000, id:"obath",   lv:0},
+    {t:63000, id:"owners",  lv:0},
   ]},
 ];
 let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || JSON.parse(JSON.stringify(DEFAULT_SCENES));
@@ -2065,13 +2065,20 @@ function runScene(btn, key) {
   const sc = scenesData.find(s=>s.key===key); if(!sc) return;
   setStatus(sc.emoji+" "+sc.name+" Scene");
   if (sc.steps) {
-    sc.steps.forEach(step=>{
-      sceneStepTimers.push(setTimeout(()=>{
-        levels[step.id]=step.lv;
-        renderRoom(step.id);
-        updateCount(); updateImg();
-      }, step.t));
-    });
+    const startSteps = () => {
+      sc.steps.forEach(step=>{
+        sceneStepTimers.push(setTimeout(()=>{
+          levels[step.id]=step.lv;
+          renderRoom(step.id);
+          updateCount(); updateImg();
+        }, step.t));
+      });
+    };
+    if (key === 'vacation' && sunIsDay) {
+      doSunset(startSteps);
+    } else {
+      startSteps();
+    }
   } else {
     const stagger = sc.staggerMs || 220;
     sc.rooms.forEach((item,i)=>{
@@ -2185,6 +2192,30 @@ function animateSunArc(fromAngle, toAngle, duration, onDone, onStep) {
     else { sunAnimating = false; onDone && onDone(); }
   }
   requestAnimationFrame(step);
+}
+
+function doSunset(onDone) {
+  if (!sunIsDay) { onDone && onDone(); return; }
+  sunIsDay = false;
+  hideSunSmile();
+  const sky   = document.getElementById('sky-scene');
+  const badge = document.getElementById('sun-badge');
+  const info  = document.getElementById('sun-sched-info');
+  const btn   = document.getElementById('sun-toggle-btn');
+  animateClock(sunClockMins, 1200, 3200);
+  animateSunArc(90, -8, 3200, () => {
+    sky.style.filter = '';
+    sky.classList.add('night');
+    badge.textContent = '🌙 NIGHT TIME';
+    badge.className = 'night';
+    info.textContent = 'Schedule triggered — lights turned ON';
+    btn.textContent = '☀️ Simulate Sunrise Schedule';
+    const nOvl = document.getElementById('ext-night-overlay');
+    if (nOvl) nOvl.style.opacity = '1';
+    refreshExtWindowLevels();
+    startShootingStars();
+    onDone && onDone();
+  }, setSkyProgress);
 }
 
 function toggleSunSchedule() {
@@ -3226,6 +3257,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v14.0</div>
+<div id="version-badge">v14.1</div>
 </body>
 </html>
