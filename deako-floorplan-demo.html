@@ -178,7 +178,7 @@
   #version-badge{position:fixed;bottom:10px;right:14px;z-index:99999;font-weight:900;color:#7ecfe0;font-size:13px;letter-spacing:.05em;pointer-events:none;text-shadow:0 1px 6px rgba(0,0,0,0.8)}
   #debug-btn{position:relative;z-index:9999;padding:5px 12px;background:#cc0000;color:#fff;border:1px solid #ff4444;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:16px}
   #debug-btn:hover{background:#ff2222}
-  #mapper-panel{position:fixed;left:10px;top:50%;transform:translateY(-50%);background:#111826;border:1px solid #2a3348;border-radius:10px;padding:10px;width:148px;z-index:9999;display:none;flex-direction:column;gap:6px;max-height:80vh}
+  #mapper-panel{position:fixed;left:10px;top:50%;transform:translateY(-50%);background:#111826;border:1px solid #2a3348;border-radius:10px;padding:10px;width:172px;z-index:9999;display:none;flex-direction:column;gap:6px;max-height:80vh}
   #mapper-panel.show{display:flex}
   #mapper-title{color:#7ecfe0;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid #1a2535;padding-bottom:6px}
   #mapper-room-list{display:flex;flex-direction:column;gap:3px;overflow-y:auto;max-height:320px}
@@ -190,6 +190,11 @@
   .mapper-action{padding:6px;border-radius:6px;border:none;font-size:11px;font-weight:700;cursor:pointer;width:100%}
   #mapper-copy-btn{background:#f5c842;color:#0d1117}.#mapper-copy-btn:hover{background:#ffd84a}
   #mapper-exit-btn{background:#1b2233;color:#778;border:1px solid #2a3348}.#mapper-exit-btn:hover{color:#aaa}
+  #mapper-save-btn{background:#2a5a2a;color:#4ade80;border:1px solid #3a7a3a}#mapper-save-btn:hover{background:#3a7a3a}
+  #mapper-name-row{display:flex;gap:4px;align-items:center}
+  #mapper-name-input{flex:1;background:#0a0e17;color:#fff;border:1px solid #7ecfe0;border-radius:4px;padding:4px 6px;font-size:11px;font-weight:700;min-width:0}
+  #floorplan-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2535;color:#7ecfe0;border:1px solid #2a4a5a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
+  #floorplan-btn:hover{background:#223040}
 
   /* Deako switch hover */
   .deako-switch{transition:transform 0.15s ease;transform-box:fill-box;transform-origin:center;cursor:pointer}
@@ -499,8 +504,12 @@
 <div id="mapper-panel">
   <div id="mapper-title">Room Mapper</div>
   <div id="mapper-room-list"></div>
+  <div id="mapper-name-row">
+    <input id="mapper-name-input" placeholder="Room name…" oninput="updateMapRoomName(this.value)">
+  </div>
   <div id="mapper-info"></div>
   <div id="mapper-hint">Click a room, then drag on the floor plan to set its boundary.</div>
+  <button class="mapper-action" id="mapper-save-btn" onclick="saveRoomLayout()">💾 Save Layout</button>
   <button class="mapper-action" id="mapper-copy-btn" onclick="copyCoords()">📋 Copy Coords</button>
   <button class="mapper-action" id="mapper-exit-btn" onclick="toggleDebug()">✕ Exit Mapper</button>
 </div>
@@ -508,7 +517,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><button id="floorplan-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
 </div>
 
 <div id="switch-picker">
@@ -950,6 +959,60 @@ const ROOMS = [
   {id:"porch",   label:"Front Porch",   x:37.91, y:77.82, w:26.97, h:9.47},
   {id:"deck",    label:"Rear Deck",     x:38.12, y:4.67,  w:26.96, h:14.79},
 ];
+// ── FLOOR PLAN & ROOM LAYOUT PERSISTENCE ────────────────────────────────────
+// Restore saved room layout (positions + labels)
+(function loadSavedRoomLayout() {
+  const saved = JSON.parse(localStorage.getItem('bhRooms') || 'null');
+  if (!saved) return;
+  saved.forEach(s => { const r = ROOMS.find(r => r.id === s.id); if (r) Object.assign(r, s); });
+})();
+
+// Restore saved floor plan image
+(function loadSavedFloorPlan() {
+  const saved = localStorage.getItem('bhFloorImg');
+  if (saved) document.getElementById('fpimg').src = saved;
+})();
+
+// Handle new floor plan file pick
+document.getElementById('fp-file-input').addEventListener('change', function(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1200;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      document.getElementById('fpimg').src = dataUrl;
+      try { localStorage.setItem('bhFloorImg', dataUrl); } catch(e) {}
+      requestAnimationFrame(sizeAndAlign);
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  this.value = '';
+});
+
+function saveRoomLayout() {
+  localStorage.setItem('bhRooms', JSON.stringify(ROOMS.map(r => ({id:r.id,label:r.label,x:r.x,y:r.y,w:r.w,h:r.h}))));
+  // Update room select in ext popup
+  const sel = document.getElementById('ext-room-select');
+  if (sel) { sel.innerHTML = ''; ROOMS.forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = r.label; sel.appendChild(o); }); }
+  refreshMapperOutlines();
+  const btn = document.getElementById('mapper-save-btn');
+  btn.textContent = '✓ Saved!'; setTimeout(() => btn.textContent = '💾 Save Layout', 2000);
+}
+
+function updateMapRoomName(val) {
+  if (!activeMapRoom) return;
+  const r = ROOMS.find(r => r.id === activeMapRoom);
+  if (r) { r.label = val; refreshMapperOutlines(); }
+}
+
 const DEFAULT_SCENES = [
   {key:"morning", emoji:"🌞", name:"Good Morning", steps:[
     {t:0,    id:"owners",  lv:70},
@@ -2434,7 +2497,11 @@ function selectMapRoom(id) {
   const btn = document.getElementById("mrb-"+id);
   if (btn) { btn.classList.add("active"); btn.scrollIntoView({block:"nearest"}); }
   const r = ROOMS.find(r => r.id === id);
-  if (r) showMapInfo(r.x, r.y, r.w, r.h);
+  if (r) {
+    showMapInfo(r.x, r.y, r.w, r.h);
+    const inp = document.getElementById('mapper-name-input');
+    if (inp) inp.value = r.label;
+  }
   refreshMapperOutlines();
 }
 
@@ -2980,6 +3047,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v13.7</div>
+<div id="version-badge">v13.8</div>
 </body>
 </html>
