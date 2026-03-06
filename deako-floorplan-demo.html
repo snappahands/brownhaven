@@ -138,6 +138,9 @@
   #left-panel.ext-active{gap:0}
   #ext-view{position:absolute;inset:0;display:none;z-index:10;background:#0a0e17}
   #ext-view.active{display:block}
+  /* Split view — exterior top half, interior bottom half */
+  #fpbox.split-view #ext-view{height:50%;bottom:auto}
+  #fpbox.split-view::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(126,207,224,0.35);z-index:25;pointer-events:none}
   #ext-img{width:100%;height:100%;object-fit:contain;display:block;user-select:none;draggable:false}
   #ext-sky-overlay{position:absolute;top:0;left:0;width:100%;height:52%;background:linear-gradient(to bottom,rgba(0,0,0,1) 0%,rgba(0,0,0,0.55) 65%,rgba(0,0,0,0) 100%);pointer-events:none;opacity:0}
   #ext-night-overlay{position:absolute;inset:0;background:rgba(2,8,28,0.52);pointer-events:none;opacity:0;transition:opacity 2s}
@@ -1090,16 +1093,20 @@ function sizeAndAlign() {
   if (!fpimg.naturalWidth) return;
   const bW = fpbox.clientWidth, bH = fpbox.clientHeight;
   if (!bW || !bH) return;
+  const isSplit = fpbox.classList.contains('split-view');
+  const availH  = isSplit ? Math.floor(bH / 2) : bH;
+  const baseY   = isSplit ? Math.floor(bH / 2) : 0;
   const iW = fpimg.naturalWidth, iH = fpimg.naturalHeight;
-  const scale = Math.min(bW / iW, bH / iH);
+  const scale = Math.min(bW / iW, availH / iH);
   const dW = Math.round(iW * scale);
   const dH = Math.round(iH * scale);
   const ox = Math.round((bW - dW) / 2);
-  const oy = Math.round((bH - dH) / 2);
-  // Force image to exact computed dimensions
-  fpimg.style.width  = dW + "px";
-  fpimg.style.height = dH + "px";
-  // SVG uses identical dimensions and position
+  const oy = Math.round(baseY + (availH - dH) / 2);
+  fpimg.style.width     = dW + "px";
+  fpimg.style.height    = dH + "px";
+  fpimg.style.top       = oy + "px";
+  fpimg.style.left      = ox + "px";
+  fpimg.style.transform = 'none';
   svg.style.left   = ox + "px";
   svg.style.top    = oy + "px";
   svg.style.width  = dW + "px";
@@ -2827,14 +2834,36 @@ function refreshExtWindowLevels() {
   });
 }
 
+let viewMode = 0; // 0=interior, 1=exterior, 2=split
 function toggleExteriorView() {
+  viewMode = (viewMode + 1) % 3;
+  applyViewMode();
+}
+function applyViewMode() {
   const btn = document.getElementById('exterior-btn');
   const lp  = document.getElementById('left-panel');
-  const active = extView.classList.toggle('active');
-  btn.classList.toggle('active', active);
-  btn.textContent = active ? '🏠 Interior' : '🏠 Exterior';
-  lp.classList.toggle('ext-active', active);
-  if (active) refreshExtWindowLevels();
+  extView.classList.remove('active');
+  fpbox.classList.remove('split-view');
+  lp.classList.remove('ext-active');
+  btn.classList.remove('active');
+  if (viewMode === 1) {
+    extView.classList.add('active');
+    lp.classList.add('ext-active');
+    btn.classList.add('active');
+    btn.textContent = '⬜ Split View';
+    refreshExtWindowLevels();
+  } else if (viewMode === 2) {
+    extView.classList.add('active');
+    fpbox.classList.add('split-view');
+    lp.classList.add('ext-active');
+    btn.classList.add('active');
+    btn.textContent = '🏠 Interior';
+    refreshExtWindowLevels();
+    requestAnimationFrame(sizeAndAlign);
+  } else {
+    btn.textContent = '🏠 Exterior';
+    requestAnimationFrame(sizeAndAlign);
+  }
 }
 
 function toggleExtMapper() {
@@ -2942,6 +2971,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v13.5</div>
+<div id="version-badge">v13.6</div>
 </body>
 </html>
