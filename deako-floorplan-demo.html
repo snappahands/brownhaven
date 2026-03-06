@@ -2013,6 +2013,7 @@ function createUserSwitchEl(sw) {
 
   g.addEventListener('mousedown', e => {
     if (!editSwitchMode) return;
+    if (e.target.classList.contains('sw-del-badge')) return;
     e.stopPropagation(); e.preventDefault();
     const {x,y} = svgCoordsFromEvent(e);
     swDrag = { g, sw, ox: x - sw.x, oy: y - sw.y };
@@ -3669,6 +3670,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v14.7</div>
+<div id="version-badge">v14.8</div>
 </body>
 </html>
