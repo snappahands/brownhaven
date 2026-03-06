@@ -1994,7 +1994,7 @@ function toggleSunSchedule() {
       badge.textContent = '🌅 SUNRISE';
       badge.className = '';
       info.textContent = 'Lights scheduled to turn ON at sunset';
-      animateClock(378, 780, 4200, () => {});
+      animateClock(378, 780, 4500, () => {});
       btn.textContent = '🌙 Simulate Sunset Schedule';
       btn.disabled = false;
 
@@ -2111,28 +2111,30 @@ function stopShootingStars() {
   document.querySelectorAll('.shooting-star').forEach(el => el.remove());
 }
 
-// Animate a sun crossing from the exterior photo to the sky-scene panel
+// Animate a sun rising from behind the house roof to the sky-scene panel apex
 function animateExtSunriseSun(onDone) {
-  const extRect  = extView.getBoundingClientRect();
-  const skyEl    = document.getElementById('sky-scene');
-  const skyRect  = skyEl.getBoundingClientRect();
+  const extRect = extView.getBoundingClientRect();
+  const skyEl   = document.getElementById('sky-scene');
+  const skyRect = skyEl.getBoundingClientRect();
   const {cx, cy: skyCy, r} = getSkyDimensions();
 
-  // Start: right side of ext photo near horizon (eastern sky)
-  const startX = extRect.left + extRect.width  * 0.78;
-  const startY = extRect.top  + extRect.height * 0.38;
+  // Start: center of house at roofline height (behind the house)
+  const startX = extRect.left + extRect.width  * 0.50;
+  const startY = extRect.top  + extRect.height * 0.58;
 
-  // End: sun apex (angle=90°) inside sky-scene in screen coords
+  // End: sun apex in sky-scene
   const endX = skyRect.left + cx;
   const endY = skyRect.top  + (skyCy - r);
 
-  // Bezier control point — arc peak well above both panels
-  const ctrlX = (startX + endX) * 0.5;
-  const ctrlY = Math.min(startY, endY) - Math.abs(endX - startX) * 0.55;
+  // Cubic bezier — first rises nearly straight up from roof, then sweeps to scheduler
+  const c1x = startX + (endX - startX) * 0.08;
+  const c1y = startY - (startY - endY) * 0.75;
+  const c2x = startX + (endX - startX) * 0.72;
+  const c2y = endY - 40;
 
   const tSun = document.createElement('div');
   tSun.style.cssText = [
-    'position:fixed','width:22px','height:22px','border-radius:50%',
+    'position:fixed','border-radius:50%',
     'background:radial-gradient(circle at 36% 36%,#fffbc0 0%,#ffd700 55%,#ff9500 100%)',
     'box-shadow:0 0 14px 5px rgba(255,210,50,.8)',
     'z-index:99999','pointer-events:none','opacity:0',
@@ -2140,21 +2142,26 @@ function animateExtSunriseSun(onDone) {
   ].join(';');
   document.body.appendChild(tSun);
 
-  const duration = 4200;
-  const start = performance.now();
+  const duration = 4500;
+  const startTime = performance.now();
 
   requestAnimationFrame(function tick(now) {
-    const t = Math.min((now - start) / duration, 1);
-    // ease in-out
-    const e = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    const t = Math.min((now - startTime) / duration, 1);
+    // ease-out (feels like gravity easing near apex)
+    const e = 1 - Math.pow(1 - t, 2.2);
     const inv = 1 - e;
-    const x = inv*inv*startX + 2*inv*e*ctrlX + e*e*endX;
-    const y = inv*inv*startY + 2*inv*e*ctrlY + e*e*endY;
-    tSun.style.left    = x + 'px';
-    tSun.style.top     = y + 'px';
-    // fade in first 8%, hold, fade out last 12%
-    tSun.style.opacity = t < 0.08 ? (t/0.08).toString()
-                       : t > 0.88 ? ((1-t)/0.12).toString() : '1';
+    // Cubic bezier position
+    const x = inv*inv*inv*startX + 3*inv*inv*e*c1x + 3*inv*e*e*c2x + e*e*e*endX;
+    const y = inv*inv*inv*startY + 3*inv*inv*e*c1y + 3*inv*e*e*c2y + e*e*e*endY;
+    // Size: grows from 10px to 22px as it rises
+    const sz = 10 + 12 * e;
+    tSun.style.width  = sz + 'px';
+    tSun.style.height = sz + 'px';
+    tSun.style.left   = x + 'px';
+    tSun.style.top    = y + 'px';
+    // Fade in over first 10%, full brightness, fade out last 10%
+    tSun.style.opacity = t < 0.10 ? (t / 0.10).toString()
+                       : t > 0.90 ? ((1 - t) / 0.10).toString() : '1';
     if (t < 1) { requestAnimationFrame(tick); }
     else { tSun.remove(); onDone && onDone(); }
   });
@@ -2936,6 +2943,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v13.2</div>
+<div id="version-badge">v13.3</div>
 </body>
 </html>
