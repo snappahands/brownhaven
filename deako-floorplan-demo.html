@@ -272,6 +272,17 @@
   #pricing-btn:hover{background:#22300a}
   .pr-place-btn{background:#1a3a2a;border:1px solid #2a5a3a;color:#7ecfe0;border-radius:5px;width:28px;height:28px;font-size:16px;line-height:1;cursor:pointer;font-weight:900;padding:0}
   .pr-place-btn:hover{background:#2a5a3a;color:#fff}
+  #pr-export-btn{background:#1a3a1a;border:1px solid #2a5a2a;color:#7ecfe0;border-radius:6px;padding:5px 14px;cursor:pointer;font-size:12px;font-weight:700}
+  #pr-export-btn:hover{background:#2a5a2a;color:#fff}
+  /* scene assignment popup */
+  #sw-scene-popup{position:fixed;z-index:99999;background:#111826;border:1px solid #2a3a4a;border-radius:12px;padding:10px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.7);display:none}
+  #sw-scene-popup.open{display:block}
+  #ssp-title{color:#7ecfe0;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;padding:0 4px}
+  .ssp-item{padding:8px 12px;border-radius:7px;cursor:pointer;color:#ccd;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .ssp-item:hover{background:rgba(126,207,224,0.12)}
+  .ssp-item.active{background:rgba(245,200,66,0.15);color:#f5c842}
+  .ssp-none{color:#667;font-style:italic}
+  .sw-scene-badge{font-size:1.5px;pointer-events:none}
 
   #lib-name-modal{position:fixed;inset:0;z-index:99100;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
   #lib-name-modal.open{display:flex}
@@ -637,10 +648,18 @@
 </div>
 
 <!-- Project name modal -->
+<div id="sw-scene-popup">
+  <div id="ssp-title">Assign scene to switch</div>
+  <div id="ssp-list"></div>
+</div>
+
 <div id="pricing-panel">
   <div id="pricing-header">
     <div id="pricing-title">💰 Project Pricing</div>
-    <button id="pricing-close" onclick="hidePricingPanel()">✕ Close</button>
+    <div style="display:flex;gap:8px">
+      <button id="pr-export-btn" onclick="exportPricingPDF()">🖨 Export PDF</button>
+      <button id="pricing-close" onclick="hidePricingPanel()">✕ Close</button>
+    </div>
   </div>
   <div id="pricing-body">
     <!-- Sections rendered by JS -->
@@ -2091,6 +2110,23 @@ function createUserSwitchEl(sw) {
   si.classList.add('deako-switch','user-switch-img');
   si.style.pointerEvents = 'all';
 
+  // Scene badge — shows assigned scene emoji below the switch image
+  const sb = document.createElementNS('http://www.w3.org/2000/svg','text');
+  sb.classList.add('sw-scene-badge');
+  sb.setAttribute('x','1.6'); sb.setAttribute('y','4.2');
+  sb.setAttribute('text-anchor','middle'); sb.setAttribute('font-size','1.5');
+  sb.setAttribute('fill','#f5c842');
+  const swNow = () => userSwitches.find(s => s.id === sw.id) || sw;
+  const refreshBadge = () => {
+    const cur = swNow();
+    if (cur.scene) {
+      const sc = scenesData.find(s => s.key === cur.scene);
+      sb.textContent = sc ? sc.emoji : '★';
+      sb.style.display = '';
+    } else { sb.style.display = 'none'; }
+  };
+  refreshBadge();
+
   // Delete badge (×)
   const dc = document.createElementNS('http://www.w3.org/2000/svg','circle');
   dc.setAttribute('cx','3.0'); dc.setAttribute('cy','0.3'); dc.setAttribute('r','1.1');
@@ -2111,17 +2147,163 @@ function createUserSwitchEl(sw) {
     const {x,y} = svgCoordsFromEvent(e);
     swDrag = { g, sw, ox: x - sw.x, oy: y - sw.y };
   });
+
+  // Long-press (2s) → scene assignment; short click → toggle room or run scene
+  let lpTimer = null, lpFired = false;
+  si.addEventListener('mousedown', e => {
+    if (editSwitchMode || e.button !== 0) return;
+    lpFired = false;
+    lpTimer = setTimeout(() => {
+      lpTimer = null; lpFired = true;
+      openSwitchScenePopup(sw.id, e.clientX, e.clientY, refreshBadge);
+    }, 2000);
+  });
+  si.addEventListener('mousemove', () => { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } });
+  si.addEventListener('mouseup',   () => { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } });
   si.addEventListener('click', e => {
     if (editSwitchMode) { e.stopPropagation(); return; }
     e.stopPropagation();
-    if (sw.room && levels[sw.room] !== undefined) {
+    if (lpFired) { lpFired = false; return; }
+    const cur = swNow();
+    if (cur.scene) {
+      runScene(null, cur.scene);
+    } else if (sw.room && levels[sw.room] !== undefined) {
       levels[sw.room] = levels[sw.room] > 0 ? 0 : 80;
       renderRoom(sw.room); updateCount(); updateImg(); renderIphoneRooms();
     }
   });
 
-  g.appendChild(si); g.appendChild(dc); g.appendChild(dt);
+  g.appendChild(si); g.appendChild(sb); g.appendChild(dc); g.appendChild(dt);
   return g;
+}
+
+// ── SWITCH SCENE ASSIGNMENT ───────────────────────────────────────────────────
+function openSwitchScenePopup(swId, clientX, clientY, onAssign) {
+  const popup = document.getElementById('sw-scene-popup');
+  const list  = document.getElementById('ssp-list');
+  const cur   = userSwitches.find(s => s.id === swId) || {};
+  list.innerHTML = '';
+
+  const allScenes = [
+    ...scenesData.map(sc => ({ key: sc.key, label: sc.emoji + ' ' + sc.name })),
+    { key: '__allon__',  label: '☀ All On' },
+    { key: '__alloff__', label: '🌑 All Off' },
+    { key: null,         label: '— None (room toggle)', cls: 'ssp-none' },
+  ];
+
+  allScenes.forEach(opt => {
+    const item = document.createElement('div');
+    item.className = 'ssp-item' + (opt.cls ? ' ' + opt.cls : '') + (cur.scene === opt.key ? ' active' : '');
+    item.textContent = opt.label;
+    item.addEventListener('click', () => {
+      const sw = userSwitches.find(s => s.id === swId);
+      if (sw) { sw.scene = opt.key || undefined; saveUserSwitches(); }
+      if (onAssign) onAssign();
+      closeSwitchScenePopup();
+    });
+    list.appendChild(item);
+  });
+
+  // Position popup near cursor, keep on-screen
+  const pw = 210, ph = 300;
+  const left = Math.min(clientX + 8, window.innerWidth  - pw - 8);
+  const top  = Math.min(clientY + 8, window.innerHeight - ph - 8);
+  popup.style.left = left + 'px';
+  popup.style.top  = top  + 'px';
+  popup.classList.add('open');
+
+  // Close on outside click
+  setTimeout(() => document.addEventListener('click', closeSwitchScenePopup, { once: true }), 0);
+}
+function closeSwitchScenePopup() {
+  document.getElementById('sw-scene-popup').classList.remove('open');
+}
+
+// ── PDF EXPORT ────────────────────────────────────────────────────────────────
+function exportPricingPDF() {
+  const s      = loadPricingSettings();
+  const placed = getPlacedCounts();
+  const gangLabels = {'1':'Single-Gang','2':'Double-Gang','3':'Triple-Gang','4':'Quad-Gang'};
+  const swDisc   = s.switchDiscount || 0;
+  const gangDisc = s.gangDiscount   || 0;
+  const rebate   = parseFloat(s.rebate  || 0);
+  const markup   = parseFloat(s.markup  || 0);
+
+  let swRows = '', swTotal = 0;
+  SWITCH_TYPES.forEach(st => {
+    const qty  = s.switchQty[st.id] !== undefined ? s.switchQty[st.id] : (placed[st.id] || 0);
+    if (qty === 0) return;
+    const msrp = s.switchPrices[st.id] || 0;
+    const unit = msrp * (1 - swDisc / 100);
+    const tot  = unit * qty;
+    swTotal += tot;
+    swRows += `<tr><td><img src="${st.href}" style="width:36px;height:36px;border-radius:5px;object-fit:cover"></td>
+      <td>${st.label}</td><td>$${msrp.toFixed(2)}</td><td>${qty}</td>
+      <td>$${unit.toFixed(2)}</td><td>$${tot.toFixed(2)}</td></tr>`;
+  });
+
+  let gangRows = '', gangTotal = 0;
+  ['1','2','3','4'].forEach(g => {
+    const qty  = (s.gangQty && s.gangQty[g]) || 0;
+    if (qty === 0) return;
+    const msrp = (s.gangPrices && s.gangPrices[g]) || 0;
+    const unit = msrp * (1 - gangDisc / 100);
+    const tot  = unit * qty;
+    gangTotal += tot;
+    gangRows += `<tr><td colspan="2">${gangLabels[g]}</td>
+      <td>$${msrp.toFixed(2)}</td><td>${qty}</td>
+      <td>$${unit.toFixed(2)}</td><td>$${tot.toFixed(2)}</td></tr>`;
+  });
+
+  const subtotal  = swTotal + gangTotal;
+  const markupAmt = subtotal * (markup / 100);
+  const grand     = Math.max(0, subtotal - rebate + markupAmt);
+  const projName  = (typeof bhLibrary !== 'undefined' && bhLibrary.length)
+    ? bhLibrary[bhLibrary.length - 1].name : 'Deako Smart Lighting Project';
+  const today = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>Deako Pricing — ${projName}</title>
+<style>
+  body{font-family:Arial,sans-serif;margin:0;padding:32px;color:#111;font-size:13px}
+  h1{font-size:22px;margin:0 0 4px;color:#0d1117}
+  .sub{color:#556;font-size:12px;margin-bottom:24px}
+  .logo{font-size:28px;font-weight:900;letter-spacing:-.03em;color:#0d1117}
+  .logo small{font-size:11px;font-weight:400;color:#778;letter-spacing:.05em;display:block}
+  table{width:100%;border-collapse:collapse;margin-bottom:20px}
+  th{background:#f0f2f5;padding:7px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#445}
+  th:not(:first-child){text-align:right}
+  td{padding:7px 10px;border-bottom:1px solid #e8eaec;vertical-align:middle}
+  td:not(:first-child){text-align:right}
+  .sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7ecfe0;margin:18px 0 6px;border-bottom:2px solid #7ecfe0;padding-bottom:4px}
+  .adj-row td{color:#333;font-style:italic}
+  .grand-row td{font-size:16px;font-weight:900;border-top:2px solid #111;color:#0d1117;padding-top:12px}
+  .grand-row td:last-child{color:#c8900a}
+  img{border-radius:5px}
+  @media print{body{padding:20px}}
+</style></head><body>
+<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px">
+  <div><div class="logo">deako<small>Smart Lighting</small></div></div>
+  <div style="text-align:right"><div style="font-size:16px;font-weight:700">${projName}</div><div style="color:#778;font-size:12px">${today}</div></div>
+</div>
+${swRows ? `<div class="sec-title">Smart Switches &amp; Controls${swDisc > 0 ? ' ('+swDisc+'% discount)' : ''}</div>
+<table><thead><tr><th></th><th>Product</th><th>MSRP</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+<tbody>${swRows}</tbody></table>` : ''}
+${gangRows ? `<div class="sec-title">Base System — Gang Locations${gangDisc > 0 ? ' ('+gangDisc+'% discount)' : ''}</div>
+<table><thead><tr><th colspan="2">Gang Type</th><th>MSRP</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+<tbody>${gangRows}</tbody></table>` : ''}
+<table><tbody>
+  ${rebate > 0 ? `<tr class="adj-row"><td colspan="5">💸 Rebate / Promotional Credit</td><td>-$${rebate.toFixed(2)}</td></tr>` : ''}
+  ${markupAmt > 0 ? `<tr class="adj-row"><td colspan="5">🔧 Electrician Markup (${markup}%)</td><td>+$${markupAmt.toFixed(2)}</td></tr>` : ''}
+  <tr class="grand-row"><td colspan="5">Package Total</td><td>$${grand.toFixed(2)}</td></tr>
+</tbody></table>
+<script>window.onload=()=>{window.print();}<\/script>
+</body></html>`;
+
+  const w = window.open('', '_blank');
+  if (!w) { alert('Allow pop-ups to export PDF.'); return; }
+  w.document.write(html);
+  w.document.close();
 }
 
 function deleteUserSwitch(id) {
@@ -3764,6 +3946,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v14.9</div>
+<div id="version-badge">v15.0</div>
 </body>
 </html>
