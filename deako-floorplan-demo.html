@@ -3004,6 +3004,8 @@ function switchTab(idx) {
 })();
 
 // ── EXTERIOR VIEW ─────────────────────────────────────────────────────────────
+let viewMode = 0; // 0=interior, 1=exterior, 2=split
+function activeExtWins() { return viewMode === 2 ? extWindowsSplit : extWindows; }
 let extWindows      = JSON.parse(localStorage.getItem('bhExtWindows')      || '[]');
 let extWindowsSplit = JSON.parse(localStorage.getItem('bhExtWindowsSplit') || '[]');
 let extMapMode = false;
@@ -3126,8 +3128,6 @@ function refreshExtWindowLevels() {
   });
 }
 
-let viewMode = 0; // 0=interior, 1=exterior, 2=split
-function activeExtWins() { return viewMode === 2 ? extWindowsSplit : extWindows; }
 function toggleExteriorView() {
   viewMode = (viewMode + 1) % 3;
   applyViewMode();
@@ -3266,6 +3266,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v14.3</div>
+<div id="version-badge">v14.4</div>
 </body>
 </html>
