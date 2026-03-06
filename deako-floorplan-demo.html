@@ -1994,7 +1994,7 @@ function toggleSunSchedule() {
       badge.textContent = '🌅 SUNRISE';
       badge.className = '';
       info.textContent = 'Lights scheduled to turn ON at sunset';
-      animateClock(378, 780, 4500, () => {});
+      animateClock(378, 780, 5000, () => {});
       btn.textContent = '🌙 Simulate Sunset Schedule';
       btn.disabled = false;
 
@@ -2118,49 +2118,48 @@ function animateExtSunriseSun(onDone) {
   const skyRect = skyEl.getBoundingClientRect();
   const {cx, cy: skyCy, r} = getSkyDimensions();
 
-  // Start: center of house at roofline height (behind the house)
-  const startX = extRect.left + extRect.width  * 0.50;
-  const startY = extRect.top  + extRect.height * 0.58;
+  // Start: just above the house roofline (center-right, upper portion of photo)
+  const startX = extRect.left + extRect.width  * 0.52;
+  const startY = extRect.top  + extRect.height * 0.38;
 
   // End: sun apex in sky-scene
   const endX = skyRect.left + cx;
   const endY = skyRect.top  + (skyCy - r);
 
-  // Cubic bezier — first rises nearly straight up from roof, then sweeps to scheduler
-  const c1x = startX + (endX - startX) * 0.08;
-  const c1y = startY - (startY - endY) * 0.75;
-  const c2x = startX + (endX - startX) * 0.72;
-  const c2y = endY - 40;
+  // Cubic bezier: shoots nearly straight up first, then arcs right to the scheduler
+  const c1x = startX - (endX - startX) * 0.05; // barely left — straight up initially
+  const c1y = startY - (startY - endY) * 1.35;  // overshoot above apex for drama
+  const c2x = startX + (endX - startX) * 0.65;
+  const c2y = endY - 20;
 
   const tSun = document.createElement('div');
   tSun.style.cssText = [
     'position:fixed','border-radius:50%',
     'background:radial-gradient(circle at 36% 36%,#fffbc0 0%,#ffd700 55%,#ff9500 100%)',
-    'box-shadow:0 0 14px 5px rgba(255,210,50,.8)',
+    'box-shadow:0 0 18px 6px rgba(255,210,50,.9)',
     'z-index:99999','pointer-events:none','opacity:0',
     `left:${startX}px`,`top:${startY}px`,'transform:translate(-50%,-50%)'
   ].join(';');
   document.body.appendChild(tSun);
 
-  const duration = 4500;
+  const duration = 5000;
   const startTime = performance.now();
 
   requestAnimationFrame(function tick(now) {
     const t = Math.min((now - startTime) / duration, 1);
-    // ease-out (feels like gravity easing near apex)
-    const e = 1 - Math.pow(1 - t, 2.2);
+    // ease-out so it slows gracefully at apex
+    const e = 1 - Math.pow(1 - t, 2.5);
     const inv = 1 - e;
-    // Cubic bezier position
+    // Cubic bezier
     const x = inv*inv*inv*startX + 3*inv*inv*e*c1x + 3*inv*e*e*c2x + e*e*e*endX;
     const y = inv*inv*inv*startY + 3*inv*inv*e*c1y + 3*inv*e*e*c2y + e*e*e*endY;
-    // Size: grows from 10px to 22px as it rises
-    const sz = 10 + 12 * e;
+    // Grows from 8px (peeking over roof) to 24px at apex
+    const sz = 8 + 16 * e;
     tSun.style.width  = sz + 'px';
     tSun.style.height = sz + 'px';
     tSun.style.left   = x + 'px';
     tSun.style.top    = y + 'px';
-    // Fade in over first 10%, full brightness, fade out last 10%
-    tSun.style.opacity = t < 0.10 ? (t / 0.10).toString()
+    tSun.style.opacity = t < 0.08 ? (t / 0.08).toString()
                        : t > 0.90 ? ((1 - t) / 0.10).toString() : '1';
     if (t < 1) { requestAnimationFrame(tick); }
     else { tSun.remove(); onDone && onDone(); }
@@ -2943,6 +2942,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v13.3</div>
+<div id="version-badge">v13.4</div>
 </body>
 </html>
