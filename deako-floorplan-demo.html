@@ -166,9 +166,12 @@
   #ext-popup-btns{display:flex;gap:5px}
   #ext-popup-btns button{flex:1;padding:5px;border-radius:5px;border:1px solid #2a3348;background:#1a2535;color:#aaa;font-size:11px;font-weight:700;cursor:pointer}
   #ext-popup-confirm{color:#7ecfe0 !important;border-color:#7ecfe0 !important}
+  .admin-btn{display:none}
+  .admin-visible .admin-btn{display:inline-block}
   #exterior-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2535;color:#7ecfe0;border:1px solid #2a4a5a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
   #exterior-btn:hover{background:#223040}
   #exterior-btn.active{background:#2a4a5a;border-color:#7ecfe0;color:#fff}
+  #sun-orb{cursor:pointer}
 
   .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
   #stxt{color:#7ecfe0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
@@ -587,7 +590,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><button id="floorplan-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" onclick="showLibraryPanel()">📚 Library</button><button id="pricing-btn" onclick="showPricingPanel()">💰 Pricing</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" class="admin-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" class="admin-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" class="admin-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="floorplan-btn" class="admin-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" class="admin-btn" onclick="showLibraryPanel()">📚 Library</button><button id="pricing-btn" class="admin-btn" onclick="showPricingPanel()">💰 Pricing</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
 </div>
 
 <div id="switch-picker">
@@ -2497,6 +2500,15 @@ function renderSceneButtons() {
 }
 
 // ── SUN SCHEDULER ──────────────────────────────────────────────────────────
+// ── ADMIN TOGGLE (secret: click the sun) ─────────────────────────────────────
+let adminVisible = false;
+function toggleAdminButtons(e) {
+  if (e) e.stopPropagation();
+  adminVisible = !adminVisible;
+  document.querySelector('.dtag').classList.toggle('admin-visible', adminVisible);
+}
+document.getElementById('sun-orb').addEventListener('click', toggleAdminButtons);
+
 const SUN_ROOMS = ["porch","deck","foyer","mudroom"];
 let sunIsDay = true;
 let sunAnimating = false;
@@ -3657,6 +3669,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v14.6</div>
+<div id="version-badge">v14.7</div>
 </body>
 </html>
