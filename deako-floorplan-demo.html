@@ -253,6 +253,8 @@
   .pr-markup-row td{color:#f5c842}
   #pricing-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2535;color:#f5c842;border:1px solid #3a3010;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
   #pricing-btn:hover{background:#22300a}
+  .pr-place-btn{background:#1a3a2a;border:1px solid #2a5a3a;color:#7ecfe0;border-radius:5px;width:28px;height:28px;font-size:16px;line-height:1;cursor:pointer;font-weight:900;padding:0}
+  .pr-place-btn:hover{background:#2a5a3a;color:#fff}
 
   #lib-name-modal{position:fixed;inset:0;z-index:99100;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
   #lib-name-modal.open{display:flex}
@@ -1128,19 +1130,38 @@ const PRICING_DEFAULTS = {
     'nightlight':    32.99,
     'vent-timer':    74.99,
   },
+  switchQty:    {}, // manual overrides; empty = use floor plan count
   switchDiscount: 0,
-  gangPrices: { '1': 10.99, '2': 21.98, '3': 32.97, '4': 43.96 },
-  gangQty:    { '1': 0,     '2': 0,     '3': 0,     '4': 0 },
+  gangPrices:   { '1': 10.99, '2': 21.98, '3': 32.97, '4': 43.96 },
+  gangQty:      { '1': 0, '2': 0, '3': 0, '4': 0 },
   gangDiscount: 0,
   rebate: 0,
   markup: 0,
 };
 
 function loadPricingSettings() {
-  try { return Object.assign({}, PRICING_DEFAULTS, JSON.parse(localStorage.getItem('bhPricing') || 'null')); }
-  catch(e) { return Object.assign({}, PRICING_DEFAULTS); }
+  const saved = JSON.parse(localStorage.getItem('bhPricing') || 'null');
+  if (!saved) return JSON.parse(JSON.stringify(PRICING_DEFAULTS));
+  // deep merge nested objects
+  const out = JSON.parse(JSON.stringify(PRICING_DEFAULTS));
+  if (saved.switchPrices)  Object.assign(out.switchPrices,  saved.switchPrices);
+  if (saved.switchQty)     Object.assign(out.switchQty,     saved.switchQty);
+  if (saved.gangPrices)    Object.assign(out.gangPrices,    saved.gangPrices);
+  if (saved.gangQty)       Object.assign(out.gangQty,       saved.gangQty);
+  ['switchDiscount','gangDiscount','rebate','markup'].forEach(k => {
+    if (saved[k] !== undefined) out[k] = saved[k];
+  });
+  return out;
 }
 function savePricingSettings(s) { localStorage.setItem('bhPricing', JSON.stringify(s)); }
+
+// Floor-plan counts (live)
+function getPlacedCounts() {
+  const counts = {};
+  SWITCH_TYPES.forEach(st => counts[st.id] = 0);
+  userSwitches.forEach(sw => { if (counts[sw.type] !== undefined) counts[sw.type]++; });
+  return counts;
+}
 
 function showPricingPanel() {
   renderPricingPanel();
@@ -1150,56 +1171,82 @@ function hidePricingPanel() {
   document.getElementById('pricing-panel').classList.remove('open');
 }
 
-function renderPricingPanel() {
-  const s = loadPricingSettings();
-  // Count placed switches by type
-  const counts = {};
-  SWITCH_TYPES.forEach(st => counts[st.id] = 0);
-  userSwitches.forEach(sw => { if (counts[sw.type] !== undefined) counts[sw.type]++; });
 
-  // Merge saved gang qty
-  const gangQty = Object.assign({'1':0,'2':0,'3':0,'4':0}, s.gangQty || {});
+function renderPricingPanel() {
+  const s      = loadPricingSettings();
+  const placed = getPlacedCounts();
+  const gangQty = Object.assign({'1':0,'2':0,'3':0,'4':0}, s.gangQty);
 
   const body = document.getElementById('pricing-body');
   body.innerHTML = '';
 
   // ── SWITCHES SECTION ────────────────────────────────────────────────────
   const swSec = document.createElement('div');
-  swSec.innerHTML = '<div class="pr-section-title">Smart Switches &amp; Controls</div>';
+  swSec.innerHTML = `<div class="pr-section-title">Smart Switches &amp; Controls
+    <span style="float:right;font-size:10px;color:#556;font-weight:600;cursor:pointer" onclick="pricingSyncFloorPlan()" title="Reset quantities to match floor plan">↺ Sync Floor Plan</span>
+  </div>`;
   const swTable = document.createElement('table');
   swTable.className = 'pr-table';
   swTable.innerHTML = `<thead><tr>
-    <th></th><th>Product</th>
-    <th>MSRP</th><th>Qty</th>
-    <th>Discount&nbsp;%</th><th>Unit&nbsp;Price</th><th>Total</th>
+    <th style="width:70px"></th>
+    <th style="min-width:160px">Product</th>
+    <th>MSRP</th>
+    <th>Qty</th>
+    <th>Unit&nbsp;Price</th>
+    <th>Total</th>
+    <th style="width:36px"></th>
   </tr></thead>`;
   const swBody = document.createElement('tbody');
 
   SWITCH_TYPES.forEach(st => {
-    const qty = counts[st.id] || 0;
-    if (qty === 0) return;
-    const msrp = s.switchPrices[st.id] !== undefined ? s.switchPrices[st.id] : PRICING_DEFAULTS.switchPrices[st.id] || 0;
+    const placedQty = placed[st.id] || 0;
+    // Use manual override if set, else use floor plan count
+    const qty = s.switchQty[st.id] !== undefined ? s.switchQty[st.id] : placedQty;
+    const msrp = s.switchPrices[st.id] !== undefined ? s.switchPrices[st.id] : (PRICING_DEFAULTS.switchPrices[st.id] || 0);
     const disc = s.switchDiscount || 0;
     const unit = msrp * (1 - disc / 100);
     const total = unit * qty;
+    const hasOverride = s.switchQty[st.id] !== undefined;
+
     const tr = document.createElement('tr');
+    tr.dataset.swId = st.id;
     tr.innerHTML = `
-      <td><img class="pr-img" src="${st.href}" alt="${st.label}" onerror="this.style.opacity=0.3"></td>
-      <td>${st.label}</td>
-      <td><input class="pr-input" type="number" min="0" step="0.01" value="${msrp.toFixed(2)}" data-sw-price="${st.id}"></td>
-      <td class="pr-count-cell">${qty}</td>
-      <td>—</td>
+      <td>
+        <img class="pr-img" src="${st.href}" alt="${st.label}"
+          draggable="true" data-place-type="${st.id}"
+          style="cursor:grab;width:60px;height:60px;border-radius:8px"
+          onerror="this.style.opacity=0.25">
+      </td>
+      <td style="text-align:left">
+        <div style="font-weight:700;color:#eef;font-size:12px">${st.label}</div>
+        <div style="font-size:10px;color:#556;margin-top:2px">${placedQty} on floor plan</div>
+      </td>
+      <td><input class="pr-input" type="number" min="0" step="0.01"
+        value="${msrp.toFixed(2)}" data-sw-price="${st.id}"></td>
+      <td>
+        <input class="pr-input pr-qty" type="number" min="0" step="1"
+          value="${qty}" data-sw-qty="${st.id}"
+          style="${hasOverride ? 'border-color:#f5c842' : ''}">
+      </td>
       <td class="pr-unit-sw-${st.id}">$${unit.toFixed(2)}</td>
-      <td class="pr-total-col pr-total-sw-${st.id}">$${total.toFixed(2)}</td>`;
+      <td class="pr-total-col pr-total-sw-${st.id}">$${total.toFixed(2)}</td>
+      <td>
+        <button class="pr-place-btn" data-place-type="${st.id}" title="Place on floor plan">＋</button>
+      </td>`;
     swBody.appendChild(tr);
   });
 
-  // Discount row for all switches
+  // Discount row
   const discRow = document.createElement('tr');
-  discRow.innerHTML = `<td colspan="4"></td>
-    <td style="text-align:left;color:#7ecfe0;font-size:11px;font-weight:700;">
-      Switch Discount&nbsp;%:&nbsp;<input class="pr-input pr-qty" type="number" min="0" max="100" step="0.5" value="${s.switchDiscount||0}" id="pr-sw-disc">
-    </td><td colspan="2"></td>`;
+  discRow.innerHTML = `
+    <td colspan="2" style="text-align:right;color:#7ecfe0;font-size:11px;font-weight:700;padding-top:10px">
+      Switch Discount&nbsp;%
+    </td>
+    <td colspan="2" style="padding-top:10px">
+      <input class="pr-input pr-qty" type="number" min="0" max="100" step="0.5"
+        value="${s.switchDiscount||0}" id="pr-sw-disc">
+    </td>
+    <td colspan="3"></td>`;
   swBody.appendChild(discRow);
   swTable.appendChild(swBody);
   swSec.appendChild(swTable);
@@ -1207,37 +1254,56 @@ function renderPricingPanel() {
 
   // ── BASE SYSTEM / GANGS SECTION ─────────────────────────────────────────
   const gangSec = document.createElement('div');
-  gangSec.innerHTML = '<div class="pr-section-title">Base System — Gang Locations (Connectors)</div>';
+  gangSec.innerHTML = '<div class="pr-section-title">Base System — Gang Locations (Connectors / Backplates)</div>';
   const gangTable = document.createElement('table');
   gangTable.className = 'pr-table';
   gangTable.innerHTML = `<thead><tr>
-    <th colspan="2">Gang Type</th>
-    <th>MSRP/Location</th><th>Qty</th>
-    <th>Discount&nbsp;%</th><th>Unit&nbsp;Price</th><th>Total</th>
+    <th style="width:70px"></th>
+    <th style="text-align:left">Gang Type</th>
+    <th>MSRP / Location</th>
+    <th>Qty</th>
+    <th>Unit&nbsp;Price</th>
+    <th>Total</th>
+    <th></th>
   </tr></thead>`;
   const gangTbody = document.createElement('tbody');
+  const gangLabels = {'1':'Single-Gang','2':'Double-Gang','3':'Triple-Gang','4':'Quad-Gang'};
+  const gangColors = {'1':'#3a5a7a','2':'#3a6a5a','3':'#5a4a7a','4':'#6a3a3a'};
   ['1','2','3','4'].forEach(g => {
-    const msrp = s.gangPrices && s.gangPrices[g] !== undefined ? s.gangPrices[g] : PRICING_DEFAULTS.gangPrices[g];
-    const qty  = gangQty[g] || 0;
-    const disc = s.gangDiscount || 0;
-    const unit = msrp * (1 - disc / 100);
+    const msrp  = s.gangPrices[g] !== undefined ? s.gangPrices[g] : PRICING_DEFAULTS.gangPrices[g];
+    const qty   = gangQty[g] || 0;
+    const disc  = s.gangDiscount || 0;
+    const unit  = msrp * (1 - disc / 100);
     const total = unit * qty;
-    const labels = {'1':'Single-Gang','2':'Double-Gang','3':'Triple-Gang','4':'Quad-Gang'};
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td colspan="2" style="text-align:left">${labels[g]}</td>
-      <td><input class="pr-input" type="number" min="0" step="0.01" value="${msrp.toFixed(2)}" data-gang-price="${g}"></td>
-      <td><input class="pr-input pr-qty" type="number" min="0" step="1" value="${qty}" data-gang-qty="${g}"></td>
-      <td>—</td>
+      <td>
+        <div style="width:60px;height:60px;border-radius:8px;background:${gangColors[g]};
+          display:flex;align-items:center;justify-content:center;
+          font-size:22px;font-weight:900;color:rgba(255,255,255,0.85)">
+          ${g}G
+        </div>
+      </td>
+      <td style="text-align:left;font-weight:700;color:#eef">${gangLabels[g]}</td>
+      <td><input class="pr-input" type="number" min="0" step="0.01"
+        value="${msrp.toFixed(2)}" data-gang-price="${g}"></td>
+      <td><input class="pr-input pr-qty" type="number" min="0" step="1"
+        value="${qty}" data-gang-qty="${g}"></td>
       <td class="pr-unit-gang-${g}">$${unit.toFixed(2)}</td>
-      <td class="pr-total-col pr-total-gang-${g}">$${total.toFixed(2)}</td>`;
+      <td class="pr-total-col pr-total-gang-${g}">$${total.toFixed(2)}</td>
+      <td></td>`;
     gangTbody.appendChild(tr);
   });
   const gangDiscRow = document.createElement('tr');
-  gangDiscRow.innerHTML = `<td colspan="4"></td>
-    <td style="text-align:left;color:#7ecfe0;font-size:11px;font-weight:700;">
-      Gang Discount&nbsp;%:&nbsp;<input class="pr-input pr-qty" type="number" min="0" max="100" step="0.5" value="${s.gangDiscount||0}" id="pr-gang-disc">
-    </td><td colspan="2"></td>`;
+  gangDiscRow.innerHTML = `
+    <td colspan="2" style="text-align:right;color:#7ecfe0;font-size:11px;font-weight:700;padding-top:10px">
+      Gang Discount&nbsp;%
+    </td>
+    <td colspan="2" style="padding-top:10px">
+      <input class="pr-input pr-qty" type="number" min="0" max="100" step="0.5"
+        value="${s.gangDiscount||0}" id="pr-gang-disc">
+    </td>
+    <td colspan="3"></td>`;
   gangTbody.appendChild(gangDiscRow);
   gangTable.appendChild(gangTbody);
   gangSec.appendChild(gangTable);
@@ -1246,64 +1312,72 @@ function renderPricingPanel() {
   // ── ADJUSTMENTS SECTION ─────────────────────────────────────────────────
   const adjSec = document.createElement('div');
   adjSec.innerHTML = '<div class="pr-section-title">Adjustments</div>';
-  const adjTable = document.createElement('table');
-  adjTable.className = 'pr-table';
-  const adjTbody = document.createElement('tbody');
-
-  const rebateRow = document.createElement('tr');
-  rebateRow.className = 'pr-adjust-row pr-rebate-row';
-  rebateRow.innerHTML = `<td colspan="3" style="text-align:left">💸 Rebate / Promotional Credit</td>
-    <td colspan="2" style="text-align:left">
-      $&nbsp;<input class="pr-input wide" type="number" min="0" step="1" value="${s.rebate||0}" id="pr-rebate">
-    </td><td></td>
-    <td class="pr-total-col" id="pr-rebate-display" style="color:#4caf7d">-$${parseFloat(s.rebate||0).toFixed(2)}</td>`;
-  adjTbody.appendChild(rebateRow);
-
-  const markupRow = document.createElement('tr');
-  markupRow.className = 'pr-adjust-row pr-markup-row';
-  markupRow.innerHTML = `<td colspan="3" style="text-align:left">🔧 Electrician Installation Markup</td>
-    <td colspan="2" style="text-align:left">
-      <input class="pr-input pr-qty" type="number" min="0" step="0.5" value="${s.markup||0}" id="pr-markup">&nbsp;%
-    </td><td></td>
-    <td class="pr-total-col" id="pr-markup-display" style="color:#f5c842">+$0.00</td>`;
-  adjTbody.appendChild(markupRow);
-
-  adjTable.appendChild(adjTbody);
-  adjSec.appendChild(adjTable);
+  adjSec.innerHTML += `<table class="pr-table"><tbody>
+    <tr class="pr-adjust-row">
+      <td style="width:70px">
+        <div style="font-size:28px;text-align:center">💸</div>
+      </td>
+      <td style="text-align:left;color:#4caf7d;font-weight:700">Rebate / Promotional Credit</td>
+      <td style="text-align:left" colspan="2">
+        $&nbsp;<input class="pr-input wide" type="number" min="0" step="1"
+          value="${s.rebate||0}" id="pr-rebate">
+      </td>
+      <td></td>
+      <td class="pr-total-col" id="pr-rebate-display" style="color:#4caf7d">
+        -$${parseFloat(s.rebate||0).toFixed(2)}
+      </td>
+      <td></td>
+    </tr>
+    <tr class="pr-adjust-row">
+      <td>
+        <div style="font-size:28px;text-align:center">🔧</div>
+      </td>
+      <td style="text-align:left;color:#f5c842;font-weight:700">Electrician Installation Markup</td>
+      <td style="text-align:left" colspan="2">
+        <input class="pr-input pr-qty" type="number" min="0" step="0.5"
+          value="${s.markup||0}" id="pr-markup">&nbsp;%
+      </td>
+      <td></td>
+      <td class="pr-total-col" id="pr-markup-display" style="color:#f5c842">+$0.00</td>
+      <td></td>
+    </tr>
+  </tbody></table>`;
   body.appendChild(adjSec);
 
   // ── GRAND TOTAL ─────────────────────────────────────────────────────────
-  const totalSec = document.createElement('div');
-  totalSec.innerHTML = `<table class="pr-table"><tbody>
-    <tr class="pr-foot-row">
-      <td class="pr-grand-label">PACKAGE TOTAL</td>
-      <td colspan="5"></td>
-      <td class="pr-grand" id="pr-grand-total">$0.00</td>
-    </tr></tbody></table>`;
-  body.appendChild(totalSec);
+  const totalDiv = document.createElement('div');
+  totalDiv.style.cssText = 'display:flex;justify-content:space-between;align-items:center;border-top:2px solid #2a3a4a;padding:14px 8px 4px';
+  totalDiv.innerHTML = `
+    <span style="color:#7ecfe0;font-size:14px;font-weight:800;letter-spacing:.05em">PACKAGE TOTAL</span>
+    <span id="pr-grand-total" style="color:#f5c842;font-size:26px;font-weight:900">$0.00</span>`;
+  body.appendChild(totalDiv);
 
   recalcPricing();
   attachPricingListeners();
 }
 
-function recalcPricing() {
+function pricingSyncFloorPlan() {
   const s = loadPricingSettings();
-  const counts = {};
-  SWITCH_TYPES.forEach(st => counts[st.id] = 0);
-  userSwitches.forEach(sw => { if (counts[sw.type] !== undefined) counts[sw.type]++; });
+  s.switchQty = {}; // clear all overrides → revert to floor plan counts
+  savePricingSettings(s);
+  renderPricingPanel();
+}
 
-  const swDisc  = parseFloat(document.getElementById('pr-sw-disc')?.value   || s.switchDiscount || 0);
-  const gangDisc= parseFloat(document.getElementById('pr-gang-disc')?.value || s.gangDiscount   || 0);
-  const rebate  = parseFloat(document.getElementById('pr-rebate')?.value    || s.rebate         || 0);
-  const markup  = parseFloat(document.getElementById('pr-markup')?.value    || s.markup         || 0);
+function recalcPricing() {
+  const s      = loadPricingSettings();
+  const placed = getPlacedCounts();
+  const swDisc   = parseFloat(document.getElementById('pr-sw-disc')?.value   || s.switchDiscount || 0);
+  const gangDisc = parseFloat(document.getElementById('pr-gang-disc')?.value || s.gangDiscount   || 0);
+  const rebate   = parseFloat(document.getElementById('pr-rebate')?.value    || s.rebate         || 0);
+  const markup   = parseFloat(document.getElementById('pr-markup')?.value    || s.markup         || 0);
 
   let swTotal = 0;
   SWITCH_TYPES.forEach(st => {
-    const qty = counts[st.id] || 0;
-    if (qty === 0) return;
-    const inp = document.querySelector(`[data-sw-price="${st.id}"]`);
-    const msrp = inp ? parseFloat(inp.value) : (s.switchPrices[st.id] || 0);
-    const unit = msrp * (1 - swDisc / 100);
+    const qtyInp  = document.querySelector(`[data-sw-qty="${st.id}"]`);
+    const priceInp = document.querySelector(`[data-sw-price="${st.id}"]`);
+    const qty  = qtyInp   ? parseInt(qtyInp.value)   : (placed[st.id] || 0);
+    const msrp = priceInp ? parseFloat(priceInp.value) : (s.switchPrices[st.id] || 0);
+    const unit  = msrp * (1 - swDisc / 100);
     const total = unit * qty;
     swTotal += total;
     const unitEl  = document.querySelector(`.pr-unit-sw-${st.id}`);
@@ -1320,16 +1394,16 @@ function recalcPricing() {
     const qty   = qtyInp   ? parseInt(qtyInp.value)     : 0;
     const unit  = msrp * (1 - gangDisc / 100);
     const total = unit * qty;
-    gangTotal  += total;
+    gangTotal += total;
     const unitEl  = document.querySelector(`.pr-unit-gang-${g}`);
     const totalEl = document.querySelector(`.pr-total-gang-${g}`);
     if (unitEl)  unitEl.textContent  = '$' + unit.toFixed(2);
     if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
   });
 
-  const subtotal = swTotal + gangTotal;
+  const subtotal  = swTotal + gangTotal;
   const markupAmt = subtotal * (markup / 100);
-  const grand = subtotal - rebate + markupAmt;
+  const grand     = subtotal - rebate + markupAmt;
 
   const rebateEl = document.getElementById('pr-rebate-display');
   const markupEl = document.getElementById('pr-markup-display');
@@ -1346,8 +1420,16 @@ function savePricingFromUI() {
   s.rebate  = parseFloat(document.getElementById('pr-rebate')?.value || 0);
   s.markup  = parseFloat(document.getElementById('pr-markup')?.value || 0);
   SWITCH_TYPES.forEach(st => {
-    const inp = document.querySelector(`[data-sw-price="${st.id}"]`);
-    if (inp) s.switchPrices[st.id] = parseFloat(inp.value) || 0;
+    const priceInp = document.querySelector(`[data-sw-price="${st.id}"]`);
+    const qtyInp   = document.querySelector(`[data-sw-qty="${st.id}"]`);
+    if (priceInp) s.switchPrices[st.id] = parseFloat(priceInp.value) || 0;
+    if (qtyInp) {
+      const placed = getPlacedCounts()[st.id] || 0;
+      const val = parseInt(qtyInp.value) || 0;
+      // store override only if different from floor plan count
+      if (val !== placed) s.switchQty[st.id] = val;
+      else delete s.switchQty[st.id];
+    }
   });
   ['1','2','3','4'].forEach(g => {
     const priceInp = document.querySelector(`[data-gang-price="${g}"]`);
@@ -1359,8 +1441,22 @@ function savePricingFromUI() {
 }
 
 function attachPricingListeners() {
+  // Input changes → recalc + save
   document.querySelectorAll('#pricing-body input').forEach(inp => {
     inp.addEventListener('input', () => { recalcPricing(); savePricingFromUI(); });
+  });
+  // Place button or image click → close panel, enter placement mode, reopen when done
+  const startPlace = (typeId) => {
+    const st = SWITCH_TYPES.find(s => s.id === typeId);
+    if (!st) return;
+    hidePricingPanel();
+    enterPlacementMode(st, () => showPricingPanel());
+  };
+  document.querySelectorAll('.pr-place-btn').forEach(btn => {
+    btn.addEventListener('click', () => startPlace(btn.dataset.placeType));
+  });
+  document.querySelectorAll('img[data-place-type]').forEach(img => {
+    img.addEventListener('click', () => startPlace(img.dataset.placeType));
   });
 }
 
@@ -1973,7 +2069,7 @@ function buildSwitchPickerGrid() {
 }
 
 // Placement mode
-function enterPlacementMode(switchType) {
+function enterPlacementMode(switchType, onPlaced) {
   placingSwitch = switchType;
   document.getElementById('stxt').textContent = `Placing: ${switchType.label} — click floor plan to drop · Esc to cancel`;
   placeOverlay = document.createElementNS('http://www.w3.org/2000/svg','rect');
@@ -1984,12 +2080,14 @@ function enterPlacementMode(switchType) {
   placeOverlay.addEventListener('click', e => {
     e.stopPropagation();
     const {x,y} = svgCoordsFromEvent(e);
-    const sw = { id:'us_'+Date.now(), href:placingSwitch.href, label:placingSwitch.label,
+    const sw = { id:'us_'+Date.now(), type:placingSwitch.id,
+                 href:placingSwitch.href, label:placingSwitch.label,
                  x: Math.max(0,Math.min(96.8, x-1.6)), y: Math.max(0,Math.min(96.8, y-1.6)),
                  room: findRoomAtPoint(x,y) };
     userSwitches.push(sw); saveUserSwitches();
     svg.appendChild(createUserSwitchEl(sw));
     exitPlacementMode();
+    if (onPlaced) onPlaced();
   });
   svg.appendChild(placeOverlay);
 }
@@ -3559,6 +3657,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v14.5</div>
+<div id="version-badge">v14.6</div>
 </body>
 </html>
