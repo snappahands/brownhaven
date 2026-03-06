@@ -195,6 +195,41 @@
   #mapper-name-input{flex:1;background:#0a0e17;color:#fff;border:1px solid #7ecfe0;border-radius:4px;padding:4px 6px;font-size:11px;font-weight:700;min-width:0}
   #floorplan-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2535;color:#7ecfe0;border:1px solid #2a4a5a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
   #floorplan-btn:hover{background:#223040}
+  #library-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2535;color:#f5c842;border:1px solid #3a3010;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:4px}
+  #library-btn:hover{background:#22200a}
+  /* Library panel */
+  #lib-panel{position:fixed;inset:0;z-index:99000;background:rgba(5,8,16,0.92);display:none;flex-direction:column;padding:24px}
+  #lib-panel.open{display:flex}
+  #lib-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-shrink:0}
+  #lib-title{color:#f5c842;font-size:16px;font-weight:800;letter-spacing:.06em}
+  #lib-close{background:#1b2233;border:1px solid #2a3348;color:#aaa;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:13px;font-weight:700}
+  #lib-close:hover{color:#fff;border-color:#7ecfe0}
+  #lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;overflow-y:auto;flex:1}
+  .lib-card{background:#111826;border:1px solid #2a3348;border-radius:10px;overflow:hidden;cursor:pointer;transition:all .18s;display:flex;flex-direction:column}
+  .lib-card:hover{border-color:#7ecfe0;box-shadow:0 0 12px rgba(126,207,224,0.2)}
+  .lib-card-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;background:#0a0e17;display:block}
+  .lib-card-thumb-placeholder{width:100%;aspect-ratio:4/3;background:#0a0e17;display:flex;align-items:center;justify-content:center;font-size:32px}
+  .lib-card-body{padding:10px 12px 8px;flex:1;display:flex;flex-direction:column;gap:4px}
+  .lib-card-name{color:#fff;font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lib-card-date{color:#556;font-size:10px}
+  .lib-card-btns{display:flex;gap:6px;padding:0 10px 10px}
+  .lib-load-btn{flex:1;padding:5px;border-radius:6px;border:none;background:#1a3a4a;color:#7ecfe0;font-size:11px;font-weight:700;cursor:pointer}
+  .lib-load-btn:hover{background:#234a5a}
+  .lib-del-btn{padding:5px 8px;border-radius:6px;border:none;background:#2a1010;color:#f87;font-size:11px;font-weight:700;cursor:pointer}
+  .lib-del-btn:hover{background:#3a1818}
+  #lib-footer{flex-shrink:0;margin-top:16px;display:flex;gap:10px;justify-content:center}
+  #lib-save-current{padding:10px 22px;border-radius:8px;border:none;background:#f5c842;color:#0d1117;font-size:13px;font-weight:800;cursor:pointer}
+  #lib-save-current:hover{background:#ffd84a}
+  /* Name modal */
+  #lib-name-modal{position:fixed;inset:0;z-index:99100;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center}
+  #lib-name-modal.open{display:flex}
+  #lib-name-box{background:#111826;border:1px solid #2a3348;border-radius:14px;padding:24px;width:340px;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 40px rgba(0,0,0,0.7)}
+  #lib-name-title{color:#f5c842;font-size:14px;font-weight:800;letter-spacing:.05em}
+  #lib-name-input{background:#0a0e17;color:#fff;border:1px solid #7ecfe0;border-radius:7px;padding:10px 12px;font-size:14px;font-weight:700;outline:none}
+  #lib-name-input:focus{border-color:#f5c842}
+  #lib-name-btns{display:flex;gap:10px}
+  #lib-name-save{flex:1;padding:10px;border-radius:7px;border:none;background:#f5c842;color:#0d1117;font-size:13px;font-weight:800;cursor:pointer}
+  #lib-name-cancel{padding:10px 16px;border-radius:7px;border:1px solid #2a3348;background:#1b2233;color:#778;font-size:13px;font-weight:700;cursor:pointer}
 
   /* Deako switch hover */
   .deako-switch{transition:transform 0.15s ease;transform-box:fill-box;transform-origin:center;cursor:pointer}
@@ -517,7 +552,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><button id="floorplan-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><button id="floorplan-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" onclick="showLibraryPanel()">📚 Library</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
 </div>
 
 <div id="switch-picker">
@@ -530,6 +565,30 @@
 </div>
 
 </div><!-- #left-panel -->
+
+<!-- Library panel (fixed overlay) -->
+<div id="lib-panel">
+  <div id="lib-header">
+    <span id="lib-title">📚 Project Library</span>
+    <button id="lib-close" onclick="hideLibraryPanel()">✕ Close</button>
+  </div>
+  <div id="lib-grid"></div>
+  <div id="lib-footer">
+    <button id="lib-save-current" onclick="promptSaveLibrary(null)">💾 Save Current Project</button>
+  </div>
+</div>
+
+<!-- Project name modal -->
+<div id="lib-name-modal">
+  <div id="lib-name-box">
+    <div id="lib-name-title">Name this project</div>
+    <input id="lib-name-input" placeholder="e.g. Brownhaven, Smith Residence…" maxlength="48">
+    <div id="lib-name-btns">
+      <button id="lib-name-save" onclick="confirmSaveLibrary()">Save to Library</button>
+      <button id="lib-name-cancel" onclick="cancelSaveLibrary()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <div id="right-panel">
     <div id="sun-scheduler">
@@ -987,9 +1046,8 @@ document.getElementById('fp-file-input').addEventListener('change', function(e) 
       canvas.height = Math.round(img.height * scale);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-      document.getElementById('fpimg').src = dataUrl;
-      try { localStorage.setItem('bhFloorImg', dataUrl); } catch(e) {}
-      requestAnimationFrame(sizeAndAlign);
+      // Prompt for project name before applying
+      promptSaveLibrary(dataUrl);
     };
     img.src = ev.target.result;
   };
@@ -1012,6 +1070,125 @@ function updateMapRoomName(val) {
   const r = ROOMS.find(r => r.id === activeMapRoom);
   if (r) { r.label = val; refreshMapperOutlines(); }
 }
+
+// ── PROJECT LIBRARY ──────────────────────────────────────────────────────────
+let bhLibrary = JSON.parse(localStorage.getItem('bhLibrary') || '[]');
+let _libPendingImg = null; // floor plan dataUrl waiting for a name
+
+function showLibraryPanel() {
+  buildLibGrid();
+  document.getElementById('lib-panel').classList.add('open');
+}
+function hideLibraryPanel() {
+  document.getElementById('lib-panel').classList.remove('open');
+}
+
+function buildLibGrid() {
+  const grid = document.getElementById('lib-grid');
+  grid.innerHTML = '';
+  if (!bhLibrary.length) {
+    grid.innerHTML = '<div style="color:#445;font-size:13px;padding:20px">No saved projects yet. Upload a floor plan or click Save Current Project.</div>';
+    return;
+  }
+  bhLibrary.forEach(proj => {
+    const card = document.createElement('div');
+    card.className = 'lib-card';
+    const thumbHtml = proj.floorImg
+      ? `<img class="lib-card-thumb" src="${proj.floorImg}" alt="">`
+      : `<div class="lib-card-thumb-placeholder">🏠</div>`;
+    card.innerHTML = `${thumbHtml}
+      <div class="lib-card-body">
+        <div class="lib-card-name">${proj.name}</div>
+        <div class="lib-card-date">${proj.createdAt}</div>
+      </div>
+      <div class="lib-card-btns">
+        <button class="lib-load-btn">▶ Load</button>
+        <button class="lib-del-btn">🗑</button>
+      </div>`;
+    card.querySelector('.lib-load-btn').onclick = e => { e.stopPropagation(); loadProject(proj.id); };
+    card.querySelector('.lib-del-btn').onclick  = e => { e.stopPropagation(); deleteProject(proj.id); };
+    grid.appendChild(card);
+  });
+}
+
+function promptSaveLibrary(floorImgDataUrl) {
+  _libPendingImg = floorImgDataUrl; // null = save current floor plan
+  const inp = document.getElementById('lib-name-input');
+  inp.value = '';
+  document.getElementById('lib-name-modal').classList.add('open');
+  setTimeout(() => inp.focus(), 50);
+}
+
+function confirmSaveLibrary() {
+  const name = document.getElementById('lib-name-input').value.trim();
+  if (!name) { document.getElementById('lib-name-input').focus(); return; }
+  const floorImg = _libPendingImg || localStorage.getItem('bhFloorImg') || null;
+  const proj = {
+    id: 'proj_' + Date.now(),
+    name,
+    createdAt: new Date().toLocaleDateString(),
+    floorImg,
+    rooms: JSON.parse(JSON.stringify(ROOMS)),
+    userSwitches: JSON.parse(JSON.stringify(userSwitches)),
+    extImg: localStorage.getItem('bhExtImg') || null,
+    extWindows: JSON.parse(JSON.stringify(extWindows)),
+  };
+  bhLibrary.push(proj);
+  try {
+    localStorage.setItem('bhLibrary', JSON.stringify(bhLibrary));
+  } catch(e) {
+    bhLibrary.pop();
+    alert('Storage full — try deleting older projects from the library.');
+    return;
+  }
+  // If a new floor plan was pending, apply it now
+  if (_libPendingImg) {
+    document.getElementById('fpimg').src = _libPendingImg;
+    try { localStorage.setItem('bhFloorImg', _libPendingImg); } catch(e) {}
+    requestAnimationFrame(sizeAndAlign);
+  }
+  _libPendingImg = null;
+  cancelSaveLibrary();
+  showLibraryPanel();
+}
+
+function cancelSaveLibrary() {
+  _libPendingImg = null;
+  document.getElementById('lib-name-modal').classList.remove('open');
+}
+
+function deleteProject(id) {
+  bhLibrary = bhLibrary.filter(p => p.id !== id);
+  localStorage.setItem('bhLibrary', JSON.stringify(bhLibrary));
+  buildLibGrid();
+}
+
+function loadProject(id) {
+  const proj = bhLibrary.find(p => p.id === id);
+  if (!proj) return;
+  // Floor plan
+  if (proj.floorImg) { document.getElementById('fpimg').src = proj.floorImg; localStorage.setItem('bhFloorImg', proj.floorImg); }
+  // Rooms
+  proj.rooms.forEach(s => { const r = ROOMS.find(r => r.id === s.id); if (r) Object.assign(r, s); });
+  localStorage.setItem('bhRooms', JSON.stringify(proj.rooms));
+  // Switches
+  userSwitches.length = 0; proj.userSwitches.forEach(s => userSwitches.push(s));
+  saveUserSwitches(); renderUserSwitches();
+  // Exterior
+  if (proj.extImg) { extImgEl.src = proj.extImg; localStorage.setItem('bhExtImg', proj.extImg); extDrop.classList.add('hidden'); }
+  else { extImgEl.src = ''; localStorage.removeItem('bhExtImg'); extDrop.classList.remove('hidden'); }
+  extWindows.length = 0; proj.extWindows.forEach(w => extWindows.push(w));
+  saveExtWindows(); renderExtWindows();
+  // Update ext room select
+  const sel = document.getElementById('ext-room-select');
+  if (sel) { sel.innerHTML = ''; ROOMS.forEach(r => { const o = document.createElement('option'); o.value = r.id; o.textContent = r.label; sel.appendChild(o); }); }
+  allOff();
+  requestAnimationFrame(sizeAndAlign);
+  hideLibraryPanel();
+}
+
+// Enter key submits name modal
+document.getElementById('lib-name-input').addEventListener('keydown', e => { if (e.key === 'Enter') confirmSaveLibrary(); if (e.key === 'Escape') cancelSaveLibrary(); });
 
 const DEFAULT_SCENES = [
   {key:"morning", emoji:"🌞", name:"Good Morning", steps:[
@@ -3047,6 +3224,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v13.8</div>
+<div id="version-badge">v13.9</div>
 </body>
 </html>
