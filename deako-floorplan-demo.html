@@ -48,11 +48,25 @@
   .edit-switch-mode .sw-del-badge{display:block}
 
   /* ── DEVICE PANEL (left) ──────────────────────────────────────────────── */
-  #device-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:20px 0;position:relative}
+  /* left column wrapper — holds either voice panel or switch sidebar */
+  #left-col{width:320px;flex-shrink:0;display:flex;flex-direction:column;position:relative}
+  #device-panel{flex:1;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:20px 0;position:relative}
+  #device-panel.voice-active{display:flex}
   #device-panel::before{content:'';position:absolute;top:5%;left:0;right:0;bottom:5%;background:#2c2c30;border:1px solid rgba(255,255,255,0.08);border-radius:12px;pointer-events:none;z-index:0}
   #device-panel::after{content:'';position:absolute;top:5%;left:0;right:0;bottom:5%;border-radius:12px;background:rgba(3,5,13,0);transition:background 4s ease;pointer-events:none;z-index:2}
   #device-panel.night::after{background:rgba(3,5,13,0.88)}
   #device-panel > *{position:relative;z-index:1}
+  /* switch sidebar */
+  #switch-sidebar{flex:1;display:flex;flex-direction:column;gap:0;overflow:hidden;border-radius:12px;background:#0d1421;border:1px solid #1e2d3d}
+  #switch-sidebar.voice-active{display:none}
+  #sw-sidebar-title{padding:12px 14px 8px;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#7ecfe0;border-bottom:1px solid #1a2433;flex-shrink:0}
+  #sw-sidebar-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;overflow-y:auto;flex:1;padding:6px}
+  .sw-tile{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border-radius:8px;cursor:grab;transition:background .15s;user-select:none}
+  .sw-tile:hover{background:rgba(126,207,224,0.12)}
+  .sw-tile:active{background:rgba(126,207,224,0.22);cursor:grabbing}
+  .sw-tile img{width:72px;height:72px;border-radius:10px;object-fit:cover;display:block;pointer-events:none}
+  .sw-tile-label{font-size:9.5px;font-weight:700;color:#aab;text-align:center;line-height:1.3;pointer-events:none}
+  #fpbox.drag-over-fp{box-shadow:0 0 0 3px #7ecfe0 inset}
   .dv-card{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;cursor:pointer;position:relative}
   #device-panel .dv-card:first-child{margin-top:150px}
   #device-panel .dv-card:last-child{margin-bottom:40px}
@@ -516,24 +530,30 @@
 </head>
 <body>
 
-<div id="device-panel">
-  <div class="dv-card" onclick="alexaClick()">
-    <div class="speech-bubble" id="alexa-bubble">
-      <img src="talk-bubble.png" class="bubble-img" alt="">
-      <span class="bubble-text"></span>
-    </div>
-    <img src="echo-dot.jpg" class="dv-img echo" alt="Amazon Echo Dot">
-    <div class="dv-shadow"></div>
-    <div class="dv-label">Amazon Alexa</div>
+<div id="left-col">
+  <div id="switch-sidebar">
+    <div id="sw-sidebar-title">🔌 Deako Switches — drag to floor plan</div>
+    <div id="sw-sidebar-grid"></div>
   </div>
-  <div class="dv-card" onclick="hubClick()">
-    <div class="speech-bubble" id="hub-bubble">
-      <img src="talk-bubble.png" class="bubble-img" alt="">
-      <span class="bubble-text"></span>
+  <div id="device-panel">
+    <div class="dv-card" onclick="alexaClick()">
+      <div class="speech-bubble" id="alexa-bubble">
+        <img src="talk-bubble.png" class="bubble-img" alt="">
+        <span class="bubble-text"></span>
+      </div>
+      <img src="echo-dot.jpg" class="dv-img echo" alt="Amazon Echo Dot">
+      <div class="dv-shadow"></div>
+      <div class="dv-label">Amazon Alexa</div>
     </div>
-    <img src="google-hub.jpg" class="dv-img hub" alt="Google Nest Hub">
-    <div class="dv-shadow wide"></div>
-    <div class="dv-label">Google Home Hub</div>
+    <div class="dv-card" onclick="hubClick()">
+      <div class="speech-bubble" id="hub-bubble">
+        <img src="talk-bubble.png" class="bubble-img" alt="">
+        <span class="bubble-text"></span>
+      </div>
+      <img src="google-hub.jpg" class="dv-img hub" alt="Google Nest Hub">
+      <div class="dv-shadow wide"></div>
+      <div class="dv-label">Google Home Hub</div>
+    </div>
   </div>
 </div>
 
@@ -590,7 +610,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" class="admin-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" class="admin-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" class="admin-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="floorplan-btn" class="admin-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" class="admin-btn" onclick="showLibraryPanel()">📚 Library</button><button id="pricing-btn" class="admin-btn" onclick="showPricingPanel()">💰 Pricing</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" class="admin-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" class="admin-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" class="admin-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="floorplan-btn" class="admin-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" class="admin-btn" onclick="showLibraryPanel()">📚 Library</button><button id="pricing-btn" class="admin-btn" onclick="showPricingPanel()">💰 Pricing</button><button id="voice-btn" class="admin-btn" onclick="toggleVoicePanel()">🎤 Voice</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
 </div>
 
 <div id="switch-picker">
@@ -1927,6 +1947,79 @@ function renderDeakoSwitches() {
 }
 renderDeakoSwitches();
 
+// ── SWITCH SIDEBAR ────────────────────────────────────────────────────────────
+let voiceActive = false;
+let sidebarDrag = null;
+let sidebarDragGhost = null;
+
+function toggleVoicePanel() {
+  voiceActive = !voiceActive;
+  document.getElementById('device-panel').classList.toggle('voice-active', voiceActive);
+  document.getElementById('switch-sidebar').classList.toggle('voice-active', voiceActive);
+  document.getElementById('voice-btn').classList.toggle('active', voiceActive);
+}
+
+function buildSwitchSidebar() {
+  const grid = document.getElementById('sw-sidebar-grid');
+  grid.innerHTML = '';
+  SWITCH_TYPES.forEach(st => {
+    const tile = document.createElement('div');
+    tile.className = 'sw-tile';
+    tile.innerHTML = `<img src="${st.href}" alt="${st.label}" onerror="this.style.opacity=0.3">
+      <div class="sw-tile-label">${st.label}</div>`;
+    tile.addEventListener('mousedown', e => startSidebarDrag(e, st));
+    grid.appendChild(tile);
+  });
+}
+
+function startSidebarDrag(e, st) {
+  if (e.button !== 0) return;
+  e.preventDefault();
+  sidebarDrag = st;
+
+  sidebarDragGhost = document.createElement('img');
+  sidebarDragGhost.src = st.href;
+  sidebarDragGhost.style.cssText = `position:fixed;width:56px;height:56px;border-radius:10px;
+    pointer-events:none;z-index:99999;opacity:0.88;object-fit:cover;
+    box-shadow:0 6px 24px rgba(0,0,0,0.55);transform:translate(-50%,-50%);
+    left:${e.clientX}px;top:${e.clientY}px`;
+  document.body.appendChild(sidebarDragGhost);
+
+  function onMove(mv) {
+    sidebarDragGhost.style.left = mv.clientX + 'px';
+    sidebarDragGhost.style.top  = mv.clientY + 'px';
+    const svgRect = svg.getBoundingClientRect();
+    const over = mv.clientX >= svgRect.left && mv.clientX <= svgRect.right &&
+                 mv.clientY >= svgRect.top  && mv.clientY <= svgRect.bottom;
+    fpbox.classList.toggle('drag-over-fp', over);
+  }
+
+  function onUp(up) {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    sidebarDragGhost.remove(); sidebarDragGhost = null;
+    fpbox.classList.remove('drag-over-fp');
+    if (!sidebarDrag) return;
+    const svgRect = svg.getBoundingClientRect();
+    if (up.clientX >= svgRect.left && up.clientX <= svgRect.right &&
+        up.clientY >= svgRect.top  && up.clientY <= svgRect.bottom) {
+      const x = (up.clientX - svgRect.left) / svgRect.width  * 100;
+      const y = (up.clientY - svgRect.top)  / svgRect.height * 100;
+      const sw = { id:'us_'+Date.now(), type:sidebarDrag.id,
+        href:sidebarDrag.href, label:sidebarDrag.label,
+        x: Math.max(0, Math.min(96.8, x - 1.6)),
+        y: Math.max(0, Math.min(96.8, y - 1.6)),
+        room: findRoomAtPoint(x, y) };
+      userSwitches.push(sw); saveUserSwitches();
+      svg.appendChild(createUserSwitchEl(sw));
+    }
+    sidebarDrag = null;
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
 // ── SWITCH PICKER & PLACEMENT ─────────────────────────────────────────────
 const SWITCH_TYPES = [
   {id:'smart-switch',  label:'Smart Switch Gen 2',       href:'https://shop.deako.com/cdn/shop/files/Deako_Product_Image_Shopify_Smart_Switch_gen2_1080p_Square.png?v=1763997990'},
@@ -2140,6 +2233,7 @@ window.addEventListener('mouseup', () => {
 window.addEventListener('keydown', e => { if (e.key === 'Escape' && placingSwitch) exitPlacementMode(); });
 
 renderUserSwitches();
+buildSwitchSidebar();
 // Hide all nightlight glows on load; they activate once rooms are turned on then off
 svg.querySelectorAll('[data-nl-room]').forEach(el => el.style.display = 'none');
 
@@ -3670,6 +3764,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v14.8</div>
+<div id="version-badge">v14.9</div>
 </body>
 </html>
