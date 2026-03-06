@@ -3105,6 +3105,7 @@ function applyViewMode() {
     btn.classList.add('active');
     btn.textContent = '⬜ Split View';
     refreshExtWindowLevels();
+    requestAnimationFrame(renderExtWindows);
   } else if (viewMode === 2) {
     extView.classList.add('active');
     fpbox.classList.add('split-view');
@@ -3120,6 +3121,7 @@ function applyViewMode() {
 }
 
 function toggleExtMapper() {
+  if (viewMode === 2) return; // don't allow mapping in split mode
   extMapMode = !extMapMode;
   extView.classList.toggle('ext-map-mode', extMapMode);
   const btn = document.getElementById('ext-map-btn');
@@ -3224,6 +3226,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v13.9</div>
+<div id="version-badge">v14.0</div>
 </body>
 </html>
