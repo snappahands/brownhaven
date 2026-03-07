@@ -2115,6 +2115,8 @@ if (!scenesData.find(s => s.key === 'holiday')) {
 }
 // Migrate name and emoji for default scenes (keeps localStorage in sync with code changes)
 (()=>{ let changed=false; DEFAULT_SCENES.forEach(d=>{ const v=scenesData.find(s=>s.key===d.key); if(v&&(v.name!==d.name||v.emoji!==d.emoji)){v.name=d.name;v.emoji=d.emoji;changed=true;} }); if(changed)localStorage.setItem("bhScenes",JSON.stringify(scenesData)); })();
+// Remove user-created scenes that should not persist
+(()=>{ const before=scenesData.length; scenesData=scenesData.filter(s=>s.name!=='Santa is Coming to Town'); if(scenesData.length!==before) localStorage.setItem("bhScenes",JSON.stringify(scenesData)); })();
 
 // State: brightness 0=off, 1–100=dim level
 let levels = {};
@@ -4495,6 +4497,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v17.4</div>
+<div id="version-badge">v17.5</div>
 </body>
 </html>
