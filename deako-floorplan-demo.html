@@ -1261,38 +1261,40 @@ function renderHolidayLights() {
   if (!g) return;
   g.innerHTML = '';
   const isActive = activeSceneKey === 'holiday';
-  const show = isActive || hlPlacing; // show bulbs when scene active OR during placement
+  const show = isActive || hlPlacing;
   const colors = ['#ff2222','#22cc22','#ffee22','#2266ff','#ff8800','#cc22cc'];
   holidayLights.forEach((pt, i) => {
     const c = colors[i % colors.length];
+    // Wire
     const wire = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    wire.setAttribute('x1', pt.x); wire.setAttribute('y1', pt.y - 0.8);
-    wire.setAttribute('x2', pt.x); wire.setAttribute('y2', pt.y - 1.8);
-    wire.setAttribute('stroke', '#666'); wire.setAttribute('stroke-width', '0.18');
+    wire.setAttribute('x1', pt.x); wire.setAttribute('y1', pt.y - 1.2);
+    wire.setAttribute('x2', pt.x); wire.setAttribute('y2', pt.y - 2.4);
+    wire.setAttribute('stroke', '#888'); wire.setAttribute('stroke-width', '0.25');
     wire.classList.add('hl-bulb');
     if (!show) wire.classList.add('hidden');
     g.appendChild(wire);
-    // Glow halo — only when holiday scene is active
+    // Glow halo — only when scene active
     const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     glow.setAttribute('cx', pt.x); glow.setAttribute('cy', pt.y);
-    glow.setAttribute('r', '2.0'); glow.setAttribute('fill', c);
-    glow.setAttribute('opacity', '0.28');
+    glow.setAttribute('r', '3.2'); glow.setAttribute('fill', c);
+    glow.setAttribute('opacity', '0.32');
     glow.style.animation = `hlGlow ${1.4 + (i % 5) * 0.22}s ease-in-out infinite`;
     glow.style.animationDelay = (i * 0.17 % 2).toFixed(2) + 's';
     glow.classList.add('hl-bulb');
     if (!isActive) glow.classList.add('hidden');
     g.appendChild(glow);
-    // Bulb body — visible when scene active (animated) or placing (dim, no animation)
+    // Bulb body
     const bulb = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     bulb.setAttribute('cx', pt.x); bulb.setAttribute('cy', pt.y);
-    bulb.setAttribute('r', '0.85'); bulb.setAttribute('fill', c);
-    bulb.setAttribute('opacity', isActive ? '1' : '0.55');
+    bulb.setAttribute('r', '1.5'); bulb.setAttribute('fill', c);
+    bulb.setAttribute('opacity', isActive ? '1' : '0.8');
     if (isActive) {
       bulb.style.animation = `hlTwinkle ${1.2 + (i % 7) * 0.18}s ease-in-out infinite`;
       bulb.style.animationDelay = (i * 0.13 % 1.5).toFixed(2) + 's';
     }
     bulb.classList.add('hl-bulb');
     if (!show) bulb.classList.add('hidden');
+    // Right-click to remove (only works when placement mode active)
     bulb.style.pointerEvents = 'all';
     bulb.style.cursor = 'context-menu';
     const idx = i;
@@ -1320,27 +1322,27 @@ function toggleHolidayPlacement() {
   const btn = document.getElementById('hl-place-btn');
   if (hlPlacing) {
     btn.classList.add('active');
-    btn.textContent = '✕ Done';
-    hlOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    hlOverlay.setAttribute('x', '0'); hlOverlay.setAttribute('y', '0');
-    hlOverlay.setAttribute('width', '100'); hlOverlay.setAttribute('height', '100');
-    hlOverlay.setAttribute('fill', 'rgba(255,220,80,0.04)');
-    hlOverlay.style.pointerEvents = 'all';
-    hlOverlay.style.cursor = 'crosshair';
+    btn.textContent = '✕ Done Placing';
+    // Use a div overlay over fpbox — guaranteed to capture all clicks
+    hlOverlay = document.createElement('div');
+    hlOverlay.style.cssText = 'position:absolute;inset:0;cursor:crosshair;z-index:200;';
     hlOverlay.addEventListener('click', e => {
-      const {x, y} = svgCoordsFromEvent(e);
-      holidayLights.push({x: Math.round(x * 100) / 100, y: Math.round(y * 100) / 100});
+      e.stopPropagation();
+      const coords = svgCoordsFromEvent(e);
+      const x = Math.max(0, Math.min(100, Math.round(coords.x * 100) / 100));
+      const y = Math.max(0, Math.min(100, Math.round(coords.y * 100) / 100));
+      holidayLights.push({x, y});
       saveHolidayLights();
       renderHolidayLights();
     });
     hlOverlay.addEventListener('contextmenu', e => e.preventDefault());
-    svg.appendChild(hlOverlay);
-    renderHolidayLights(); // show existing bulbs as placement markers
+    fpbox.appendChild(hlOverlay);
+    renderHolidayLights();
   } else {
     btn.classList.remove('active');
     btn.textContent = '🎄 Place Lights';
-    if (hlOverlay) { svg.removeChild(hlOverlay); hlOverlay = null; }
-    renderHolidayLights(); // hide markers if not in holiday scene
+    if (hlOverlay) { hlOverlay.remove(); hlOverlay = null; }
+    renderHolidayLights();
   }
 }
 
@@ -4349,6 +4351,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v16.3</div>
+<div id="version-badge">v16.4</div>
 </body>
 </html>
