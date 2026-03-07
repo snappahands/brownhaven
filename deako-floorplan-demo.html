@@ -3475,7 +3475,6 @@ function toggleSunSchedule() {
     setTimeout(() => {
       // Reset all lights off
       cancelAllTimers(); clearSceneStepTimers();
-      hideHolidayLights();
       activeSceneKey = null;
       document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
       ROOMS.forEach(r => { levels[r.id] = 0; renderRoom(r.id); });
@@ -3508,12 +3507,14 @@ function toggleSunSchedule() {
           setSunPosition(90);
           setTimeout(showSunSmile, 400);
           badge.textContent = '☀ DAYTIME';
+          hideHolidayLights();
         });
       } else {
         setSunPosition(176);
         animateSunArc(176, 90, 4200, () => {
           setTimeout(showSunSmile, 1000);
           badge.textContent = '☀ DAYTIME';
+          hideHolidayLights();
         });
       }
     }, 1500);
@@ -4483,6 +4484,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v18.0</div>
+<div id="version-badge">v18.1</div>
 </body>
 </html>
