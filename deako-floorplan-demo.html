@@ -195,9 +195,9 @@
   .admin-visible .admin-btn{display:inline-flex;align-items:center;margin-left:0}
   .admin-visible.dtag{display:flex;flex-wrap:wrap;gap:5px;align-items:center;justify-content:flex-end;width:100%}
   .admin-visible.dtag button{margin-left:0 !important}
-  #exterior-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2535;color:#7ecfe0;border:1px solid #2a4a5a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
-  #exterior-btn:hover{background:#223040}
-  #exterior-btn.active{background:#2a4a5a;border-color:#7ecfe0;color:#fff}
+  #exterior-btn,#voice-btn{position:relative;z-index:9999;display:inline-flex;align-items:center;padding:5px 12px;background:#1a2535;color:#7ecfe0;border:1px solid #2a4a5a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+  #exterior-btn:hover,#voice-btn:hover{background:#223040}
+  #exterior-btn.active,#voice-btn.active{background:#2a4a5a;border-color:#7ecfe0;color:#fff}
   #sun-orb{cursor:pointer}
 
   .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;row-gap:6px;padding:8px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
@@ -635,7 +635,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" class="admin-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" class="admin-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" class="admin-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="floorplan-btn" class="admin-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" class="admin-btn" onclick="showLibraryPanel()">📚 Library</button><button id="pricing-btn" class="admin-btn" onclick="showPricingPanel()">💰 Pricing</button><button id="voice-btn" class="admin-btn" onclick="toggleVoicePanel()">🎤 Voice</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" class="admin-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" class="admin-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" class="admin-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="floorplan-btn" class="admin-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" class="admin-btn" onclick="showLibraryPanel()">📚 Library</button><button id="pricing-btn" class="admin-btn" onclick="showPricingPanel()">💰 Pricing</button><button id="voice-btn" onclick="toggleVoicePanel()">🎤 Voice</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
 </div>
 
 <div id="switch-picker">
@@ -4172,6 +4172,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v15.1</div>
+<div id="version-badge">v15.2</div>
 </body>
 </html>
