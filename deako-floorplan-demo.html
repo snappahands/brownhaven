@@ -2612,9 +2612,7 @@ function createUserSwitchEl(sw) {
     const cur = swNow();
     if (cur.scene) {
       runScene(null, cur.scene);
-    } else if (sw.type === 'motion' && sw.room && levels[sw.room] !== undefined) {
-      levels[sw.room] = 80; renderRoom(sw.room); updateCount(); updateImg(); renderIphoneRooms();
-      startRoomTimer(sw.room, 5);
+    } else if (cur.type === 'motion' && cur.room) {      const mRoom = cur.room;      const mLabel = (ROOMS.find(r=>r.id===mRoom)||{}).label || mRoom;      levels[mRoom] = 80; renderRoom(mRoom); updateCount(); updateImg(); renderIphoneRooms();      startRoomTimer(mRoom, 5);      let mCount = 5;      setStatus('⏱ Motion — ' + mLabel + ' off in ' + mCount + 's');      if (window._motionStatusTimer) clearInterval(window._motionStatusTimer);      window._motionStatusTimer = setInterval(() => {        mCount--;        if (mCount <= 0) { clearInterval(window._motionStatusTimer); window._motionStatusTimer = null; }        else { setStatus('⏱ Motion — ' + mLabel + ' off in ' + mCount + 's'); }      }, 1000);
     } else if (sw.type === 'ceiling-fan' && sw.room) {
       toggleFan(sw.room);
     } else if (sw.room && levels[sw.room] !== undefined) {
@@ -4497,6 +4495,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v17.3</div>
+<div id="version-badge">v17.4</div>
 </body>
 </html>
