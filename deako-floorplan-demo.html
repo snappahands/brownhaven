@@ -3484,6 +3484,7 @@ function toggleSunSchedule() {
       const nOvl = document.getElementById('ext-night-overlay');
       const sOvl = document.getElementById('ext-sky-overlay');
       if (nOvl) { nOvl.style.transition = 'opacity 2s'; nOvl.style.opacity = '0'; }
+      hideHolidayLights();
       if (sOvl) sOvl.style.opacity = '0';
       refreshExtWindowLevels();
 
@@ -3507,14 +3508,14 @@ function toggleSunSchedule() {
           setSunPosition(90);
           setTimeout(showSunSmile, 400);
           badge.textContent = '☀ DAYTIME';
-          hideHolidayLights();
+
         });
       } else {
         setSunPosition(176);
         animateSunArc(176, 90, 4200, () => {
           setTimeout(showSunSmile, 1000);
           badge.textContent = '☀ DAYTIME';
-          hideHolidayLights();
+
         });
       }
     }, 1500);
@@ -4484,6 +4485,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v18.1</div>
+<div id="version-badge">v18.2</div>
 </body>
 </html>
