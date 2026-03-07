@@ -71,7 +71,7 @@
   /* Interior Light Fixtures */
   .fixture-marker{pointer-events:none}
   /* Ceiling Fans */
-  .ceiling-fan{pointer-events:none;opacity:0.65}
+  .ceiling-fan{pointer-events:all;opacity:0.65;cursor:pointer}
   @keyframes fanSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   .fan-blades{transform-box:fill-box;transform-origin:center}
   .ceiling-fan.spinning .fan-blades{animation:fanSpin 1.0s linear infinite}
@@ -2924,6 +2924,7 @@ function drawCeilingFan(svgEl, cx, cy, r, roomId) {
   dot.setAttribute('cx',cx); dot.setAttribute('cy',cy); dot.setAttribute('r', r * 0.04);
   dot.setAttribute('fill','#8b1a10');
   g.appendChild(dot);
+  if (roomId) g.addEventListener('click', e => { e.stopPropagation(); toggleFan(roomId); });
   svgEl.appendChild(g);
 }
 // Great Room center: x=51.35, y=39.43; Owner's Suite center: x=77.90, y=34.83
@@ -4482,6 +4483,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v17.9</div>
+<div id="version-badge">v18.0</div>
 </body>
 </html>
