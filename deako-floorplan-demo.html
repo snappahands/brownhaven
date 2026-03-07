@@ -1280,12 +1280,6 @@ function renderHolidayLights() {
     // Wire from cap top upward
     addBulb(mk('line', {x1:cx, y1:cy-s, x2:cx, y2:cy-s-1.6, stroke:'#666', 'stroke-width':'0.22'}));
 
-    // Glow halo (scene active only)
-    const glow = mk('circle', {cx, cy, r:s*1.6, fill:c, opacity:'0.28'});
-    glow.style.animation = `hlGlow ${1.4+(i%5)*0.22}s ease-in-out infinite`;
-    glow.style.animationDelay = (i*0.17%2).toFixed(2)+'s';
-    addActive(glow);
-
     // Bulb body — upside-down C7: wide dome at top, pointed tip at bottom
     const sw = s * 0.48; // shoulder half-width
     const y0 = cy - s * 0.62; // shoulder line (just below cap)
@@ -2070,7 +2064,7 @@ const DEFAULT_SCENES = [
   {key:"dinner",  emoji:"🍽", name:"Dinner Time",   rooms:[{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}]},
   {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
   {key:"holiday", emoji:"🎄", name:"Holiday Lights", rooms:[
-    {id:"porch",   lv:90},{id:"deck",    lv:85},{id:"foyer",   lv:80},
+    {id:"porch",   lv:0},{id:"deck",    lv:0},{id:"foyer",   lv:80},
     {id:"great",   lv:50},{id:"dining",  lv:60},{id:"kitchen", lv:35},
     {id:"owners",  lv:40},{id:"obath",   lv:30},
   ]},
@@ -4486,6 +4480,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v16.7</div>
+<div id="version-badge">v16.8</div>
 </body>
 </html>
