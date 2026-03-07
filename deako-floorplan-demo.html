@@ -286,6 +286,14 @@
   .pr-place-btn{background:#1a3a2a;border:1px solid #2a5a3a;color:#7ecfe0;border-radius:5px;width:28px;height:28px;font-size:16px;line-height:1;cursor:pointer;font-weight:900;padding:0}
   .pr-place-btn:hover{background:#2a5a3a;color:#fff}
   #pr-export-btn{background:#1a3a1a;border:1px solid #2a5a2a;color:#7ecfe0;border-radius:6px;padding:5px 14px;cursor:pointer;font-size:12px;font-weight:700}
+  .pr-comp-tog-col{color:#7eb8e8;font-weight:700}
+  .pr-comp-dec-col{color:#7ed8a0;font-weight:700}
+  .pr-comp-dko-col{color:#f5c842;font-weight:700}
+  .pr-comp-total-row td{border-top:2px solid #2a3a4a;padding-top:10px;padding-bottom:6px;font-size:13px}
+  .pr-comp-dko-row td{background:rgba(245,200,66,0.06);padding:8px 8px}
+  .pr-comp-delta-row td{padding:6px 8px;border-bottom:1px solid #111a26}
+  .pr-delta-save{color:#4caf7d;font-weight:800}
+  .pr-delta-cost{color:#ff6b6b;font-weight:800}
   #pr-export-btn:hover{background:#2a5a2a;color:#fff}
   /* scene assignment popup */
   #sw-scene-popup{position:fixed;z-index:99999;background:#111826;border:1px solid #2a3a4a;border-radius:12px;padding:10px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.7);display:none}
@@ -1536,11 +1544,13 @@ const PRICING_DEFAULTS = {
   },
   switchQty:    {}, // manual overrides; empty = use floor plan count
   switchDiscount: 0,
-  gangPrices:   { '1': 10.99, '2': 21.98, '3': 32.97, '4': 43.96 },
-  gangQty:      { '1': 0, '2': 0, '3': 0, '4': 0 },
+  gangPrices:      { '1': 10.99, '2': 21.98, '3': 32.97, '4': 43.96 },
+  gangQty:         { '1': 0, '2': 0, '3': 0, '4': 0 },
   gangDiscount: 0,
   rebate: 0,
   markup: 0,
+  togglePrices:    { '1': 8.00, '2': 14.00, '3': 20.00, '4': 26.00 },
+  decoratorPrices: { '1': 18.00, '2': 32.00, '3': 46.00, '4': 60.00 },
 };
 
 function loadPricingSettings() {
@@ -1548,10 +1558,12 @@ function loadPricingSettings() {
   if (!saved) return JSON.parse(JSON.stringify(PRICING_DEFAULTS));
   // deep merge nested objects
   const out = JSON.parse(JSON.stringify(PRICING_DEFAULTS));
-  if (saved.switchPrices)  Object.assign(out.switchPrices,  saved.switchPrices);
-  if (saved.switchQty)     Object.assign(out.switchQty,     saved.switchQty);
-  if (saved.gangPrices)    Object.assign(out.gangPrices,    saved.gangPrices);
-  if (saved.gangQty)       Object.assign(out.gangQty,       saved.gangQty);
+  if (saved.switchPrices)     Object.assign(out.switchPrices,     saved.switchPrices);
+  if (saved.switchQty)        Object.assign(out.switchQty,        saved.switchQty);
+  if (saved.gangPrices)       Object.assign(out.gangPrices,       saved.gangPrices);
+  if (saved.gangQty)          Object.assign(out.gangQty,          saved.gangQty);
+  if (saved.togglePrices)     Object.assign(out.togglePrices,     saved.togglePrices);
+  if (saved.decoratorPrices)  Object.assign(out.decoratorPrices,  saved.decoratorPrices);
   ['switchDiscount','gangDiscount','rebate','markup'].forEach(k => {
     if (saved[k] !== undefined) out[k] = saved[k];
   });
@@ -1756,6 +1768,75 @@ function renderPricingPanel() {
     <span id="pr-grand-total" style="color:#f5c842;font-size:26px;font-weight:900">$0.00</span>`;
   body.appendChild(totalDiv);
 
+  // ── COMPETITIVE COMPARISON ───────────────────────────────────────────────
+  const tp = s.togglePrices    || PRICING_DEFAULTS.togglePrices;
+  const dp = s.decoratorPrices || PRICING_DEFAULTS.decoratorPrices;
+  const gangShort = {'1':'Single','2':'Double','3':'Triple','4':'Quad'};
+  const compSec = document.createElement('div');
+  compSec.innerHTML = `<div class="pr-section-title" style="color:#f5c842;margin-top:6px">⚖️ Competitive Comparison — Traditional vs Deako</div>
+    <div style="font-size:10px;color:#667;margin-bottom:10px">Edit price-per-location for toggle and decorator to match your market. Uses same gang quantities above.</div>`;
+  const compTable = document.createElement('table');
+  compTable.className = 'pr-table';
+  compTable.innerHTML = `<thead><tr>
+    <th style="text-align:left">Gang</th>
+    <th style="text-align:center">Qty</th>
+    <th style="text-align:right" class="pr-comp-tog-col">Toggle $/loc</th>
+    <th style="text-align:right" class="pr-comp-tog-col">Toggle Total</th>
+    <th style="text-align:right" class="pr-comp-dec-col">Decorator $/loc</th>
+    <th style="text-align:right" class="pr-comp-dec-col">Decorator Total</th>
+  </tr></thead>`;
+  const compTbody = document.createElement('tbody');
+  ['1','2','3','4'].forEach(g => {
+    const gqv = gangQty[g] || 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:700;color:#eef">${gangShort[g]}-Gang</td>
+      <td style="text-align:center;font-weight:700" class="pr-comp-qty-${g}">${gqv}</td>
+      <td style="text-align:right">$&nbsp;<input class="pr-input" type="number" min="0" step="0.01" style="width:52px"
+        value="${(tp[g]||0).toFixed(2)}" data-toggle-price="${g}"></td>
+      <td class="pr-total-col pr-comp-tog-col pr-toggle-total-${g}">$${((tp[g]||0)*gqv).toFixed(2)}</td>
+      <td style="text-align:right">$&nbsp;<input class="pr-input" type="number" min="0" step="0.01" style="width:52px"
+        value="${(dp[g]||0).toFixed(2)}" data-dec-price="${g}"></td>
+      <td class="pr-total-col pr-comp-dec-col pr-dec-total-${g}">$${((dp[g]||0)*gqv).toFixed(2)}</td>`;
+    compTbody.appendChild(tr);
+  });
+  // totals row
+  const totTr = document.createElement('tr');
+  totTr.className = 'pr-comp-total-row';
+  totTr.innerHTML = `
+    <td colspan="2" style="color:#7ecfe0;font-weight:800">TOTALS</td>
+    <td></td>
+    <td class="pr-total-col pr-comp-tog-col" id="pr-toggle-grand" style="font-size:14px">$0.00</td>
+    <td></td>
+    <td class="pr-total-col pr-comp-dec-col" id="pr-dec-grand" style="font-size:14px">$0.00</td>`;
+  compTbody.appendChild(totTr);
+  // Deako total row
+  const dkoTr = document.createElement('tr');
+  dkoTr.className = 'pr-comp-dko-row';
+  dkoTr.innerHTML = `
+    <td colspan="2" style="font-weight:800" class="pr-comp-dko-col">DEAKO PACKAGE TOTAL</td>
+    <td></td>
+    <td class="pr-total-col pr-comp-dko-col" colspan="3" id="pr-deako-comp-total" style="font-size:14px">$0.00</td>`;
+  compTbody.appendChild(dkoTr);
+  // Delta rows
+  const d1Tr = document.createElement('tr');
+  d1Tr.className = 'pr-comp-delta-row';
+  d1Tr.innerHTML = `
+    <td colspan="2" style="color:#aac;font-size:11px;font-weight:700">vs Toggle Switches</td>
+    <td></td>
+    <td colspan="3" id="pr-delta-toggle" style="font-size:12px;font-weight:700;text-align:right">—</td>`;
+  compTbody.appendChild(d1Tr);
+  const d2Tr = document.createElement('tr');
+  d2Tr.className = 'pr-comp-delta-row';
+  d2Tr.innerHTML = `
+    <td colspan="2" style="color:#aac;font-size:11px;font-weight:700">vs Decorator Switches</td>
+    <td></td>
+    <td colspan="3" id="pr-delta-dec" style="font-size:12px;font-weight:700;text-align:right">—</td>`;
+  compTbody.appendChild(d2Tr);
+  compTable.appendChild(compTbody);
+  compSec.appendChild(compTable);
+  body.appendChild(compSec);
+
   recalcPricing();
   attachPricingListeners();
 }
@@ -1814,7 +1895,50 @@ function recalcPricing() {
   const grandEl  = document.getElementById('pr-grand-total');
   if (rebateEl) rebateEl.textContent = '-$' + parseFloat(rebate).toFixed(2);
   if (markupEl) markupEl.textContent = '+$' + markupAmt.toFixed(2);
-  if (grandEl)  grandEl.textContent  = '$' + Math.max(0, grand).toFixed(2);
+  const deakoGrand = Math.max(0, grand);
+  if (grandEl)  grandEl.textContent  = '$' + deakoGrand.toFixed(2);
+
+  // ── COMPARISON RECALC ────────────────────────────────────────────────────
+  let togTotal = 0, decTotal = 0;
+  ['1','2','3','4'].forEach(g => {
+    const qtyInp    = document.querySelector(`[data-gang-qty="${g}"]`);
+    const togInp    = document.querySelector(`[data-toggle-price="${g}"]`);
+    const decInp    = document.querySelector(`[data-dec-price="${g}"]`);
+    const qtyDisp   = document.querySelector(`.pr-comp-qty-${g}`);
+    const qty       = qtyInp ? parseInt(qtyInp.value) || 0 : 0;
+    if (qtyDisp) qtyDisp.textContent = qty;
+    const togPrice  = togInp ? parseFloat(togInp.value) || 0 : 0;
+    const decPrice  = decInp ? parseFloat(decInp.value) || 0 : 0;
+    const togT = togPrice * qty, decT = decPrice * qty;
+    togTotal += togT; decTotal += decT;
+    const togEl = document.querySelector(`.pr-toggle-total-${g}`);
+    const decEl = document.querySelector(`.pr-dec-total-${g}`);
+    if (togEl) togEl.textContent = '$' + togT.toFixed(2);
+    if (decEl) decEl.textContent = '$' + decT.toFixed(2);
+  });
+  const togGrandEl   = document.getElementById('pr-toggle-grand');
+  const decGrandEl   = document.getElementById('pr-dec-grand');
+  const dkoCompEl    = document.getElementById('pr-deako-comp-total');
+  const deltaTogEl   = document.getElementById('pr-delta-toggle');
+  const deltaDecEl   = document.getElementById('pr-delta-dec');
+  if (togGrandEl) togGrandEl.textContent = '$' + togTotal.toFixed(2);
+  if (decGrandEl) decGrandEl.textContent = '$' + decTotal.toFixed(2);
+  if (dkoCompEl)  dkoCompEl.textContent  = '$' + deakoGrand.toFixed(2);
+  const fmtDelta = (deako, other, el) => {
+    if (!el) return;
+    if (other === 0) { el.textContent = '—'; el.className = ''; return; }
+    const diff = deako - other;
+    const pct  = Math.abs(diff / other * 100).toFixed(1);
+    if (diff < 0) {
+      el.innerHTML = `<span class="pr-delta-save">Deako saves $${Math.abs(diff).toFixed(2)} (${pct}% less)</span>`;
+    } else if (diff > 0) {
+      el.innerHTML = `<span class="pr-delta-cost">Deako costs $${diff.toFixed(2)} more (${pct}% more)</span>`;
+    } else {
+      el.textContent = 'Same cost';
+    }
+  };
+  fmtDelta(deakoGrand, togTotal, deltaTogEl);
+  fmtDelta(deakoGrand, decTotal, deltaDecEl);
 }
 
 function savePricingFromUI() {
@@ -1840,6 +1964,10 @@ function savePricingFromUI() {
     const qtyInp   = document.querySelector(`[data-gang-qty="${g}"]`);
     if (priceInp) s.gangPrices[g] = parseFloat(priceInp.value) || 0;
     if (qtyInp)   s.gangQty[g]   = parseInt(qtyInp.value)      || 0;
+    const togInp = document.querySelector(`[data-toggle-price="${g}"]`);
+    const decInp = document.querySelector(`[data-dec-price="${g}"]`);
+    if (togInp) { if (!s.togglePrices)    s.togglePrices    = {}; s.togglePrices[g]    = parseFloat(togInp.value) || 0; }
+    if (decInp) { if (!s.decoratorPrices) s.decoratorPrices = {}; s.decoratorPrices[g] = parseFloat(decInp.value) || 0; }
   });
   savePricingSettings(s);
 }
@@ -4358,6 +4486,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v15.4</div>
+<div id="version-badge">v15.5</div>
 </body>
 </html>
