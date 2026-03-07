@@ -1313,6 +1313,7 @@ function toggleHlWhiteMode() {
 }
 
 let _hlShowTimer = null;function showHolidayLights() {  const extViewEl = document.getElementById('ext-view');  if (!extViewEl.classList.contains('active')) { viewMode = 1; applyViewMode(); }  const wb = document.getElementById('hl-white-btn'); if (wb) wb.style.display = 'inline-block';  doSunset(() => {    _hlShowTimer = setTimeout(() => {      _hlShowTimer = null;      if (activeSceneKey !== 'holiday') return;      levels['porch'] = 0; renderRoom('porch');      levels['deck']  = 0; renderRoom('deck');      updateCount(); updateImg();      renderHolidayLights();    }, 1000);  });}function hideHolidayLights() {  if (_hlShowTimer) { clearTimeout(_hlShowTimer); _hlShowTimer = null; }  const g = document.getElementById('hl-group');  if (g) g.querySelectorAll('.hl-bulb').forEach(el => el.classList.add('hidden'));  hlWhiteMode = false;  const wb = document.getElementById('hl-white-btn'); if (wb) { wb.style.display = 'none'; wb.textContent = 'White Lights'; wb.classList.remove('active'); }}
+function renderInteriorFixtures() {
   const g = document.getElementById('fixture-group');
   if (!g) return;
   g.innerHTML = '';
@@ -4481,6 +4482,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v17.8</div>
+<div id="version-badge">v17.9</div>
 </body>
 </html>
