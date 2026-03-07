@@ -3075,7 +3075,7 @@ function renderRoom(id) {
       const g = extSvgEl.querySelector(`[data-win-id="${w.id}"]`);
       if (!g) return;
       const lightG = g.querySelector('.ext-win-light');
-      if (lightG) lightG.style.opacity = lv / 100;
+      if (lightG) lightG.style.opacity = lv / 100 * 0.75;
     });
   }
   // Update fixture spot glows; suppress even fill when fixtures are placed
@@ -4271,7 +4271,7 @@ function renderExtWindows() {
     // ── Light layers (controlled via group opacity) ──────────────────────
     const lightG = document.createElementNS(ns,'g');
     lightG.classList.add('ext-win-light');
-    lightG.style.opacity = lv / 100;
+    lightG.style.opacity = lv / 100 * 0.75;
 
     // Layer 1: warm outer spill — light bleeding around window frame
     const spill = document.createElementNS(ns,'rect');
@@ -4338,7 +4338,7 @@ function refreshExtWindowLevels() {
     const g = extSvgEl.querySelector(`[data-win-id="${w.id}"]`);
     if (!g) return;
     const lightG = g.querySelector('.ext-win-light');
-    if (lightG) lightG.style.opacity = (w.room ? (levels[w.room] || 0) : 0) / 100;
+    if (lightG) lightG.style.opacity = (w.room ? (levels[w.room] || 0) : 0) / 100 * 0.75;
   });
 }
 
@@ -4481,6 +4481,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v17.7</div>
+<div id="version-badge">v17.8</div>
 </body>
 </html>
