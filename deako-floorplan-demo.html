@@ -377,7 +377,7 @@
     box-shadow:0 0 14px 5px rgba(255,210,50,.8);transition:background .7s ease,box-shadow .7s ease}
   #sun-orb.smile-mode{background:transparent;box-shadow:none}
   #sun-orb.smile-mode #sun-img{opacity:1}
-  #moon-orb{position:absolute;width:18px;height:18px;border-radius:50%;
+  #moon-orb{position:absolute;width:18px;height:18px;border-radius:50%;cursor:pointer;
     background:#d8d8b8;box-shadow:inset -4px -2px 0 2px #b0b090,0 0 10px 3px rgba(200,200,160,.4);
     opacity:0;transition:opacity .8s ease,top .05s,left .05s;top:14px;right:18px}
   #sky-scene.night #moon-orb{opacity:1}
@@ -3158,6 +3158,7 @@ function toggleAdminButtons(e) {
   document.querySelector('.dtag').classList.toggle('admin-visible', adminVisible);
 }
 document.getElementById('sun-orb').addEventListener('click', toggleAdminButtons);
+document.getElementById('moon-orb').addEventListener('click', toggleAdminButtons);
 
 const SUN_ROOMS = ["porch","deck","foyer","mudroom"];
 let sunIsDay = true;
@@ -4357,6 +4358,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v15.3</div>
+<div id="version-badge">v15.4</div>
 </body>
 </html>
