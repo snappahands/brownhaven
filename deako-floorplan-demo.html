@@ -1776,11 +1776,25 @@ function renderPricingPanel() {
   </tbody></table>`;
   body.appendChild(adjSec);
 
+  // ── SUBTOTALS ────────────────────────────────────────────────────────────
+  const subDiv = document.createElement('div');
+  subDiv.style.cssText = 'border-top:2px solid #2a3a4a;padding:10px 8px 2px;display:flex;flex-direction:column;gap:6px';
+  subDiv.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="color:#7ecfe0;font-size:12px;font-weight:700;letter-spacing:.05em">BASE SYSTEM TOTAL <span style="color:#445;font-size:10px;font-weight:500">(Gang Connectors &amp; Backplates)</span></span>
+      <span id="pr-base-total" style="color:#7ecfe0;font-size:16px;font-weight:800">$0.00</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="color:#aaddff;font-size:12px;font-weight:700;letter-spacing:.05em">STANDARD UPGRADE TOTAL <span style="color:#445;font-size:10px;font-weight:500">(Smart Switches)</span></span>
+      <span id="pr-upgrade-total" style="color:#aaddff;font-size:16px;font-weight:800">$0.00</span>
+    </div>`;
+  body.appendChild(subDiv);
+
   // ── GRAND TOTAL ─────────────────────────────────────────────────────────
   const totalDiv = document.createElement('div');
-  totalDiv.style.cssText = 'display:flex;justify-content:space-between;align-items:center;border-top:2px solid #2a3a4a;padding:14px 8px 4px';
+  totalDiv.style.cssText = 'display:flex;justify-content:space-between;align-items:center;border-top:1px solid #2a3a4a;padding:14px 8px 4px';
   totalDiv.innerHTML = `
-    <span style="color:#7ecfe0;font-size:14px;font-weight:800;letter-spacing:.05em">PACKAGE TOTAL</span>
+    <span style="color:#f5c842;font-size:14px;font-weight:800;letter-spacing:.05em">PACKAGE TOTAL</span>
     <span id="pr-grand-total" style="color:#f5c842;font-size:26px;font-weight:900">$0.00</span>`;
   body.appendChild(totalDiv);
 
@@ -1905,6 +1919,11 @@ function recalcPricing() {
   const subtotal  = swTotal + gangTotal;
   const markupAmt = subtotal * (markup / 100);
   const grand     = subtotal - rebate + markupAmt;
+
+  const baseEl    = document.getElementById('pr-base-total');
+  const upgradeEl = document.getElementById('pr-upgrade-total');
+  if (baseEl)    baseEl.textContent    = '$' + gangTotal.toFixed(2);
+  if (upgradeEl) upgradeEl.textContent = '$' + swTotal.toFixed(2);
 
   const rebateEl = document.getElementById('pr-rebate-display');
   const markupEl = document.getElementById('pr-markup-display');
@@ -4502,6 +4521,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v15.6</div>
+<div id="version-badge">v15.7</div>
 </body>
 </html>
