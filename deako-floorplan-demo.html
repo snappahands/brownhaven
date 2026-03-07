@@ -376,6 +376,19 @@
   #sky-scene.night{background:linear-gradient(180deg,#03050d 0%,#090e22 50%,#1c1828 82%,#28160a 100%)}
   .sky-star{position:absolute;background:#fff;border-radius:50%;opacity:0;transition:opacity 1.3s ease}
   #sky-scene.night .sky-star{opacity:1}
+  .sky-cloud{position:absolute;background:rgba(255,255,255,0.86);border-radius:50px;pointer-events:none;opacity:1;transition:opacity 1.3s ease}
+  .sky-cloud::before,.sky-cloud::after{content:'';position:absolute;background:rgba(255,255,255,0.86);border-radius:50%}
+  #sky-scene.night .sky-cloud{opacity:0}
+  @keyframes cloudFloat{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+  #cloud-1{width:64px;height:16px;top:20%;left:6%;animation:cloudFloat 15s ease-in-out infinite}
+  #cloud-1::before{width:24px;height:24px;top:-13px;left:8px}
+  #cloud-1::after{width:17px;height:17px;top:-9px;left:30px}
+  #cloud-2{width:48px;height:13px;top:13%;left:43%;animation:cloudFloat 20s ease-in-out infinite;animation-delay:-7s}
+  #cloud-2::before{width:19px;height:19px;top:-11px;left:6px}
+  #cloud-2::after{width:14px;height:14px;top:-7px;left:22px}
+  #cloud-3{width:38px;height:11px;top:28%;left:71%;animation:cloudFloat 13s ease-in-out infinite;animation-delay:-4s}
+  #cloud-3::before{width:15px;height:15px;top:-8px;left:5px}
+  #cloud-3::after{width:11px;height:11px;top:-5px;left:17px}
 /* Shooting stars drawn via JS */
   @keyframes sun-glow-pulse{0%,100%{filter:drop-shadow(0 0 5px rgba(255,220,40,0.55)) drop-shadow(0 0 10px rgba(255,180,0,0.3))}50%{filter:drop-shadow(0 0 14px rgba(255,235,50,1)) drop-shadow(0 0 28px rgba(255,200,0,0.7))}}
   #sun-img{width:40px;height:40px;object-fit:contain;display:block;opacity:0;transition:opacity 0.9s ease;filter:drop-shadow(0 0 5px rgba(255,210,40,0.5));position:absolute;left:-9px;top:-9px}
@@ -707,6 +720,9 @@
 <div id="right-panel">
     <div id="sun-scheduler">
       <div id="sky-scene">
+        <div class="sky-cloud" id="cloud-1"></div>
+        <div class="sky-cloud" id="cloud-2"></div>
+        <div class="sky-cloud" id="cloud-3"></div>
         <div class="sky-star" style="width:2px;height:2px;top:18%;left:14%"></div>
         <div class="sky-star" style="width:1px;height:1px;top:8%;left:38%"></div>
         <div class="sky-star" style="width:2px;height:2px;top:32%;left:60%"></div>
@@ -4486,6 +4502,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v15.5</div>
+<div id="version-badge">v15.6</div>
 </body>
 </html>
