@@ -1312,17 +1312,7 @@ function toggleHlWhiteMode() {
   renderHolidayLights();
 }
 
-function showHolidayLights() {  const extViewEl = document.getElementById('ext-view');  if (!extViewEl.classList.contains('active')) { viewMode = 1; applyViewMode(); }  const wb = document.getElementById('hl-white-btn'); if (wb) wb.style.display = 'inline-block';  doSunset(() => {    setTimeout(() => {      levels['porch'] = 0; renderRoom('porch');      levels['deck']  = 0; renderRoom('deck');      updateCount(); updateImg();      renderHolidayLights();    }, 1000);  });}
-
-function hideHolidayLights() {
-  const g = document.getElementById('hl-group');
-  if (g) g.querySelectorAll('.hl-bulb').forEach(el => el.classList.add('hidden'));
-  hlWhiteMode = false;
-  const wb = document.getElementById('hl-white-btn'); if (wb) { wb.style.display = 'none'; wb.textContent = 'White Lights'; wb.classList.remove('active'); }
-}
-
-// ── INTERIOR LIGHT FIXTURES ───────────────────────────────────────────────────
-function renderInteriorFixtures() {
+let _hlShowTimer = null;function showHolidayLights() {  const extViewEl = document.getElementById('ext-view');  if (!extViewEl.classList.contains('active')) { viewMode = 1; applyViewMode(); }  const wb = document.getElementById('hl-white-btn'); if (wb) wb.style.display = 'inline-block';  doSunset(() => {    _hlShowTimer = setTimeout(() => {      _hlShowTimer = null;      if (activeSceneKey !== 'holiday') return;      levels['porch'] = 0; renderRoom('porch');      levels['deck']  = 0; renderRoom('deck');      updateCount(); updateImg();      renderHolidayLights();    }, 1000);  });}function hideHolidayLights() {  if (_hlShowTimer) { clearTimeout(_hlShowTimer); _hlShowTimer = null; }  const g = document.getElementById('hl-group');  if (g) g.querySelectorAll('.hl-bulb').forEach(el => el.classList.add('hidden'));  hlWhiteMode = false;  const wb = document.getElementById('hl-white-btn'); if (wb) { wb.style.display = 'none'; wb.textContent = 'White Lights'; wb.classList.remove('active'); }}
   const g = document.getElementById('fixture-group');
   if (!g) return;
   g.innerHTML = '';
@@ -3277,7 +3267,7 @@ function runScene(btn, key) {
   if (!sunIsDay) { ['porch','deck'].forEach(id=>{ levels[id]=80; renderRoom(id); }); }
   const sc = scenesData.find(s=>s.key===key); if(!sc) return;
   setStatus(sc.emoji+" "+sc.name+" Scene");
-  if (key === 'holiday') showHolidayLights(); else hideHolidayLights();
+  if (key === 'holiday') { showHolidayLights(); return; } else hideHolidayLights();
   if (sc.steps) {
     const startSteps = () => {
       sc.steps.forEach(step=>{
@@ -4491,6 +4481,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v17.6</div>
+<div id="version-badge">v17.7</div>
 </body>
 </html>
