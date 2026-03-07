@@ -1257,6 +1257,7 @@ let holidayLights = JSON.parse(localStorage.getItem('bhHolidayLights') || '[]');
 let interiorFixtures = JSON.parse(localStorage.getItem('bhFixtures') || '[]');
 let hlPlacing = false;
 let hlOverlay = null;
+let hlWhiteMode = false;
 
 function saveHolidayLights() { localStorage.setItem('bhHolidayLights', JSON.stringify(holidayLights)); }
 function saveInteriorFixtures() { localStorage.setItem('bhFixtures', JSON.stringify(interiorFixtures)); }
@@ -1268,35 +1269,38 @@ function renderHolidayLights() {
   const isActive = activeSceneKey === 'holiday';
   const show = isActive || hlPlacing;
   const NS = 'http://www.w3.org/2000/svg';
-  const colors = ['#ff2222','#22cc22','#ffee22','#2266ff','#ff8800','#cc22cc'];
+  const origColors = ['#ff2222','#22cc22','#ffee22','#2266ff','#ff8800','#cc22cc'];
   holidayLights.forEach((pt, i) => {
-    const c = colors[i % colors.length];
+    const c = hlWhiteMode ? '#ffffff' : origColors[i % origColors.length];
     const s = 2.2; // bulb scale in SVG units
     const cx = pt.x, cy = pt.y;
     const mk = (tag, attrs) => { const el = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v)); return el; };
     const addBulb = el => { el.classList.add('hl-bulb'); if (!show) el.classList.add('hidden'); g.appendChild(el); };
-    const addActive = el => { el.classList.add('hl-bulb'); if (!isActive) el.classList.add('hidden'); g.appendChild(el); };
 
     // Wire from cap top upward
     addBulb(mk('line', {x1:cx, y1:cy-s, x2:cx, y2:cy-s-1.6, stroke:'#666', 'stroke-width':'0.22'}));
 
     // Bulb body — upside-down C7: wide dome at top, pointed tip at bottom
-    const sw = s * 0.48; // shoulder half-width
-    const y0 = cy - s * 0.62; // shoulder line (just below cap)
+    const sw = s * 0.48;
+    const y0 = cy - s * 0.62;
     const d = `M ${cx-sw},${y0} C ${cx-s*0.65},${cy-s*0.1} ${cx-s*0.3},${cy+s*0.82} ${cx},${cy+s} C ${cx+s*0.3},${cy+s*0.82} ${cx+s*0.65},${cy-s*0.1} ${cx+sw},${y0} Z`;
     const body = mk('path', {d, fill:c, opacity: isActive ? '0.95' : '0.72'});
     if (isActive) {
       body.style.animation = `hlTwinkle ${1.2+(i%7)*0.18}s ease-in-out infinite`;
       body.style.animationDelay = (i*0.13%1.5).toFixed(2)+'s';
+      // Click any bulb to toggle all white / all color
+      body.style.pointerEvents = 'all';
+      body.style.cursor = 'pointer';
+      body.addEventListener('click', e => { e.stopPropagation(); hlWhiteMode = !hlWhiteMode; renderHolidayLights(); });
     }
     body.classList.add('hl-bulb');
     if (!show) body.classList.add('hidden');
     g.appendChild(body);
 
-    // Facet highlight (glossy inner reflection)
+    // Facet highlight
     addBulb(mk('ellipse', {cx: cx-sw*0.3, cy: cy-s*0.25, rx: sw*0.38, ry: s*0.28, fill:'rgba(255,255,255,0.28)'}));
 
-    // Dark cap at top (socket — upside down means it's at top now)
+    // Dark cap at top
     addBulb(mk('rect', {x: cx-s*0.22, y: cy-s, width: s*0.44, height: s*0.33, fill:'#2d2d2d', rx: s*0.07}));
   });
 }
@@ -4480,6 +4484,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v16.8</div>
+<div id="version-badge">v16.9</div>
 </body>
 </html>
