@@ -1261,16 +1261,18 @@ function renderHolidayLights() {
   if (!g) return;
   g.innerHTML = '';
   const isActive = activeSceneKey === 'holiday';
+  const show = isActive || hlPlacing; // show bulbs when scene active OR during placement
   const colors = ['#ff2222','#22cc22','#ffee22','#2266ff','#ff8800','#cc22cc'];
   holidayLights.forEach((pt, i) => {
     const c = colors[i % colors.length];
     const wire = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     wire.setAttribute('x1', pt.x); wire.setAttribute('y1', pt.y - 0.8);
     wire.setAttribute('x2', pt.x); wire.setAttribute('y2', pt.y - 1.8);
-    wire.setAttribute('stroke', '#444'); wire.setAttribute('stroke-width', '0.18');
+    wire.setAttribute('stroke', '#666'); wire.setAttribute('stroke-width', '0.18');
     wire.classList.add('hl-bulb');
-    if (!isActive) wire.classList.add('hidden');
+    if (!show) wire.classList.add('hidden');
     g.appendChild(wire);
+    // Glow halo — only when holiday scene is active
     const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     glow.setAttribute('cx', pt.x); glow.setAttribute('cy', pt.y);
     glow.setAttribute('r', '2.0'); glow.setAttribute('fill', c);
@@ -1280,13 +1282,17 @@ function renderHolidayLights() {
     glow.classList.add('hl-bulb');
     if (!isActive) glow.classList.add('hidden');
     g.appendChild(glow);
+    // Bulb body — visible when scene active (animated) or placing (dim, no animation)
     const bulb = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     bulb.setAttribute('cx', pt.x); bulb.setAttribute('cy', pt.y);
     bulb.setAttribute('r', '0.85'); bulb.setAttribute('fill', c);
-    bulb.style.animation = `hlTwinkle ${1.2 + (i % 7) * 0.18}s ease-in-out infinite`;
-    bulb.style.animationDelay = (i * 0.13 % 1.5).toFixed(2) + 's';
+    bulb.setAttribute('opacity', isActive ? '1' : '0.55');
+    if (isActive) {
+      bulb.style.animation = `hlTwinkle ${1.2 + (i % 7) * 0.18}s ease-in-out infinite`;
+      bulb.style.animationDelay = (i * 0.13 % 1.5).toFixed(2) + 's';
+    }
     bulb.classList.add('hl-bulb');
-    if (!isActive) bulb.classList.add('hidden');
+    if (!show) bulb.classList.add('hidden');
     bulb.style.pointerEvents = 'all';
     bulb.style.cursor = 'context-menu';
     const idx = i;
@@ -1329,10 +1335,12 @@ function toggleHolidayPlacement() {
     });
     hlOverlay.addEventListener('contextmenu', e => e.preventDefault());
     svg.appendChild(hlOverlay);
+    renderHolidayLights(); // show existing bulbs as placement markers
   } else {
     btn.classList.remove('active');
     btn.textContent = '🎄 Place Lights';
     if (hlOverlay) { svg.removeChild(hlOverlay); hlOverlay = null; }
+    renderHolidayLights(); // hide markers if not in holiday scene
   }
 }
 
@@ -4341,6 +4349,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v16.1</div>
+<div id="version-badge">v16.2</div>
 </body>
 </html>
