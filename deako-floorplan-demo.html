@@ -82,6 +82,9 @@
   .hl-bulb.hidden{opacity:0 !important;pointer-events:none !important}
   #hl-place-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2e1a;color:#4ade80;border:1px solid #2a5a2a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
   #hl-place-btn:hover{background:#22381a}
+  #hl-white-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a1a2e;color:#c8c8ff;border:1px solid #3a3a6a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:4px}
+  #hl-white-btn:hover{background:#252540}
+  #hl-white-btn.active{background:#3a3a6a;border-color:#c8c8ff;color:#fff}
   #hl-place-btn.active{background:#2a5a2a;border-color:#4ade80;color:#fff}
   .dv-card{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;cursor:pointer;position:relative}
   #device-panel .dv-card:first-child{margin-top:150px}
@@ -1288,10 +1291,7 @@ function renderHolidayLights() {
     if (isActive) {
       body.style.animation = `hlTwinkle ${1.2+(i%7)*0.18}s ease-in-out infinite`;
       body.style.animationDelay = (i*0.13%1.5).toFixed(2)+'s';
-      // Click any bulb to toggle all white / all color
-      body.style.pointerEvents = 'all';
-      body.style.cursor = 'pointer';
-      body.addEventListener('click', e => { e.stopPropagation(); hlWhiteMode = !hlWhiteMode; renderHolidayLights(); });
+
     }
     body.classList.add('hl-bulb');
     if (!show) body.classList.add('hidden');
@@ -1305,17 +1305,27 @@ function renderHolidayLights() {
   });
 }
 
+function toggleHlWhiteMode() {
+  hlWhiteMode = !hlWhiteMode;
+  const btn = document.getElementById('hl-white-btn');
+  if (btn) { btn.textContent = hlWhiteMode ? '🌈 Color' : '⚪ White'; btn.classList.toggle('active', hlWhiteMode); }
+  renderHolidayLights();
+}
+
 function showHolidayLights() {
   // Switch to exterior view so lights are visible
   const extViewEl = document.getElementById('ext-view');
   if (!extViewEl.classList.contains('active')) { viewMode = 1; applyViewMode(); }
   doSunset(() => { renderHolidayLights(); });
   renderHolidayLights();
+  const wb = document.getElementById('hl-white-btn'); if (wb) wb.style.display = 'inline-block';
 }
 
 function hideHolidayLights() {
   const g = document.getElementById('hl-group');
   if (g) g.querySelectorAll('.hl-bulb').forEach(el => el.classList.add('hidden'));
+  hlWhiteMode = false;
+  const wb = document.getElementById('hl-white-btn'); if (wb) { wb.style.display = 'none'; wb.textContent = '⚪ White'; wb.classList.remove('active'); }
 }
 
 // ── INTERIOR LIGHT FIXTURES ───────────────────────────────────────────────────
@@ -4484,6 +4494,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v17.0</div>
+<div id="version-badge">v17.1</div>
 </body>
 </html>
