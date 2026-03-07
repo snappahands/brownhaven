@@ -1275,7 +1275,7 @@ function renderHolidayLights() {
   const origColors = ['#ff2222','#22cc22','#ffee22','#2266ff','#ff8800','#cc22cc'];
   holidayLights.forEach((pt, i) => {
     const c = hlWhiteMode ? '#ffffff' : origColors[i % origColors.length];
-    const s = 2.2; // bulb scale in SVG units
+    const s = 1.1; // bulb scale in SVG units
     const cx = pt.x, cy = pt.y;
     const mk = (tag, attrs) => { const el = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k,v)); return el; };
     const addBulb = el => { el.classList.add('hl-bulb'); if (!show) el.classList.add('hidden'); g.appendChild(el); };
@@ -1312,14 +1312,7 @@ function toggleHlWhiteMode() {
   renderHolidayLights();
 }
 
-function showHolidayLights() {
-  // Switch to exterior view so lights are visible
-  const extViewEl = document.getElementById('ext-view');
-  if (!extViewEl.classList.contains('active')) { viewMode = 1; applyViewMode(); }
-  doSunset(() => { renderHolidayLights(); });
-  renderHolidayLights();
-  const wb = document.getElementById('hl-white-btn'); if (wb) wb.style.display = 'inline-block';
-}
+function showHolidayLights() {  const extViewEl = document.getElementById('ext-view');  if (!extViewEl.classList.contains('active')) { viewMode = 1; applyViewMode(); }  const wb = document.getElementById('hl-white-btn'); if (wb) wb.style.display = 'inline-block';  doSunset(() => {    setTimeout(() => {      levels['porch'] = 0; renderRoom('porch');      levels['deck']  = 0; renderRoom('deck');      updateCount(); updateImg();      renderHolidayLights();    }, 1000);  });}
 
 function hideHolidayLights() {
   const g = document.getElementById('hl-group');
@@ -3490,6 +3483,7 @@ function toggleSunSchedule() {
     setTimeout(() => {
       // Reset all lights off
       cancelAllTimers(); clearSceneStepTimers();
+      hideHolidayLights();
       activeSceneKey = null;
       document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('active'));
       ROOMS.forEach(r => { levels[r.id] = 0; renderRoom(r.id); });
@@ -4497,6 +4491,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v17.5</div>
+<div id="version-badge">v17.6</div>
 </body>
 </html>
