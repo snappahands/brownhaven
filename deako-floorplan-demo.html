@@ -67,6 +67,17 @@
   .sw-tile img{width:72px;height:72px;border-radius:10px;object-fit:cover;display:block;pointer-events:none}
   .sw-tile-label{font-size:9.5px;font-weight:700;color:#aab;text-align:center;line-height:1.3;pointer-events:none}
   #fpbox.drag-over-fp{box-shadow:0 0 0 3px #7ecfe0 inset}
+  /* Holiday scene */
+  #holiday-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity 2s;z-index:5}
+  #holiday-svg.hol-active{opacity:1}
+  @keyframes holTwinkle{0%,100%{opacity:1}45%{opacity:.25}55%{opacity:.25}}
+  @keyframes holPulse{0%,100%{opacity:.35}50%{opacity:.7}}
+  @keyframes holIcicle{0%,100%{opacity:.75}50%{opacity:.35}}
+  @keyframes holSnow{0%{transform:translateY(-5px);opacity:0}10%{opacity:.8}90%{opacity:.6}100%{transform:translateY(105px);opacity:0}}
+  .hol-twinkle{animation:holTwinkle 1.6s ease-in-out infinite}
+  .hol-pulse{animation:holPulse 1.8s ease-in-out infinite}
+  .hol-icicle{animation:holIcicle 2.2s ease-in-out infinite}
+  .hol-snow{animation:holSnow linear infinite}
   .dv-card{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;cursor:pointer;position:relative}
   #device-panel .dv-card:first-child{margin-top:150px}
   #device-panel .dv-card:last-child{margin-bottom:40px}
@@ -181,13 +192,15 @@
   #ext-popup-btns button{flex:1;padding:5px;border-radius:5px;border:1px solid #2a3348;background:#1a2535;color:#aaa;font-size:11px;font-weight:700;cursor:pointer}
   #ext-popup-confirm{color:#7ecfe0 !important;border-color:#7ecfe0 !important}
   .admin-btn{display:none}
-  .admin-visible .admin-btn{display:inline-block}
+  .admin-visible .admin-btn{display:inline-flex;align-items:center;margin-left:0}
+  .admin-visible.dtag{display:flex;flex-wrap:wrap;gap:5px;align-items:center;justify-content:flex-end;width:100%}
+  .admin-visible.dtag button{margin-left:0 !important}
   #exterior-btn{position:relative;z-index:9999;padding:5px 12px;background:#1a2535;color:#7ecfe0;border:1px solid #2a4a5a;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;vertical-align:middle;margin-left:8px}
   #exterior-btn:hover{background:#223040}
   #exterior-btn.active{background:#2a4a5a;border-color:#7ecfe0;color:#fff}
   #sun-orb{cursor:pointer}
 
-  .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
+  .statusbar{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;row-gap:6px;padding:8px 16px;background:#111826;border-radius:8px;border:1px solid #1a2535}
   #stxt{color:#7ecfe0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
   #scnt{color:#334;font-size:11px}
   #scnt span{color:#f5c842;font-weight:700}
@@ -588,6 +601,7 @@
     <img id="ext-img" alt="" draggable="false">
     <div id="ext-sky-overlay"></div>
     <div id="ext-night-overlay"></div>
+    <svg id="holiday-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
     <svg id="ext-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
     <div id="ext-room-popup">
       <label>Assign room to window</label>
@@ -1158,6 +1172,208 @@ function updateMapRoomName(val) {
   if (r) { r.label = val; refreshMapperOutlines(); }
 }
 
+// ── HOLIDAY SCENE ─────────────────────────────────────────────────────────────
+const HOL_NS = 'http://www.w3.org/2000/svg';
+function _hEl(tag, attrs, cls) {
+  const el = document.createElementNS(HOL_NS, tag);
+  if (attrs) Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, String(v)));
+  if (cls)   cls.forEach(c => el.classList.add(c));
+  return el;
+}
+
+function getHolidayTheme() {
+  const m = new Date().getMonth();
+  if (m === 9)  return 'halloween';    // October
+  if (m === 6)  return 'july4';        // July
+  if (m === 1)  return 'valentine';    // February
+  if (m === 2)  return 'stpatricks';   // March
+  if (m === 3)  return 'easter';       // April
+  if (m === 10) return 'thanksgiving'; // November
+  return 'christmas'; // Dec, Jan + default
+}
+
+function drawStringLights(svg, x1, y1, x2, y2, colors, base=0) {
+  const n = Math.round((x2-x1)/5.5);
+  svg.appendChild(_hEl('path',{d:`M${x1},${y1+0.5} C${x1+(x2-x1)*.33},${y1+2} ${x1+(x2-x1)*.66},${y1+2} ${x2},${y2+0.5}`,stroke:'rgba(20,20,20,0.55)','stroke-width':'0.18',fill:'none'}));
+  for (let i=0; i<=n; i++) {
+    const t=i/n, x=x1+(x2-x1)*t;
+    const y=Math.pow(1-t,2)*(y1+0.5)+2*(1-t)*t*(y1+2)+t*t*(y2+0.5);
+    const color=colors[i%colors.length], delay=(base+i*0.13)+'s';
+    const glow=_hEl('circle',{cx:x,cy:y+0.5,r:'1.2',fill:color,opacity:'0.28'},['hol-twinkle']);
+    glow.style.animationDelay=delay; svg.appendChild(glow);
+    svg.appendChild(_hEl('rect',{x:x-0.2,y:y,width:'0.4',height:'0.6',fill:'rgba(30,30,30,0.7)'}));
+    const b=_hEl('ellipse',{cx:x,cy:y+1.1,rx:'0.6',ry:'0.8',fill:color},['hol-twinkle']);
+    b.style.animationDelay=delay; svg.appendChild(b);
+  }
+}
+
+function drawIcicles(svg, x1, x2, y, base=0) {
+  const lens=[2.2,3.8,2.6,4.3,2.0,3.5,2.9,4.6,2.4,3.1,4.0,2.7,3.3,2.1,4.8,3.6,2.8,4.1,2.3,3.9];
+  let li=0;
+  for (let x=x1; x<=x2; x+=4.2,li++) {
+    const len=lens[li%lens.length], delay=(base+li*0.07)+'s';
+    const ic=_hEl('line',{x1:x,y1:y,x2:x,y2:y+len,stroke:'rgba(185,225,255,0.72)','stroke-width':'0.32'},['hol-icicle']);
+    ic.style.animationDelay=delay; svg.appendChild(ic);
+    svg.appendChild(_hEl('circle',{cx:x,cy:y+len,r:'0.28',fill:'rgba(210,240,255,0.85)'}));
+  }
+}
+
+function drawWreath(svg, cx, cy) {
+  svg.appendChild(_hEl('circle',{cx,cy,r:'3.8',fill:'none',stroke:'#1a5c14','stroke-width':'2.0'}));
+  svg.appendChild(_hEl('circle',{cx,cy,r:'3.8',fill:'none',stroke:'#2a8a1a','stroke-width':'0.7','stroke-dasharray':'1.8 1.0'}));
+  [[cx-2,cy+1.2],[cx+2.2,cy+1.5],[cx-0.5,cy-2.8],[cx-2.8,cy-0.3],[cx+2.8,cy-0.8]].forEach(([bx,by])=>
+    svg.appendChild(_hEl('circle',{cx:bx,cy:by,r:'0.6',fill:'#cc1a1a'})));
+  svg.appendChild(_hEl('path',{d:`M${cx-2.5},${cy-4} Q${cx-0.8},${cy-6} ${cx},${cy-3.8} Q${cx-1},${cy-5} ${cx-2.5},${cy-4}`,fill:'#cc0000'}));
+  svg.appendChild(_hEl('path',{d:`M${cx+2.5},${cy-4} Q${cx+0.8},${cy-6} ${cx},${cy-3.8} Q${cx+1},${cy-5} ${cx+2.5},${cy-4}`,fill:'#cc0000'}));
+  svg.appendChild(_hEl('circle',{cx,cy:cy-3.7,r:'0.85',fill:'#aa0000'}));
+}
+
+function drawStar(svg, cx, cy, r=2, fill='#ffee22') {
+  const pts=[];
+  for(let i=0;i<10;i++){const a=(i*Math.PI/5)-Math.PI/2,rd=i%2===0?r:r*.38;pts.push(`${cx+rd*Math.cos(a)},${cy+rd*Math.sin(a)}`);}
+  svg.appendChild(_hEl('polygon',{points:pts.join(' '),fill}));
+}
+
+function drawPumpkin(svg, cx, cy) {
+  for(let dx=-1;dx<=1;dx++) svg.appendChild(_hEl('ellipse',{cx:cx+dx*1.3,cy,rx:'1.6',ry:'2.6',fill:'#e05e10',opacity:'0.92'}));
+  svg.appendChild(_hEl('rect',{x:cx-0.35,y:cy-2.6-1.4,width:'0.7',height:'1.4',fill:'#3a6010',rx:'0.3'}));
+  // face
+  svg.appendChild(_hEl('polygon',{points:`${cx-1.3},${cy-.5} ${cx-.5},${cy-1.6} ${cx+.3},${cy-.5}`,fill:'#1a0800'}));
+  svg.appendChild(_hEl('polygon',{points:`${cx+.5},${cy-.5} ${cx+1.2},${cy-1.6} ${cx+2.0},${cy-.5}`,fill:'#1a0800'}));
+  svg.appendChild(_hEl('path',{d:`M${cx-1.5},${cy+0.8} Q${cx},${cy+2.5} ${cx+1.6},${cy+0.8}`,stroke:'#1a0800','stroke-width':'0.45',fill:'none'}));
+  const gl=_hEl('ellipse',{cx,cy,rx:'2',ry:'1.8',fill:'rgba(255,130,0,0.38)'},['hol-pulse']); svg.appendChild(gl);
+}
+
+function drawBunting(svg, x1, x2, y) {
+  const cols=['#cc0000','#ffffff','#003399'];
+  let ci=0;
+  for(let x=x1;x<x2-3.5;x+=4,ci++)
+    svg.appendChild(_hEl('polygon',{points:`${x},${y} ${x+4},${y} ${x+2},${y+3.5}`,fill:cols[ci%cols.length],opacity:'0.88'}));
+  svg.appendChild(_hEl('line',{x1,y1:y,x2,y2:y,stroke:'rgba(200,180,140,0.65)','stroke-width':'0.22'}));
+}
+
+function drawShamrock(svg, cx, cy) {
+  [[-1.2,-1.2],[1.2,-1.2],[0,-0.2]].forEach(([dx,dy])=>
+    svg.appendChild(_hEl('circle',{cx:cx+dx,cy:cy+dy,r:'1.5',fill:'#2d8b2d',opacity:'0.92'})));
+  svg.appendChild(_hEl('line',{x1:cx,y1:cy+1.2,x2:cx,y2:cy+3.5,stroke:'#1a6e1a','stroke-width':'0.45'}));
+}
+
+function drawEasterEgg(svg, cx, cy, fill='#ff99cc') {
+  svg.appendChild(_hEl('ellipse',{cx,cy,rx:'2.0',ry:'2.8',fill,opacity:'0.88'}));
+  svg.appendChild(_hEl('path',{d:`M${cx-2},${cy} Q${cx},${cy-1.5} ${cx+2},${cy}`,stroke:'rgba(255,255,255,0.55)','stroke-width':'0.4',fill:'none'}));
+}
+
+function drawLeafPile(svg, cx, cy) {
+  [['#cc5500',0],['#ee8800',0.8],['#aa3300',-0.7],['#dd6600',1.4],['#ff9900',-1.2]].forEach(([fill,dx])=>
+    svg.appendChild(_hEl('ellipse',{cx:cx+dx,cy:cy+Math.abs(dx)*.4,rx:'2.4',ry:'1.1',fill,opacity:'0.88',transform:`rotate(${dx*14+8},${cx+dx},${cy})`})));
+}
+
+function drawSnowflakes(svg) {
+  const flakes='❄✦✧❅'.split('');
+  for(let i=0;i<8;i++){
+    const x=8+i*11+Math.sin(i*1.7)*4, dur=(6+i*0.7)+'s', delay=(i*0.9)+'s';
+    const fl=_hEl('text',{x,y:'0','text-anchor':'middle','font-size':'2.5',fill:'rgba(210,240,255,0.85)'},['hol-snow']);
+    fl.textContent=flakes[i%flakes.length];
+    fl.style.animationDuration=dur; fl.style.animationDelay=delay;
+    svg.appendChild(fl);
+  }
+}
+
+function drawInteriorTree() {
+  // bottom-left corner of great room: x:38.33, y:20.88, w:26.03, h:37.10
+  const cx=43, by=56;
+  const g=document.createElementNS(HOL_NS,'g'); g.id='holiday-interior-g'; g.style.display='none';
+  // Trunk
+  g.appendChild(_hEl('rect',{x:cx-.7,y:by,width:'1.4',height:'2.2',fill:'#4a2800'}));
+  // Tree body — 3 layered triangles
+  [{base:by,top:by-8,w:9},{base:by-5,top:by-12,w:7},{base:by-10,top:by-16,w:5}].forEach(({base,top,w})=>
+    g.appendChild(_hEl('polygon',{points:`${cx},${top} ${cx-w/2},${base} ${cx+w/2},${base}`,fill:'#1a5c14',stroke:'#0d3d0a','stroke-width':'0.18'})));
+  // Colored light bulbs
+  const lc=['#ff0000','#ffee00','#0055cc','#ff6600','#cc00cc','#00cc55'];
+  [[cx-.5,by-17],[cx+1.8,by-14],[cx-2.2,by-12],[cx+2.8,by-10],[cx-1,by-8],[cx+3.2,by-6],[cx-3,by-5],[cx+1.5,by-3],[cx-2.5,by-14.5],[cx+0,by-10.5]].forEach(([lx,ly],i)=>{
+    const c=lc[i%lc.length], dl=(i*.18)+'s';
+    const gl=_hEl('circle',{cx:lx,cy:ly,r:'1.0',fill:c,opacity:'0.35'},['hol-twinkle']); gl.style.animationDelay=dl; g.appendChild(gl);
+    const b=_hEl('circle',{cx:lx,cy:ly,r:'0.42',fill:c},['hol-twinkle']); b.style.animationDelay=dl; g.appendChild(b);
+  });
+  // Glowing star on top
+  const sg1=_hEl('circle',{cx,cy:by-18,r:'3.0',fill:'rgba(255,240,80,0.22)'},['hol-pulse']); g.appendChild(sg1);
+  const sg2=_hEl('circle',{cx,cy:by-18,r:'1.9',fill:'rgba(255,220,0,0.45)'},['hol-pulse']); sg2.style.animationDelay='.5s'; g.appendChild(sg2);
+  drawStar(g, cx, by-18, 1.3, '#ffee22');
+  // Tree skirt
+  g.appendChild(_hEl('ellipse',{cx,cy:by+0.5,rx:'2.8',ry:'0.9',fill:'#cc0000',opacity:'0.85'}));
+  document.getElementById('holiday-svg').appendChild(g);
+}
+
+function renderHolidayDecorations() {
+  const holSvg = document.getElementById('holiday-svg');
+  holSvg.innerHTML = '';
+  const theme = getHolidayTheme();
+
+  if (theme === 'christmas') {
+    const cc = ['#ff2222','#22cc22','#ffee22','#2266ff','#ff8800'];
+    drawStringLights(holSvg, 6, 22, 94, 22, cc, 0);
+    drawIcicles(holSvg, 7, 93, 23.5, 0.3);
+    drawWreath(holSvg, 48, 62);
+    drawStar(holSvg, 51, 15, 2.2, '#ffee22');
+    drawSnowflakes(holSvg);
+  } else if (theme === 'halloween') {
+    const hc = ['#ff6600','#9900cc','#ff9900','#660099'];
+    drawStringLights(holSvg, 6, 22, 94, 22, hc, 0);
+    drawPumpkin(holSvg, 18, 73);
+    drawPumpkin(holSvg, 50, 74);
+    drawPumpkin(holSvg, 80, 73);
+    // Ghost
+    const gc = document.createElementNS(HOL_NS,'g');
+    gc.appendChild(_hEl('ellipse',{cx:'78',cy:'32',rx:'4',ry:'5',fill:'rgba(240,240,255,0.85)'}));
+    gc.appendChild(_hEl('path',{d:'M74,37 Q75,40 76,37 Q77,40 78,37 Q79,40 80,37 Q81,40 82,37 L82,33 Q78,28 74,33 Z',fill:'rgba(240,240,255,0.85)'}));
+    gc.appendChild(_hEl('circle',{cx:'76.5',cy:'31',r:'1',fill:'#333'}));
+    gc.appendChild(_hEl('circle',{cx:'79.5',cy:'31',r:'1',fill:'#333'}));
+    holSvg.appendChild(gc);
+  } else if (theme === 'july4') {
+    const jc = ['#cc0000','#ffffff','#0033cc'];
+    drawBunting(holSvg, 5, 95, 21);
+    drawStringLights(holSvg, 6, 27, 94, 27, jc, 0);
+    [[20,15],[51,13],[82,16],[35,18],[68,14]].forEach(([sx,sy]) => drawStar(holSvg,sx,sy,2.2,'#ffee22'));
+  } else if (theme === 'valentine') {
+    const vc = ['#ff2266','#ff99bb','#ff0044','#ffbbcc'];
+    drawStringLights(holSvg, 6, 22, 94, 22, vc, 0);
+    // Hearts
+    [[30,35],[52,33],[72,36]].forEach(([hx,hy])=>{
+      holSvg.appendChild(_hEl('path',{d:`M${hx},${hy} C${hx-3},${hy-4} ${hx-6},${hy} ${hx},${hy+5} C${hx+6},${hy} ${hx+3},${hy-4} ${hx},${hy}`,fill:'rgba(255,50,100,0.75)'}));
+    });
+  } else if (theme === 'stpatricks') {
+    const gc = ['#009900','#22cc22','#00cc44','#006600','#66ee44'];
+    drawStringLights(holSvg, 6, 22, 94, 22, gc, 0);
+    [[15,60],[30,58],[50,62],[68,59],[83,61]].forEach(([sx,sy]) => drawShamrock(holSvg,sx,sy));
+    drawWreath(holSvg, 48, 62);
+  } else if (theme === 'easter') {
+    const ec = ['#ff99cc','#99ccff','#aaee88','#ffee99','#ee99ff'];
+    drawStringLights(holSvg, 6, 22, 94, 22, ec, 0);
+    [[15,58],[30,60],[48,57],[65,60],[82,58]].forEach(([ex,ey],i) => drawEasterEgg(holSvg,ex,ey,ec[i%ec.length]));
+    drawSnowflakes(holSvg); // reuse snowflake float for falling petals look
+  } else if (theme === 'thanksgiving') {
+    const tc = ['#cc5500','#ee8800','#aa3300','#dd9900','#884400'];
+    drawStringLights(holSvg, 6, 22, 94, 22, tc, 0);
+    [[12,60],[35,62],[55,60],[78,61],[92,59]].forEach(([lx,ly]) => drawLeafPile(holSvg,lx,ly));
+    drawWreath(holSvg, 48, 62);
+  }
+}
+
+function showHolidayOverlay() {
+  renderHolidayDecorations();
+  document.getElementById('holiday-svg').classList.add('hol-active');
+  // Interior tree
+  if (!document.getElementById('holiday-interior-g')) drawInteriorTree();
+  const ig = document.getElementById('holiday-interior-g');
+  if (ig) ig.style.display = '';
+}
+
+function hideHolidayOverlay() {
+  document.getElementById('holiday-svg').classList.remove('hol-active');
+  const ig = document.getElementById('holiday-interior-g');
+  if (ig) ig.style.display = 'none';
+}
+
 // ── PRICING PANEL ────────────────────────────────────────────────────────────
 const PRICING_DEFAULTS = {
   switchPrices: {
@@ -1648,6 +1864,11 @@ const DEFAULT_SCENES = [
   ]},
   {key:"dinner",  emoji:"🍽", name:"Dinner Time",   rooms:[{id:"dining",lv:80},{id:"kitchen",lv:60},{id:"great",lv:50}]},
   {key:"evening", emoji:"🌙", name:"Wind Down",     rooms:[{id:"great",lv:30},{id:"owic",lv:40},{id:"owners",lv:60}]},
+  {key:"holiday", emoji:"🎄", name:"Holiday Lights", rooms:[
+    {id:"porch",   lv:90},{id:"deck",    lv:85},{id:"foyer",   lv:80},
+    {id:"great",   lv:50},{id:"dining",  lv:60},{id:"kitchen", lv:35},
+    {id:"owners",  lv:40},{id:"obath",   lv:30},
+  ]},
   {key:"vacation",emoji:"🔒", name:"Vacation Mode", steps:[
     {t:0,     id:"porch",   lv:55},
     {t:3000,  id:"foyer",   lv:100},
@@ -1674,6 +1895,11 @@ let scenesData = JSON.parse(localStorage.getItem("bhScenes") || "null") || JSON.
   const v=scenesData.find(s=>s.key===key); const d=DEFAULT_SCENES.find(s=>s.key===key);
   if(v&&d&&JSON.stringify(v.steps)!==JSON.stringify(d.steps)){delete v.staggerMs;delete v.rooms;v.steps=JSON.parse(JSON.stringify(d.steps));localStorage.setItem("bhScenes",JSON.stringify(scenesData));}
 });
+// Add holiday scene if missing from saved data
+if (!scenesData.find(s => s.key === 'holiday')) {
+  const d = DEFAULT_SCENES.find(s => s.key === 'holiday');
+  if (d) { scenesData.splice(scenesData.findIndex(s=>s.key==='vacation'), 0, JSON.parse(JSON.stringify(d))); localStorage.setItem('bhScenes', JSON.stringify(scenesData)); }
+}
 // Migrate name and emoji for default scenes (keeps localStorage in sync with code changes)
 (()=>{ let changed=false; DEFAULT_SCENES.forEach(d=>{ const v=scenesData.find(s=>s.key===d.key); if(v&&(v.name!==d.name||v.emoji!==d.emoji)){v.name=d.name;v.emoji=d.emoji;changed=true;} }); if(changed)localStorage.setItem("bhScenes",JSON.stringify(scenesData)); })();
 
@@ -3946,6 +4172,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v15.0</div>
+<div id="version-badge">v15.1</div>
 </body>
 </html>
