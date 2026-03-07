@@ -657,7 +657,7 @@
 <div class="statusbar">
   <span id="stxt">Tap a room to toggle · Long-press to dim</span>
   <span id="scnt"><span id="ln">0</span> / 14 rooms lit</span>
-  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" class="admin-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" class="admin-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" class="admin-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="floorplan-btn" class="admin-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" class="admin-btn" onclick="showLibraryPanel()">📚 Library</button><button id="pricing-btn" class="admin-btn" onclick="showPricingPanel()">💰 Pricing</button><button id="hl-place-btn" onclick="toggleHolidayPlacement()">🎄 Place Lights</button><button id="voice-btn" onclick="toggleVoicePanel()">🎤 Voice</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
+  <span class="dtag">DEAKO SMART LIGHTING &nbsp;<button id="debug-btn" class="admin-btn" onclick="toggleDebug()">⊞ Mapper</button><button id="switches-btn" class="admin-btn" onclick="toggleSwitchPicker()">🔌 Switches</button><button id="edit-switches-btn" class="admin-btn" onclick="toggleEditSwitches()">✏ Edit Switches</button><button id="floorplan-btn" class="admin-btn" onclick="document.getElementById('fp-file-input').click()">🗺 New Floor Plan</button><button id="library-btn" class="admin-btn" onclick="showLibraryPanel()">📚 Library</button><button id="pricing-btn" class="admin-btn" onclick="showPricingPanel()">💰 Pricing</button><button id="hl-place-btn" onclick="toggleHolidayPlacement()">🎄 Place Lights</button><button id="hl-white-btn" onclick="toggleHlWhiteMode()" style="display:none">White Lights</button><button id="voice-btn" onclick="toggleVoicePanel()">🎤 Voice</button><button id="exterior-btn" onclick="toggleExteriorView()">🏠 Exterior</button><input type="file" id="fp-file-input" accept="image/*" style="display:none"></span>
 </div>
 
 <div id="switch-picker">
@@ -1325,7 +1325,7 @@ function hideHolidayLights() {
   const g = document.getElementById('hl-group');
   if (g) g.querySelectorAll('.hl-bulb').forEach(el => el.classList.add('hidden'));
   hlWhiteMode = false;
-  const wb = document.getElementById('hl-white-btn'); if (wb) { wb.style.display = 'none'; wb.textContent = '⚪ White'; wb.classList.remove('active'); }
+  const wb = document.getElementById('hl-white-btn'); if (wb) { wb.style.display = 'none'; wb.textContent = 'White Lights'; wb.classList.remove('active'); }
 }
 
 // ── INTERIOR LIGHT FIXTURES ───────────────────────────────────────────────────
@@ -4497,6 +4497,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v17.2</div>
+<div id="version-badge">v17.3</div>
 </body>
 </html>
