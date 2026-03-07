@@ -2777,7 +2777,7 @@ function drawCeilingFan(svgEl, cx, cy, r) {
     const rootX = cx + Math.cos(rad) * r * 0.20;
     const rootY = cy + Math.sin(rad) * r * 0.20;
     const px = -Math.sin(rad), py = Math.cos(rad);
-    const tw = r * 0.24, rw = r * 0.08;
+    const tw = r * 0.11, rw = r * 0.04;
     const blade = document.createElementNS(NS, 'polygon');
     blade.setAttribute('points', [
       `${tipX + px * tw},${tipY + py * tw}`,
@@ -2785,8 +2785,8 @@ function drawCeilingFan(svgEl, cx, cy, r) {
       `${rootX - px * rw},${rootY - py * rw}`,
       `${rootX + px * rw},${rootY + py * rw}`,
     ].join(' '));
-    blade.setAttribute('fill', 'rgba(126,207,224,0.08)');
-    blade.setAttribute('stroke', '#7ecfe0');
+    blade.setAttribute('fill', 'rgba(160,30,20,0.15)');
+    blade.setAttribute('stroke', '#8b1a10');
     blade.setAttribute('stroke-width', '0.28');
     g.appendChild(blade);
   });
@@ -2795,21 +2795,21 @@ function drawCeilingFan(svgEl, cx, cy, r) {
   const sq = document.createElementNS(NS, 'rect');
   sq.setAttribute('x', cx - hw); sq.setAttribute('y', cy - hw);
   sq.setAttribute('width', hw * 2); sq.setAttribute('height', hw * 2);
-  sq.setAttribute('fill', 'rgba(126,207,224,0.18)');
-  sq.setAttribute('stroke', '#7ecfe0'); sq.setAttribute('stroke-width', '0.28');
+  sq.setAttribute('fill', 'rgba(160,30,20,0.18)');
+  sq.setAttribute('stroke', '#8b1a10'); sq.setAttribute('stroke-width', '0.28');
   g.appendChild(sq);
   // Crosshair
   [[cx - hw, cy, cx + hw, cy],[cx, cy - hw, cx, cy + hw]].forEach(([x1,y1,x2,y2]) => {
     const l = document.createElementNS(NS, 'line');
     l.setAttribute('x1',x1); l.setAttribute('y1',y1);
     l.setAttribute('x2',x2); l.setAttribute('y2',y2);
-    l.setAttribute('stroke','#7ecfe0'); l.setAttribute('stroke-width','0.18');
+    l.setAttribute('stroke','#8b1a10'); l.setAttribute('stroke-width','0.18');
     g.appendChild(l);
   });
   // Center dot
   const dot = document.createElementNS(NS, 'circle');
   dot.setAttribute('cx',cx); dot.setAttribute('cy',cy); dot.setAttribute('r', r * 0.04);
-  dot.setAttribute('fill','#7ecfe0');
+  dot.setAttribute('fill','#8b1a10');
   g.appendChild(dot);
   svgEl.appendChild(g);
 }
@@ -4349,6 +4349,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v16.2</div>
+<div id="version-badge">v16.3</div>
 </body>
 </html>
