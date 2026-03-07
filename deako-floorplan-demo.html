@@ -68,6 +68,8 @@
   .sw-tile-label{font-size:9.5px;font-weight:700;color:#aab;text-align:center;line-height:1.3;pointer-events:none}
   #fpbox.drag-over-fp{box-shadow:0 0 0 3px #7ecfe0 inset}
   /* Holiday scene */
+  /* Interior Light Fixtures */
+  .fixture-marker{pointer-events:none}
   /* Ceiling Fans */
   .ceiling-fan{pointer-events:none;opacity:0.65}
   @keyframes fanSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
@@ -1252,12 +1254,12 @@ function updateMapRoomName(val) {
 
 // ── HOLIDAY LIGHT PLACEMENT TOOL ──────────────────────────────────────────────
 let holidayLights = JSON.parse(localStorage.getItem('bhHolidayLights') || '[]');
+let interiorFixtures = JSON.parse(localStorage.getItem('bhFixtures') || '[]');
 let hlPlacing = false;
 let hlOverlay = null;
 
-function saveHolidayLights() {
-  localStorage.setItem('bhHolidayLights', JSON.stringify(holidayLights));
-}
+function saveHolidayLights() { localStorage.setItem('bhHolidayLights', JSON.stringify(holidayLights)); }
+function saveInteriorFixtures() { localStorage.setItem('bhFixtures', JSON.stringify(interiorFixtures)); }
 
 function renderHolidayLights() {
   const g = document.getElementById('hl-group');
@@ -1318,45 +1320,124 @@ function hideHolidayLights() {
   if (g) g.querySelectorAll('.hl-bulb').forEach(el => el.classList.add('hidden'));
 }
 
+// ── INTERIOR LIGHT FIXTURES ───────────────────────────────────────────────────
+function renderInteriorFixtures() {
+  const g = document.getElementById('fixture-group');
+  if (!g) return;
+  g.innerHTML = '';
+  const NS = 'http://www.w3.org/2000/svg';
+  const placingInterior = hlPlacing && !document.getElementById('ext-view').classList.contains('active');
+  interiorFixtures.forEach((ft, i) => {
+    const {x, y, room} = ft;
+    const lv = (room && typeof levels !== 'undefined') ? (levels[room] || 0) : 0;
+    const a = lv / 100;
+    // Glow pool — scales with room brightness
+    const gc = document.createElementNS(NS, 'circle');
+    gc.setAttribute('cx', x); gc.setAttribute('cy', y); gc.setAttribute('r', '10');
+    gc.setAttribute('fill', 'url(#fixture-grad)');
+    gc.setAttribute('opacity', lv > 0 ? (0.25 + a * 0.72).toFixed(2) : '0');
+    gc.classList.add('fixture-glow'); gc.dataset.fixtureRoom = room || '';
+    g.appendChild(gc);
+    // Architectural marker: small circle + X (recessed can from above)
+    const mop = placingInterior ? '1' : '0.22';
+    const mc = document.createElementNS(NS, 'circle');
+    mc.setAttribute('cx', x); mc.setAttribute('cy', y); mc.setAttribute('r', '0.65');
+    mc.setAttribute('fill', 'none'); mc.setAttribute('stroke', '#7ecfe0');
+    mc.setAttribute('stroke-width', '0.2'); mc.setAttribute('opacity', mop);
+    mc.classList.add('fixture-marker'); g.appendChild(mc);
+    const d = 0.44;
+    [[x-d,y-d,x+d,y+d],[x+d,y-d,x-d,y+d]].forEach(([x1,y1,x2,y2]) => {
+      const l = document.createElementNS(NS, 'line');
+      l.setAttribute('x1',x1); l.setAttribute('y1',y1); l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+      l.setAttribute('stroke','#7ecfe0'); l.setAttribute('stroke-width','0.18'); l.setAttribute('opacity',mop);
+      l.classList.add('fixture-marker'); g.appendChild(l);
+    });
+  });
+}
+
+function updateFixtureGlows(roomId) {
+  const g = document.getElementById('fixture-group');
+  if (!g) return;
+  const lv = levels[roomId] || 0;
+  const a = lv / 100;
+  g.querySelectorAll(`.fixture-glow[data-fixture-room="${roomId}"]`).forEach(el => {
+    el.setAttribute('opacity', lv > 0 ? (0.25 + a * 0.72).toFixed(2) : '0');
+  });
+}
+
 function toggleHolidayPlacement() {
   hlPlacing = !hlPlacing;
   const btn = document.getElementById('hl-place-btn');
+  const isExterior = document.getElementById('ext-view').classList.contains('active');
+
   if (hlPlacing) {
-    // Auto-show exterior view for placement
-    const extViewEl = document.getElementById('ext-view');
-    if (!extViewEl.classList.contains('active')) { viewMode = 1; applyViewMode(); }
     btn.classList.add('active');
-    btn.textContent = '✕ Done Placing';
-    const extSvg = document.getElementById('ext-svg');
-    hlOverlay = document.createElement('div');
-    hlOverlay.style.cssText = 'position:absolute;inset:0;cursor:crosshair;z-index:200;';
-    hlOverlay.addEventListener('click', e => {
-      e.stopPropagation();
-      const r = extSvg.getBoundingClientRect();
-      const x = Math.max(0, Math.min(100, Math.round((e.clientX - r.left) / r.width * 10000) / 100));
-      const y = Math.max(0, Math.min(100, Math.round((e.clientY - r.top) / r.height * 10000) / 100));
-      holidayLights.push({x, y});
-      saveHolidayLights();
+    if (isExterior) {
+      // ── EXTERIOR: place holiday bulbs ──────────────────────────────
+      btn.textContent = '✕ Done';
+      const extSvg = document.getElementById('ext-svg');
+      hlOverlay = document.createElement('div');
+      hlOverlay.style.cssText = 'position:absolute;inset:0;cursor:crosshair;z-index:200;';
+      hlOverlay.addEventListener('click', e => {
+        e.stopPropagation();
+        const r = extSvg.getBoundingClientRect();
+        const x = Math.max(0, Math.min(100, Math.round((e.clientX - r.left) / r.width * 10000) / 100));
+        const y = Math.max(0, Math.min(100, Math.round((e.clientY - r.top) / r.height * 10000) / 100));
+        holidayLights.push({x, y});
+        saveHolidayLights(); renderHolidayLights();
+      });
+      hlOverlay.addEventListener('contextmenu', e => {
+        e.preventDefault(); e.stopPropagation();
+        const r = extSvg.getBoundingClientRect();
+        const mx = (e.clientX - r.left) / r.width * 100, my = (e.clientY - r.top) / r.height * 100;
+        let minDist = Infinity, minIdx = -1;
+        holidayLights.forEach((pt, i) => { const d = Math.hypot(pt.x-mx, pt.y-my); if (d < minDist) { minDist=d; minIdx=i; } });
+        if (minIdx >= 0 && minDist < 10) { holidayLights.splice(minIdx, 1); saveHolidayLights(); renderHolidayLights(); }
+      });
+      document.getElementById('ext-view').appendChild(hlOverlay);
       renderHolidayLights();
-    });
-    // Right-click removes nearest bulb
-    hlOverlay.addEventListener('contextmenu', e => {
-      e.preventDefault(); e.stopPropagation();
-      const r = extSvg.getBoundingClientRect();
-      const mx = (e.clientX - r.left) / r.width * 100;
-      const my = (e.clientY - r.top) / r.height * 100;
-      let minDist = Infinity, minIdx = -1;
-      holidayLights.forEach((pt, i) => { const d = Math.hypot(pt.x-mx, pt.y-my); if (d < minDist) { minDist=d; minIdx=i; } });
-      if (minIdx >= 0 && minDist < 10) { holidayLights.splice(minIdx, 1); saveHolidayLights(); renderHolidayLights(); }
-    });
-    extViewEl.appendChild(hlOverlay);
-    renderHolidayLights();
+    } else {
+      // ── INTERIOR: place light fixtures ─────────────────────────────
+      btn.textContent = '✕ Done';
+      hlOverlay = document.createElement('div');
+      hlOverlay.style.cssText = 'position:absolute;inset:0;cursor:crosshair;z-index:200;';
+      hlOverlay.addEventListener('click', e => {
+        e.stopPropagation();
+        const r = svg.getBoundingClientRect();
+        const x = Math.max(0, Math.min(100, Math.round((e.clientX - r.left) / r.width * 10000) / 100));
+        const y = Math.max(0, Math.min(100, Math.round((e.clientY - r.top) / r.height * 10000) / 100));
+        const room = findRoomAtPoint(x, y);
+        interiorFixtures.push({x, y, room});
+        saveInteriorFixtures(); renderInteriorFixtures();
+        // Update room rendering so fixture glow immediately shows if room is on
+        if (room) renderRoom(room);
+      });
+      hlOverlay.addEventListener('contextmenu', e => {
+        e.preventDefault(); e.stopPropagation();
+        const r = svg.getBoundingClientRect();
+        const mx = (e.clientX - r.left) / r.width * 100, my = (e.clientY - r.top) / r.height * 100;
+        let minDist = Infinity, minIdx = -1;
+        interiorFixtures.forEach((ft, i) => { const d = Math.hypot(ft.x-mx, ft.y-my); if (d < minDist) { minDist=d; minIdx=i; } });
+        if (minIdx >= 0 && minDist < 8) { interiorFixtures.splice(minIdx, 1); saveInteriorFixtures(); renderInteriorFixtures(); }
+      });
+      fpbox.appendChild(hlOverlay);
+      renderInteriorFixtures();
+    }
   } else {
     btn.classList.remove('active');
-    btn.textContent = '🎄 Place Lights';
+    updatePlaceBtn();
     if (hlOverlay) { hlOverlay.remove(); hlOverlay = null; }
+    renderInteriorFixtures();
     renderHolidayLights();
   }
+}
+
+function updatePlaceBtn() {
+  if (hlPlacing) return;
+  const btn = document.getElementById('hl-place-btn');
+  if (!btn) return;
+  const isExt = document.getElementById('ext-view').classList.contains('active');
+  btn.textContent = isExt ? '🎄 Place Lights' : '💡 Place Fixtures';
 }
 
 // ── PRICING PANEL ────────────────────────────────────────────────────────────
@@ -2172,6 +2253,12 @@ defs.innerHTML = `<filter id="glow" x="-40%" y="-40%" width="180%" height="180%"
   <stop offset="35%"  stop-color="rgba(255,175,50,0.45)"/>
   <stop offset="70%"  stop-color="rgba(255,140,20,0.18)"/>
   <stop offset="100%" stop-color="rgba(255,120,0,0)"/>
+</radialGradient>
+<radialGradient id="fixture-grad" cx="50%" cy="50%" r="50%" gradientUnits="objectBoundingBox">
+  <stop offset="0%"   stop-color="rgba(255,250,210,0.95)"/>
+  <stop offset="28%"  stop-color="rgba(255,228,130,0.60)"/>
+  <stop offset="60%"  stop-color="rgba(255,200,80,0.25)"/>
+  <stop offset="100%" stop-color="rgba(255,170,40,0)"/>
 </radialGradient>`;
 svg.appendChild(defs);
 
@@ -2782,6 +2869,13 @@ buildSwitchSidebar();
   extSvg.appendChild(hlGrp);
   renderHolidayLights();
 })();
+// Init interior fixture group (lives in floor plan #svgl)
+(function() {
+  const fxGrp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  fxGrp.id = 'fixture-group';
+  svg.appendChild(fxGrp);
+  renderInteriorFixtures();
+})();
 
 // ── CEILING FANS ──────────────────────────────────────────────────────────────
 function drawCeilingFan(svgEl, cx, cy, r, roomId) {
@@ -2989,6 +3083,13 @@ function renderRoom(id) {
       const lightG = g.querySelector('.ext-win-light');
       if (lightG) lightG.style.opacity = lv / 100;
     });
+  }
+  // Update fixture spot glows; suppress even fill when fixtures are placed
+  updateFixtureGlows(id);
+  if (on && interiorFixtures.some(f => f.room === id)) {
+    fr.setAttribute('fill', `rgba(255,210,60,${0.01 + a*0.03})`);
+    gl.setAttribute('opacity', (0.04 + a*0.06).toFixed(2));
+    rr.style.display = 'none';
   }
 }
 
@@ -4122,6 +4223,7 @@ function switchTab(idx) {
 
 // ── EXTERIOR VIEW ─────────────────────────────────────────────────────────────
 let viewMode = 0; // 0=interior, 1=exterior, 2=split
+updatePlaceBtn(); // set initial button label based on view
 function activeExtWins() { return viewMode === 2 ? extWindowsSplit : extWindows; }
 let extWindows      = JSON.parse(localStorage.getItem('bhExtWindows')      || '[]');
 let extWindowsSplit = JSON.parse(localStorage.getItem('bhExtWindowsSplit') || '[]');
@@ -4274,6 +4376,7 @@ function applyViewMode() {
     btn.textContent = '🏠 Exterior';
     requestAnimationFrame(sizeAndAlign);
   }
+  updatePlaceBtn();
 }
 
 function toggleExtMapper() {
@@ -4383,6 +4486,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v16.6</div>
+<div id="version-badge">v16.7</div>
 </body>
 </html>
