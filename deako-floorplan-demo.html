@@ -68,6 +68,8 @@
   .sw-tile-label{font-size:9.5px;font-weight:700;color:#aab;text-align:center;line-height:1.3;pointer-events:none}
   #fpbox.drag-over-fp{box-shadow:0 0 0 3px #7ecfe0 inset}
   /* Holiday scene */
+  /* Ceiling Fans */
+  .ceiling-fan{pointer-events:none;opacity:0.65}
   /* Holiday Light Placement Tool */
   @keyframes hlTwinkle{0%,100%{opacity:1}45%{opacity:.25}55%{opacity:.25}}
   @keyframes hlGlow{0%,100%{opacity:.3}50%{opacity:.75}}
@@ -2753,6 +2755,59 @@ buildSwitchSidebar();
   svg.appendChild(hlGrp);
   renderHolidayLights();
 })();
+
+// ── CEILING FANS ──────────────────────────────────────────────────────────────
+function drawCeilingFan(svgEl, cx, cy, r) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const g = document.createElementNS(NS, 'g');
+  g.classList.add('ceiling-fan');
+  // 4 blades at 45° diagonals (NE, NW, SW, SE)
+  [45, 135, 225, 315].forEach(deg => {
+    const rad = deg * Math.PI / 180;
+    const tipX = cx + Math.cos(rad) * r;
+    const tipY = cy + Math.sin(rad) * r;
+    const rootX = cx + Math.cos(rad) * r * 0.20;
+    const rootY = cy + Math.sin(rad) * r * 0.20;
+    const px = -Math.sin(rad), py = Math.cos(rad);
+    const tw = r * 0.24, rw = r * 0.08;
+    const blade = document.createElementNS(NS, 'polygon');
+    blade.setAttribute('points', [
+      `${tipX + px * tw},${tipY + py * tw}`,
+      `${tipX - px * tw},${tipY - py * tw}`,
+      `${rootX - px * rw},${rootY - py * rw}`,
+      `${rootX + px * rw},${rootY + py * rw}`,
+    ].join(' '));
+    blade.setAttribute('fill', 'rgba(126,207,224,0.08)');
+    blade.setAttribute('stroke', '#7ecfe0');
+    blade.setAttribute('stroke-width', '0.28');
+    g.appendChild(blade);
+  });
+  // Center housing (square)
+  const hw = r * 0.15;
+  const sq = document.createElementNS(NS, 'rect');
+  sq.setAttribute('x', cx - hw); sq.setAttribute('y', cy - hw);
+  sq.setAttribute('width', hw * 2); sq.setAttribute('height', hw * 2);
+  sq.setAttribute('fill', 'rgba(126,207,224,0.18)');
+  sq.setAttribute('stroke', '#7ecfe0'); sq.setAttribute('stroke-width', '0.28');
+  g.appendChild(sq);
+  // Crosshair
+  [[cx - hw, cy, cx + hw, cy],[cx, cy - hw, cx, cy + hw]].forEach(([x1,y1,x2,y2]) => {
+    const l = document.createElementNS(NS, 'line');
+    l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+    l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+    l.setAttribute('stroke','#7ecfe0'); l.setAttribute('stroke-width','0.18');
+    g.appendChild(l);
+  });
+  // Center dot
+  const dot = document.createElementNS(NS, 'circle');
+  dot.setAttribute('cx',cx); dot.setAttribute('cy',cy); dot.setAttribute('r', r * 0.04);
+  dot.setAttribute('fill','#7ecfe0');
+  g.appendChild(dot);
+  svgEl.appendChild(g);
+}
+// Great Room center: x=51.35, y=39.43; Owner's Suite center: x=77.90, y=34.83
+drawCeilingFan(svg, 51.35, 39.43, 5.5);
+drawCeilingFan(svg, 77.90, 34.83, 4.5);
 // Hide all nightlight glows on load; they activate once rooms are turned on then off
 svg.querySelectorAll('[data-nl-room]').forEach(el => el.style.display = 'none');
 
@@ -4286,6 +4341,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v16.0</div>
+<div id="version-badge">v16.1</div>
 </body>
 </html>
