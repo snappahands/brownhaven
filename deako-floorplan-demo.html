@@ -433,6 +433,11 @@
   .iapp-scroll::-webkit-scrollbar{width:0}
   .iapp-sec-label{color:#8e8e93;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;padding-left:2px}
   .iapp-scene-grid{display:flex;flex-direction:column;gap:8px}
+  .hol-month-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px 2px 2px}
+  .hol-mo-btn{background:#f0f4ff;border:1px solid #d0d8e8;border-radius:8px;padding:5px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:9px;font-weight:700;color:#444;transition:all .15s;line-height:1.2;width:100%}
+  .hol-mo-btn:hover{background:#dde8ff}
+  .hol-mo-btn.active{background:#e5f0ff;border-color:#007AFF;color:#007AFF}
+  .hol-mo-emoji{font-size:14px;line-height:1.3}
   .iapp-scene-card{background:#fff;border:none;border-radius:14px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;flex-direction:row;align-items:center;gap:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);-webkit-tap-highlight-color:transparent}
   .iapp-scene-card:active{transform:scale(.97)}
   .iapp-scene-card.active{background:#e5f0ff;outline:2px solid #007AFF}
@@ -1181,15 +1186,23 @@ function _hEl(tag, attrs, cls) {
   return el;
 }
 
+let selectedHolidayMonth = new Date().getMonth();
 function getHolidayTheme() {
-  const m = new Date().getMonth();
-  if (m === 9)  return 'halloween';    // October
-  if (m === 6)  return 'july4';        // July
-  if (m === 1)  return 'valentine';    // February
-  if (m === 2)  return 'stpatricks';   // March
-  if (m === 3)  return 'easter';       // April
-  if (m === 10) return 'thanksgiving'; // November
-  return 'christmas'; // Dec, Jan + default
+  const themes = [
+    'lunar_new_year', // Jan
+    'valentine',      // Feb
+    'stpatricks',     // Mar
+    'easter',         // Apr
+    'cincodemayo',    // May
+    'pride',          // Jun
+    'july4',          // Jul
+    'eid',            // Aug
+    'midautumn',      // Sep
+    'halloween',      // Oct
+    'diwali',         // Nov
+    'christmas',      // Dec
+  ];
+  return themes[selectedHolidayMonth] || 'christmas';
 }
 
 function drawStringLights(svg, x1, y1, x2, y2, colors, base=0) {
@@ -1268,6 +1281,88 @@ function drawLeafPile(svg, cx, cy) {
     svg.appendChild(_hEl('ellipse',{cx:cx+dx,cy:cy+Math.abs(dx)*.4,rx:'2.4',ry:'1.1',fill,opacity:'0.88',transform:`rotate(${dx*14+8},${cx+dx},${cy})`})));
 }
 
+function drawLantern(svg, cx, cy, fill='#cc0000') {
+  svg.appendChild(_hEl('ellipse',{cx,cy,rx:'3.5',ry:'5',fill:'rgba(255,140,0,0.15)'},[]));
+  svg.appendChild(_hEl('ellipse',{cx,cy,rx:'2.5',ry:'3.5',fill,opacity:'0.9'}));
+  svg.appendChild(_hEl('rect',{x:cx-1.5,y:cy-3.5,width:'3',height:'0.8',fill:'#cc9900',rx:'0.2'}));
+  svg.appendChild(_hEl('rect',{x:cx-1.5,y:cy+2.7,width:'3',height:'0.8',fill:'#cc9900',rx:'0.2'}));
+  svg.appendChild(_hEl('line',{x1:cx,y1:cy+3.5,x2:cx,y2:cy+5.5,stroke:'#cc9900','stroke-width':'0.4'}));
+  svg.appendChild(_hEl('circle',{cx,cy:cy+5.6,r:'0.45',fill:'#cc9900'}));
+  const gl=_hEl('ellipse',{cx,cy,rx:'3.2',ry:'4.5',fill:'rgba(255,160,0,0.20)'},['hol-pulse']); svg.appendChild(gl);
+}
+
+function drawDiya(svg, cx, cy) {
+  svg.appendChild(_hEl('path',{d:`M${cx-2},${cy} Q${cx-2.3},${cy+2} ${cx},${cy+2} Q${cx+2.3},${cy+2} ${cx+2},${cy} Z`,fill:'#b85c2a'}));
+  const gl=_hEl('circle',{cx,cy:cy-0.8,r:'2.2',fill:'rgba(255,150,0,0.25)'},['hol-pulse']); svg.appendChild(gl);
+  const fl=_hEl('ellipse',{cx,cy:cy-1.3,rx:'0.5',ry:'0.9',fill:'#ffaa00'},['hol-twinkle']); svg.appendChild(fl);
+  const fl2=_hEl('ellipse',{cx,cy:cy-1.7,rx:'0.25',ry:'0.5',fill:'#ffee88'},['hol-twinkle']); fl2.style.animationDelay='.25s'; svg.appendChild(fl2);
+}
+
+function drawRangoli(svg, cx, cy) {
+  const cols=['#ff6600','#ffee00','#cc00cc','#00aacc','#ff2200','#00cc44'];
+  svg.appendChild(_hEl('circle',{cx,cy,r:'5.0',fill:'rgba(255,160,0,0.10)'}));
+  for(let i=0;i<6;i++){
+    const a=(i/6)*Math.PI*2;
+    svg.appendChild(_hEl('circle',{cx:cx+Math.cos(a)*3.2,cy:cy+Math.sin(a)*3.2,r:'1.4',fill:cols[i],opacity:'0.85'}));
+    svg.appendChild(_hEl('circle',{cx:cx+Math.cos(a)*1.8,cy:cy+Math.sin(a)*1.8,r:'0.7',fill:cols[(i+3)%6],opacity:'0.8'}));
+  }
+  svg.appendChild(_hEl('circle',{cx,cy,r:'1.0',fill:'#ffee00'}));
+}
+
+function drawCrescent(svg, cx, cy, fill='#ffdd44') {
+  const r1=3.5, r2=3.0, ox=1.3, oy=-0.3;
+  svg.appendChild(_hEl('path',{
+    d:`M${cx-r1},${cy} A${r1},${r1} 0 1,0 ${cx+r1},${cy} A${r1},${r1} 0 1,0 ${cx-r1},${cy} Z `+
+      `M${cx+ox-r2},${cy+oy} A${r2},${r2} 0 1,1 ${cx+ox+r2},${cy+oy} A${r2},${r2} 0 1,1 ${cx+ox-r2},${cy+oy} Z`,
+    fill, opacity:'0.92', 'fill-rule':'evenodd'
+  }));
+}
+
+function drawMenorah(svg, cx, cy) {
+  svg.appendChild(_hEl('rect',{x:cx-4.5,y:cy+3,width:'9',height:'0.8',fill:'#ccaa00',rx:'0.3'}));
+  svg.appendChild(_hEl('rect',{x:cx-0.45,y:cy-2,width:'0.9',height:'5',fill:'#ccaa00'}));
+  [-4,-3,-2,-1,0,1,2,3,4].forEach((off,i) => {
+    const bx=cx+off*1.1, isSh=off===0, bty=isSh?cy-3.8:cy-1.8;
+    if(off!==0) svg.appendChild(_hEl('path',{d:`M${cx},${cy-2} Q${cx+(bx-cx)*0.5},${cy-0.2} ${bx},${bty}`,stroke:'#ccaa00','stroke-width':'0.45',fill:'none'}));
+    svg.appendChild(_hEl('rect',{x:bx-0.25,y:bty-1.4,width:'0.5',height:'1.4',fill:'#eeeecc'}));
+    const fl=_hEl('ellipse',{cx:bx,cy:bty-2.0,rx:'0.4',ry:'0.75',fill:isSh?'#ffee00':'#ffaa00'},['hol-twinkle']);
+    fl.style.animationDelay=(i*.13)+'s'; svg.appendChild(fl);
+    const gl=_hEl('circle',{cx:bx,cy:bty-1.6,r:'0.9',fill:'rgba(255,180,0,0.22)'},['hol-pulse']);
+    gl.style.animationDelay=(i*.16)+'s'; svg.appendChild(gl);
+  });
+}
+
+function drawHexStar(svg, cx, cy, r=2, fill='#0055cc') {
+  const pts1=[], pts2=[];
+  for(let i=0;i<3;i++){const a=(i*2*Math.PI/3)-Math.PI/2; pts1.push(`${cx+r*Math.cos(a)},${cy+r*Math.sin(a)}`);}
+  for(let i=0;i<3;i++){const a=(i*2*Math.PI/3)+Math.PI/2; pts2.push(`${cx+r*Math.cos(a)},${cy+r*Math.sin(a)}`);}
+  svg.appendChild(_hEl('polygon',{points:pts1.join(' '),fill,opacity:'0.85'}));
+  svg.appendChild(_hEl('polygon',{points:pts2.join(' '),fill,opacity:'0.85'}));
+}
+
+function drawMoon(svg, cx, cy) {
+  svg.appendChild(_hEl('circle',{cx,cy,r:'9',fill:'rgba(255,230,150,0.10)'}));
+  svg.appendChild(_hEl('circle',{cx,cy,r:'6',fill:'rgba(255,220,120,0.20)'}));
+  svg.appendChild(_hEl('circle',{cx,cy,r:'4.2',fill:'rgba(255,210,100,0.50)'}));
+  svg.appendChild(_hEl('circle',{cx,cy,r:'3.2',fill:'#ffdc64',opacity:'0.88'},['hol-pulse']));
+}
+
+function drawMarigold(svg, cx, cy) {
+  const p=['#ff8800','#ff6600','#ffaa00','#ff5500','#ffcc00','#ff7700'];
+  for(let i=0;i<6;i++){
+    const a=(i/6)*Math.PI*2;
+    svg.appendChild(_hEl('circle',{cx:cx+Math.cos(a)*2.0,cy:cy+Math.sin(a)*2.0,r:'1.4',fill:p[i%p.length],opacity:'0.88'}));
+  }
+  svg.appendChild(_hEl('circle',{cx,cy,r:'0.9',fill:'#ffee44'}));
+}
+
+function drawRainbow(svg, cx, cy) {
+  ['#ff0000','#ff8800','#ffee00','#00bb00','#0055cc','#8800cc'].forEach((c,i)=>{
+    const r=17-i*1.9;
+    svg.appendChild(_hEl('path',{d:`M${cx-r},${cy} A${r},${r} 0 0,1 ${cx+r},${cy}`,stroke:c,'stroke-width':'1.7',fill:'none',opacity:'0.78'}));
+  });
+}
+
 function drawSnowflakes(svg) {
   const flakes='❄✦✧❅'.split('');
   for(let i=0;i<8;i++){
@@ -1309,53 +1404,104 @@ function renderHolidayDecorations() {
   holSvg.innerHTML = '';
   const theme = getHolidayTheme();
 
-  if (theme === 'christmas') {
-    const cc = ['#ff2222','#22cc22','#ffee22','#2266ff','#ff8800'];
-    drawStringLights(holSvg, 6, 22, 94, 22, cc, 0);
-    drawIcicles(holSvg, 7, 93, 23.5, 0.3);
+  if (theme === 'lunar_new_year') {
+    // Chinese/Lunar New Year: red lanterns, gold lights, string lights
+    const rc = ['#cc0000','#ff3300','#ffcc00','#cc0000','#ff6600'];
+    drawStringLights(holSvg, 6, 22, 94, 22, rc, 0);
+    drawStringLights(holSvg, 6, 70, 94, 70, rc, 0.4);
+    [[18,34],[35,31],[52,29],[68,31],[83,34]].forEach(([lx,ly]) => drawLantern(holSvg,lx,ly,'#cc0000'));
+    [[25,66],[52,64],[76,66]].forEach(([lx,ly]) => drawLantern(holSvg,lx,ly,'#aa0000'));
+    [[15,16],[85,16],[50,14]].forEach(([sx,sy]) => drawStar(holSvg,sx,sy,2,'#ffcc00'));
+  } else if (theme === 'valentine') {
+    // Valentine's Day: pink/red string lights, hearts, wreath
+    const vc = ['#ff2266','#ff99bb','#ff0044','#ffbbcc'];
+    drawStringLights(holSvg, 6, 22, 94, 22, vc, 0);
+    [[22,36],[50,33],[76,36],[36,56],[64,54]].forEach(([hx,hy])=>{
+      holSvg.appendChild(_hEl('path',{d:`M${hx},${hy} C${hx-3},${hy-4} ${hx-6},${hy} ${hx},${hy+5} C${hx+6},${hy} ${hx+3},${hy-4} ${hx},${hy}`,fill:'rgba(255,50,100,0.75)'}));
+    });
     drawWreath(holSvg, 48, 62);
-    drawStar(holSvg, 51, 15, 2.2, '#ffee22');
+  } else if (theme === 'stpatricks') {
+    // St. Patrick's Day: green lights, shamrocks, wreath
+    const gc = ['#009900','#22cc22','#00cc44','#006600','#66ee44'];
+    drawStringLights(holSvg, 6, 22, 94, 22, gc, 0);
+    [[15,58],[30,56],[50,60],[68,57],[83,59]].forEach(([sx,sy]) => drawShamrock(holSvg,sx,sy));
+    drawWreath(holSvg, 48, 62);
+    drawStar(holSvg, 50, 14, 2.5, '#ffcc00');
+  } else if (theme === 'easter') {
+    // Easter: pastel lights, decorated eggs, drifting petals
+    const ec = ['#ff99cc','#99ccff','#aaee88','#ffee99','#ee99ff'];
+    drawStringLights(holSvg, 6, 22, 94, 22, ec, 0);
+    [[15,58],[30,60],[48,57],[65,60],[82,58]].forEach(([ex,ey],i) => drawEasterEgg(holSvg,ex,ey,ec[i%ec.length]));
     drawSnowflakes(holSvg);
+  } else if (theme === 'cincodemayo') {
+    // Cinco de Mayo: Mexican flag colors, papel picado banners, marigolds
+    const mc = ['#006847','#ffee00','#ce1126','#ff8800'];
+    drawBunting(holSvg, 5, 50, 21);
+    drawBunting(holSvg, 50, 95, 21);
+    drawStringLights(holSvg, 6, 26, 94, 26, mc, 0);
+    [[18,65],[36,63],[55,65],[72,63],[87,65]].forEach(([fx,fy]) => drawMarigold(holSvg,fx,fy));
+    [[20,14],[50,12],[80,14]].forEach(([sx,sy]) => drawStar(holSvg,sx,sy,2.2,'#ffee22'));
+  } else if (theme === 'pride') {
+    // Pride Month: rainbow arc, rainbow string lights, rainbow bunting
+    drawRainbow(holSvg, 50, 82);
+    const rc=['#ff0000','#ff8800','#ffee00','#00bb00','#0055cc','#8800cc'];
+    drawStringLights(holSvg, 6, 22, 94, 22, rc, 0);
+    let ci=0;
+    for(let x=5;x<92;x+=4,ci++)
+      holSvg.appendChild(_hEl('polygon',{points:`${x},26 ${x+4},26 ${x+2},29.5`,fill:rc[ci%rc.length],opacity:'0.82'}));
+  } else if (theme === 'july4') {
+    // Independence Day: red/white/blue bunting, firework stars
+    const jc = ['#cc0000','#ffffff','#0033cc'];
+    drawBunting(holSvg, 5, 95, 21);
+    drawStringLights(holSvg, 6, 27, 94, 27, jc, 0);
+    [[20,15],[51,13],[82,16],[35,18],[68,14]].forEach(([sx,sy]) => drawStar(holSvg,sx,sy,2.2,'#ffee22'));
+  } else if (theme === 'eid') {
+    // Eid al-Fitr: crescent moon, gold/green lights, geometric lanterns
+    const ec = ['#cc9900','#006633','#ffcc44','#009955','#cc8800'];
+    drawStringLights(holSvg, 6, 22, 94, 22, ec, 0);
+    drawStringLights(holSvg, 6, 70, 94, 70, ec, 0.35);
+    drawCrescent(holSvg, 50, 14);
+    [[15,28],[85,28]].forEach(([sx,sy]) => drawStar(holSvg,sx,sy,2,'#ffdd44'));
+    [[18,65],[50,63],[82,65]].forEach(([lx,ly]) => drawLantern(holSvg,lx,ly,'#996600'));
+  } else if (theme === 'midautumn') {
+    // Mid-Autumn / Moon Festival: glowing full moon, warm lanterns, string lights
+    const lac = ['#ff6600','#ff9900','#ffcc00','#cc4400'];
+    drawMoon(holSvg, 50, 13);
+    drawStringLights(holSvg, 6, 24, 94, 24, lac, 0);
+    drawStringLights(holSvg, 6, 68, 94, 68, lac, 0.4);
+    [[18,35],[82,35],[25,65],[75,65]].forEach(([lx,ly]) => drawLantern(holSvg,lx,ly,'#ff6600'));
   } else if (theme === 'halloween') {
+    // Halloween: orange/purple lights, pumpkins, floating ghost
     const hc = ['#ff6600','#9900cc','#ff9900','#660099'];
     drawStringLights(holSvg, 6, 22, 94, 22, hc, 0);
     drawPumpkin(holSvg, 18, 73);
     drawPumpkin(holSvg, 50, 74);
     drawPumpkin(holSvg, 80, 73);
-    // Ghost
     const gc = document.createElementNS(HOL_NS,'g');
     gc.appendChild(_hEl('ellipse',{cx:'78',cy:'32',rx:'4',ry:'5',fill:'rgba(240,240,255,0.85)'}));
     gc.appendChild(_hEl('path',{d:'M74,37 Q75,40 76,37 Q77,40 78,37 Q79,40 80,37 Q81,40 82,37 L82,33 Q78,28 74,33 Z',fill:'rgba(240,240,255,0.85)'}));
     gc.appendChild(_hEl('circle',{cx:'76.5',cy:'31',r:'1',fill:'#333'}));
     gc.appendChild(_hEl('circle',{cx:'79.5',cy:'31',r:'1',fill:'#333'}));
     holSvg.appendChild(gc);
-  } else if (theme === 'july4') {
-    const jc = ['#cc0000','#ffffff','#0033cc'];
-    drawBunting(holSvg, 5, 95, 21);
-    drawStringLights(holSvg, 6, 27, 94, 27, jc, 0);
-    [[20,15],[51,13],[82,16],[35,18],[68,14]].forEach(([sx,sy]) => drawStar(holSvg,sx,sy,2.2,'#ffee22'));
-  } else if (theme === 'valentine') {
-    const vc = ['#ff2266','#ff99bb','#ff0044','#ffbbcc'];
-    drawStringLights(holSvg, 6, 22, 94, 22, vc, 0);
-    // Hearts
-    [[30,35],[52,33],[72,36]].forEach(([hx,hy])=>{
-      holSvg.appendChild(_hEl('path',{d:`M${hx},${hy} C${hx-3},${hy-4} ${hx-6},${hy} ${hx},${hy+5} C${hx+6},${hy} ${hx+3},${hy-4} ${hx},${hy}`,fill:'rgba(255,50,100,0.75)'}));
-    });
-  } else if (theme === 'stpatricks') {
-    const gc = ['#009900','#22cc22','#00cc44','#006600','#66ee44'];
-    drawStringLights(holSvg, 6, 22, 94, 22, gc, 0);
-    [[15,60],[30,58],[50,62],[68,59],[83,61]].forEach(([sx,sy]) => drawShamrock(holSvg,sx,sy));
-    drawWreath(holSvg, 48, 62);
-  } else if (theme === 'easter') {
-    const ec = ['#ff99cc','#99ccff','#aaee88','#ffee99','#ee99ff'];
-    drawStringLights(holSvg, 6, 22, 94, 22, ec, 0);
-    [[15,58],[30,60],[48,57],[65,60],[82,58]].forEach(([ex,ey],i) => drawEasterEgg(holSvg,ex,ey,ec[i%ec.length]));
-    drawSnowflakes(holSvg); // reuse snowflake float for falling petals look
-  } else if (theme === 'thanksgiving') {
-    const tc = ['#cc5500','#ee8800','#aa3300','#dd9900','#884400'];
-    drawStringLights(holSvg, 6, 22, 94, 22, tc, 0);
-    [[12,60],[35,62],[55,60],[78,61],[92,59]].forEach(([lx,ly]) => drawLeafPile(holSvg,lx,ly));
-    drawWreath(holSvg, 48, 62);
+  } else if (theme === 'diwali') {
+    // Diwali: warm golden lights, diyas (oil lamps) along porch, rangoli, lanterns
+    const dc = ['#ff6600','#ffcc00','#ff3300','#ffaa00','#ff9900'];
+    drawStringLights(holSvg, 6, 22, 94, 22, dc, 0);
+    drawStringLights(holSvg, 6, 70, 94, 70, dc, 0.3);
+    [10,20,30,40,50,60,70,80,90].forEach((dx,i) => drawDiya(holSvg, dx, 73+(i%2)*0.8));
+    [15,30,50,70,85].forEach(dx => drawDiya(holSvg, dx, 26));
+    drawRangoli(holSvg, 50, 60);
+    [[18,35],[82,35]].forEach(([lx,ly]) => drawLantern(holSvg,lx,ly,'#ff6600'));
+  } else {
+    // Christmas & Hanukkah (December): colored lights, icicles, wreaths, menorah, Star of David, snow
+    const cc = ['#ff2222','#22cc22','#ffee22','#2266ff','#ff8800'];
+    drawStringLights(holSvg, 6, 22, 94, 22, cc, 0);
+    drawIcicles(holSvg, 7, 93, 23.5, 0.3);
+    drawWreath(holSvg, 28, 62);
+    drawWreath(holSvg, 70, 62);
+    drawMenorah(holSvg, 50, 51);
+    drawHexStar(holSvg, 50, 13, 2.5, '#0066ff');
+    drawSnowflakes(holSvg);
   }
 }
 
@@ -2964,6 +3110,7 @@ function runScene(btn, key) {
   if (!sunIsDay) { ['porch','deck'].forEach(id=>{ levels[id]=80; renderRoom(id); }); }
   const sc = scenesData.find(s=>s.key===key); if(!sc) return;
   setStatus(sc.emoji+" "+sc.name+" Scene");
+  if (key === 'holiday') showHolidayOverlay(); else hideHolidayOverlay();
   if (sc.steps) {
     const startSteps = () => {
       sc.steps.forEach(step=>{
@@ -3697,6 +3844,44 @@ function renderIphoneScenes() {
     };
     grid.appendChild(card);
   });
+
+  // Holiday month picker — appears below Holiday Lights card when active
+  if (activeSceneKey === 'holiday') {
+    const MONTH_THEMES = [
+      {mo:'Jan',emoji:'🏮',label:'Lunar New Year'},
+      {mo:'Feb',emoji:'💝',label:"Valentine's"},
+      {mo:'Mar',emoji:'☘️',label:"St. Patrick's"},
+      {mo:'Apr',emoji:'🐣',label:'Easter'},
+      {mo:'May',emoji:'🌺',label:'Cinco de Mayo'},
+      {mo:'Jun',emoji:'🌈',label:'Pride'},
+      {mo:'Jul',emoji:'🎆',label:'July 4th'},
+      {mo:'Aug',emoji:'🌙',label:'Eid al-Fitr'},
+      {mo:'Sep',emoji:'🥮',label:'Mid-Autumn'},
+      {mo:'Oct',emoji:'🎃',label:'Halloween'},
+      {mo:'Nov',emoji:'🪔',label:'Diwali'},
+      {mo:'Dec',emoji:'🎄',label:'Christmas'},
+    ];
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.07em;padding:8px 4px 2px;';
+    lbl.textContent = 'Choose Holiday';
+    grid.appendChild(lbl);
+    const picker = document.createElement('div');
+    picker.className = 'hol-month-picker';
+    MONTH_THEMES.forEach(({mo,emoji,label},i) => {
+      const btn = document.createElement('button');
+      btn.className = 'hol-mo-btn' + (selectedHolidayMonth === i ? ' active' : '');
+      btn.title = label;
+      btn.innerHTML = `<span class="hol-mo-emoji">${emoji}</span><span>${mo}</span>`;
+      btn.onclick = e => {
+        e.stopPropagation();
+        selectedHolidayMonth = i;
+        showHolidayOverlay();
+        renderIphoneScenes();
+      };
+      picker.appendChild(btn);
+    });
+    grid.appendChild(picker);
+  }
 }
 
 function renderIphoneRooms() {
@@ -4172,6 +4357,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v15.2</div>
+<div id="version-badge">v15.3</div>
 </body>
 </html>
