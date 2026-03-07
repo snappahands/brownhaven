@@ -376,19 +376,13 @@
   #sky-scene.night{background:linear-gradient(180deg,#03050d 0%,#090e22 50%,#1c1828 82%,#28160a 100%)}
   .sky-star{position:absolute;background:#fff;border-radius:50%;opacity:0;transition:opacity 1.3s ease}
   #sky-scene.night .sky-star{opacity:1}
-  .sky-cloud{position:absolute;background:rgba(255,255,255,0.86);border-radius:50px;pointer-events:none;opacity:1;transition:opacity 1.3s ease}
-  .sky-cloud::before,.sky-cloud::after{content:'';position:absolute;background:rgba(255,255,255,0.86);border-radius:50%}
+  .sky-cloud{position:absolute;pointer-events:none;opacity:1;transition:opacity 1.3s ease;line-height:0}
   #sky-scene.night .sky-cloud{opacity:0}
-  @keyframes cloudFloat{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
-  #cloud-1{width:64px;height:16px;top:20%;left:6%;animation:cloudFloat 15s ease-in-out infinite}
-  #cloud-1::before{width:24px;height:24px;top:-13px;left:8px}
-  #cloud-1::after{width:17px;height:17px;top:-9px;left:30px}
-  #cloud-2{width:48px;height:13px;top:13%;left:43%;animation:cloudFloat 20s ease-in-out infinite;animation-delay:-7s}
-  #cloud-2::before{width:19px;height:19px;top:-11px;left:6px}
-  #cloud-2::after{width:14px;height:14px;top:-7px;left:22px}
-  #cloud-3{width:38px;height:11px;top:28%;left:71%;animation:cloudFloat 13s ease-in-out infinite;animation-delay:-4s}
-  #cloud-3::before{width:15px;height:15px;top:-8px;left:5px}
-  #cloud-3::after{width:11px;height:11px;top:-5px;left:17px}
+  @keyframes cloudFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(8px,-1px)}}
+  /* Clouds kept in lower sky, left/right sides — away from sun apex (top-center) */
+  #cloud-1{top:38%;left:2%;animation:cloudFloat 16s ease-in-out infinite}
+  #cloud-2{top:32%;right:3%;animation:cloudFloat 21s ease-in-out infinite;animation-delay:-8s}
+  #cloud-3{top:54%;left:30%;animation:cloudFloat 13s ease-in-out infinite;animation-delay:-5s}
 /* Shooting stars drawn via JS */
   @keyframes sun-glow-pulse{0%,100%{filter:drop-shadow(0 0 5px rgba(255,220,40,0.55)) drop-shadow(0 0 10px rgba(255,180,0,0.3))}50%{filter:drop-shadow(0 0 14px rgba(255,235,50,1)) drop-shadow(0 0 28px rgba(255,200,0,0.7))}}
   #sun-img{width:40px;height:40px;object-fit:contain;display:block;opacity:0;transition:opacity 0.9s ease;filter:drop-shadow(0 0 5px rgba(255,210,40,0.5));position:absolute;left:-9px;top:-9px}
@@ -720,9 +714,67 @@
 <div id="right-panel">
     <div id="sun-scheduler">
       <div id="sky-scene">
-        <div class="sky-cloud" id="cloud-1"></div>
-        <div class="sky-cloud" id="cloud-2"></div>
-        <div class="sky-cloud" id="cloud-3"></div>
+        <!-- Cloud 1 — large, left side -->
+        <div class="sky-cloud" id="cloud-1">
+          <svg viewBox="0 0 112 54" width="90" height="43" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="cf1" x="-18%" y="-18%" width="136%" height="136%">
+                <feGaussianBlur stdDeviation="2.4"/>
+              </filter>
+            </defs>
+            <g filter="url(#cf1)">
+              <ellipse cx="56" cy="47" rx="53" ry="10" fill="rgba(185,208,228,0.92)"/>
+              <ellipse cx="22" cy="36" rx="22" ry="21" fill="rgba(232,244,255,0.98)"/>
+              <ellipse cx="42" cy="28" rx="18" ry="17" fill="rgba(248,252,255,1)"/>
+              <ellipse cx="58" cy="22" rx="16" ry="20" fill="rgba(255,255,255,1)"/>
+              <ellipse cx="76" cy="30" rx="20" ry="18" fill="rgba(230,243,255,0.97)"/>
+              <ellipse cx="97" cy="40" rx="17" ry="12" fill="rgba(208,226,244,0.90)"/>
+              <ellipse cx="42" cy="21" rx="9"  ry="8"  fill="rgba(255,255,255,1)"/>
+              <ellipse cx="59" cy="16" rx="10" ry="9"  fill="rgba(255,255,255,1)"/>
+              <ellipse cx="76" cy="24" rx="11" ry="9"  fill="rgba(255,255,255,1)"/>
+            </g>
+          </svg>
+        </div>
+        <!-- Cloud 2 — medium, right side -->
+        <div class="sky-cloud" id="cloud-2">
+          <svg viewBox="0 0 94 46" width="75" height="37" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="cf2" x="-18%" y="-18%" width="136%" height="136%">
+                <feGaussianBlur stdDeviation="2.1"/>
+              </filter>
+            </defs>
+            <g filter="url(#cf2)">
+              <ellipse cx="47" cy="39" rx="44" ry="9"  fill="rgba(190,212,232,0.90)"/>
+              <ellipse cx="18" cy="30" rx="18" ry="17" fill="rgba(235,246,255,0.97)"/>
+              <ellipse cx="36" cy="24" rx="15" ry="15" fill="rgba(250,253,255,1)"/>
+              <ellipse cx="52" cy="19" rx="14" ry="17" fill="rgba(255,255,255,1)"/>
+              <ellipse cx="68" cy="27" rx="17" ry="15" fill="rgba(228,242,255,0.96)"/>
+              <ellipse cx="83" cy="35" rx="13" ry="10" fill="rgba(210,228,246,0.88)"/>
+              <ellipse cx="36" cy="18" rx="8"  ry="7"  fill="rgba(255,255,255,1)"/>
+              <ellipse cx="52" cy="13" rx="8"  ry="8"  fill="rgba(255,255,255,1)"/>
+              <ellipse cx="67" cy="21" rx="9"  ry="8"  fill="rgba(255,255,255,1)"/>
+            </g>
+          </svg>
+        </div>
+        <!-- Cloud 3 — small, lower center-left -->
+        <div class="sky-cloud" id="cloud-3">
+          <svg viewBox="0 0 76 38" width="61" height="30" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="cf3" x="-18%" y="-18%" width="136%" height="136%">
+                <feGaussianBlur stdDeviation="1.9"/>
+              </filter>
+            </defs>
+            <g filter="url(#cf3)">
+              <ellipse cx="38" cy="32" rx="35" ry="8"  fill="rgba(192,214,234,0.88)"/>
+              <ellipse cx="16" cy="24" rx="15" ry="14" fill="rgba(238,248,255,0.97)"/>
+              <ellipse cx="32" cy="19" rx="13" ry="13" fill="rgba(252,254,255,1)"/>
+              <ellipse cx="46" cy="16" rx="12" ry="15" fill="rgba(255,255,255,1)"/>
+              <ellipse cx="60" cy="23" rx="14" ry="12" fill="rgba(230,244,255,0.95)"/>
+              <ellipse cx="32" cy="14" rx="7"  ry="6"  fill="rgba(255,255,255,1)"/>
+              <ellipse cx="46" cy="10" rx="7"  ry="7"  fill="rgba(255,255,255,1)"/>
+            </g>
+          </svg>
+        </div>
         <div class="sky-star" style="width:2px;height:2px;top:18%;left:14%"></div>
         <div class="sky-star" style="width:1px;height:1px;top:8%;left:38%"></div>
         <div class="sky-star" style="width:2px;height:2px;top:32%;left:60%"></div>
@@ -4521,6 +4573,6 @@ function loadExtImage(file) {
   reader.readAsDataURL(file);
 }
 </script>
-<div id="version-badge">v15.7</div>
+<div id="version-badge">v15.8</div>
 </body>
 </html>
